@@ -1,10 +1,16 @@
 import { WebSocketServer } from 'ws';
 import net from 'net';
 import jsmodbus from 'jsmodbus';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const PORT = 3000;
-const ROBOT_IP = '192.168.0.1'; // Default ESTUN IP (Verify in manual)
-const ROBOT_PORT = 502; // Standard Modbus TCP
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '../.env') });
+
+const PORT = process.env.VITE_PROXY_PORT || 3000;
+const ROBOT_IP = process.env.VITE_ROBOT_IP || '192.168.1.100'; 
+const ROBOT_PORT = Number(process.env.VITE_ROBOT_PORT) || 502; 
 
 // --- MODBUS REGISTER MAP (PLACEHOLDERS based on standard industrial robots) ---
 // We need to verify these exact addresses from "ECM04101-EN-04..." PDF

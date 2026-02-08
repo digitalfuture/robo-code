@@ -36,8 +36,8 @@ interface RobotState {
 const state = reactive<RobotState>({
   isConnected: false,
   connection: {
-    address: '192.168.1.100',
-    port: 502,
+    address: import.meta.env.VITE_ROBOT_IP || '192.168.1.100',
+    port: Number(import.meta.env.VITE_ROBOT_PORT) || 502,
     protocol: 'MODBUS-TCP'
   },
   mode: 'MANUAL',
@@ -70,8 +70,9 @@ export const robotService = {
   connect() {
     if (state.isConnected) return;
     
-    this.addLog(`Connecting to Proxy at ws://localhost:3000...`, 'info');
-    const ws = new WebSocket('ws://localhost:3000');
+    const proxyUrl = import.meta.env.VITE_PROXY_URL || 'ws://localhost:3000';
+    this.addLog(`Connecting to Proxy at ${proxyUrl}...`, 'info');
+    const ws = new WebSocket(proxyUrl);
 
     ws.onopen = () => {
         this.addLog('Proxy Connected', 'success');
