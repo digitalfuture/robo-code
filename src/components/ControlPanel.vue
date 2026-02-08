@@ -26,6 +26,15 @@ const toggleDemo = () => {
 
 const setMode = (m: 'AUTO' | 'MANUAL') => {
   mode.value = m;
+  robotService.sendCommand('SET_MODE', { mode: m });
+};
+
+const handleJog = (axis: string) => {
+    robotService.sendCommand('JOG', { axis, speed: speed.value });
+};
+
+const handleAction = (action: string) => {
+    robotService.sendCommand(action);
 };
 </script>
 
@@ -69,9 +78,9 @@ const setMode = (m: 'AUTO' | 'MANUAL') => {
       </div>
 
       <div class="sub-actions">
-          <button class="sm-btn">{{ t('control.servo') }}</button>
-          <button class="sm-btn">{{ t('control.reset') }}</button>
-          <button class="sm-btn">{{ t('control.home') }}</button>
+          <button class="sm-btn" @click="handleAction('SERVO_ON')">{{ t('control.servo') }}</button>
+          <button class="sm-btn" @click="handleAction('RESET')">{{ t('control.reset') }}</button>
+          <button class="sm-btn" @click="handleAction('HOME')">{{ t('control.home') }}</button>
       </div>
     </div>
 
@@ -80,12 +89,12 @@ const setMode = (m: 'AUTO' | 'MANUAL') => {
       <div class="label-heading mono">{{ t('control.manualdata') }}</div>
       
       <div v-if="mode === 'MANUAL'" class="jog-grid">
-         <button class="jog-btn">X-</button>
-         <button class="jog-btn">Y+</button>
-         <button class="jog-btn">X+</button>
-         <button class="jog-btn">Z-</button>
-         <button class="jog-btn">Y-</button>
-         <button class="jog-btn">Z+</button>
+         <button class="jog-btn" @click="handleJog('X-')">X-</button>
+         <button class="jog-btn" @click="handleJog('Y+')">Y+</button>
+         <button class="jog-btn" @click="handleJog('X+')">X+</button>
+         <button class="jog-btn" @click="handleJog('Z-')">Z-</button>
+         <button class="jog-btn" @click="handleJog('Y-')">Y-</button>
+         <button class="jog-btn" @click="handleJog('Z+')">Z+</button>
       </div>
       
       <div v-else class="auto-msg mono">
@@ -96,7 +105,7 @@ const setMode = (m: 'AUTO' | 'MANUAL') => {
     
     <!-- Emergency Stop -->
     <div class="estop-wrapper">
-       <button class="estop-btn">
+       <button class="estop-btn" @click="handleAction('ESTOP')">
          <span>{{ t('control.stop') }}</span>
        </button>
     </div>
@@ -111,6 +120,12 @@ const setMode = (m: 'AUTO' | 'MANUAL') => {
   padding: 1rem 1.5rem;
   gap: 2rem;
   background: var(--color-panel);
+  flex-wrap: wrap;
+
+  @media (max-width: 1200px) {
+    gap: 1rem;
+    padding: 1rem;
+  }
 }
 
 .group {

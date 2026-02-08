@@ -179,7 +179,7 @@ const getPropColor = (val: number) => {
 
 .joints-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 columns */
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 10px;
 }
 

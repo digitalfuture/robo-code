@@ -64,6 +64,12 @@ const translations: Record<Language, Record<string, string>> = {
     'log.connecting': 'Connecting to Camera...',
     'log.waiting': 'Waiting for robot handshake...',
     'log.connected': 'Robot handshake successful',
+    'log.address': 'ADDRESS',
+    'log.port': 'PORT',
+    'log.protocol': 'PROTOCOL',
+    'log.sending': 'SENDING',
+    'log.received': 'RECEIVED',
+    'log.no_connection': 'OFFLINE: WAITING FOR LINK',
   },
   RU: {
     'header.subtitle': 'СЕТЕВОЙ ИНТЕРФЕЙС // POE-КЛАСТЕР-04',
@@ -111,6 +117,12 @@ const translations: Record<Language, Record<string, string>> = {
     'log.connecting': 'Подключение к камере (PoE)...',
     'log.waiting': 'Ожидание связи с контроллером...',
     'log.connected': 'Связь с роботом установлена',
+    'log.address': 'АДРЕС',
+    'log.port': 'ПОРТ',
+    'log.protocol': 'ПРОТОКОЛ',
+    'log.sending': 'ОТПРАВКА',
+    'log.received': 'ПРИЕМ',
+    'log.no_connection': 'ОФФЛАЙН: ОЖИДАНИЕ СВЯЗИ',
   },
   CN: {
     'header.subtitle': '网络接口 // POE-集群-04',
@@ -158,6 +170,12 @@ const translations: Record<Language, Record<string, string>> = {
     'log.connecting': '连接相机...',
     'log.waiting': '等待机器人握手...',
     'log.connected': '机器人连接成功',
+    'log.address': '地址',
+    'log.port': '端口',
+    'log.protocol': '协议',
+    'log.sending': '发送',
+    'log.received': '接收',
+    'log.no_connection': '离线: 等待连接',
   }
 };
 

@@ -1,8 +1,20 @@
 import { reactive, readonly } from 'vue';
 
 // Define the shape of our robot state
+interface LogEntry {
+  id: number;
+  time: string;
+  type: 'info' | 'warn' | 'error' | 'success' | 'cmd';
+  msg: string;
+}
+
 interface RobotState {
   isConnected: boolean;
+  connection: {
+    address: string;
+    port: number;
+    protocol: string;
+  };
   mode: 'MANUAL' | 'AUTO';
   coordinates: {
     x: number;
@@ -16,37 +28,54 @@ interface RobotState {
   camera: {
     hasSignal: boolean;
     targets: any[];
-  }
+  };
+  logs: LogEntry[];
 }
 
 // Initial State - DISCONNECTED by default
 const state = reactive<RobotState>({
   isConnected: false,
+  connection: {
+    address: '192.168.1.100',
+    port: 502,
+    protocol: 'MODBUS-TCP'
+  },
   mode: 'MANUAL',
   coordinates: { x: 0, y: 0, z: 0, r: 0, p: 0, y_rot: 0 },
   joints: [0, 0, 0, 0, 0, 0],
   camera: {
     hasSignal: false,
     targets: []
-  }
+  },
+  logs: []
 });
 
 /**
  * Service to handle actual data flow.
- * Currently just a skeleton for the real connection.
  */
 export const robotService = {
   state: readonly(state),
 
+  addLog(msg: string, type: LogEntry['type'] = 'info') {
+    const now = new Date();
+    state.logs.push({
+      id: Date.now() + Math.random(),
+      time: now.toLocaleTimeString(),
+      type,
+      msg
+    });
+    if (state.logs.length > 100) state.logs.shift();
+  },
+
   connect() {
     if (state.isConnected) return;
     
-    // Connect to our Local Node.js Proxy (which bridges to Modbus TCP)
-    console.log(`[Service] Connecting to Proxy at ws://localhost:3000...`);
+    this.addLog(`Connecting to Proxy at ws://localhost:3000...`, 'info');
     const ws = new WebSocket('ws://localhost:3000');
 
     ws.onopen = () => {
-        console.log('[Service] Proxy Connected');
+        this.addLog('Proxy Connected', 'success');
+        this.addLog(`Handshaking with Robot at ${state.connection.address}:${state.connection.port}...`, 'info');
         state.isConnected = true;
     };
 
@@ -55,7 +84,7 @@ export const robotService = {
             const data = JSON.parse(event.data);
             
             if (data.type === 'STATUS') {
-                // state.isConnected = data.connected; // Proxy tells us if IT is connected to robot
+                // state.isConnected = data.connected;
             }
             if (data.type === 'TELEMETRY') {
                 state.coordinates = data.coords || state.coordinates;
@@ -67,32 +96,34 @@ export const robotService = {
     };
 
     ws.onclose = () => {
-        console.log('[Service] Proxy Disconnected');
+        this.addLog('Proxy Disconnected', 'error');
         state.isConnected = false;
     };
-    
-    // Store WS instance if needed for sending commands
-    // (We would need to add a command method to the service)
   },
 
   disconnect() {
-      // Close WS
+      this.addLog('Manual Disconnect Triggered', 'warn');
       state.isConnected = false;
-      // In a real implementation we'd store the ws variable outside to close it
   },
 
-  // This method will be called when we receive real data packet
-  updateTelemetry() {
-    // Legacy / Direct update
+  sendCommand(cmd: string, params: any = {}) {
+    if (!state.isConnected) {
+        this.addLog(`Failed to send ${cmd}: No connection`, 'error');
+        return;
+    }
+    // const payload = JSON.stringify({ cmd, params });
+    this.addLog(`SENT: ${cmd} ${JSON.stringify(params)}`, 'cmd');
+    // In real app: ws.send(payload);
   },
-  
-  // Call this to simulate a connection for DEMO purposes only (Explicit user action)
+
   toggleDemoMode(enabled: boolean) {
     if (enabled) {
+        this.addLog('DEMO MODE STARTED', 'success');
         state.isConnected = true;
         state.camera.hasSignal = true;
         startSimulation();
     } else {
+        this.addLog('DEMO MODE STOPPED', 'warn');
         state.isConnected = false;
         state.camera.hasSignal = false;
         stopSimulation();
@@ -100,7 +131,7 @@ export const robotService = {
   }
 };
 
-// --- SIMULATION LOGIC (Moved out of components) ---
+// --- SIMULATION LOGIC ---
 let simTimer: number | null = null;
 
 function startSimulation() {
@@ -119,13 +150,17 @@ function startSimulation() {
        return +(Math.sin(elapsed * 0.5 + offset) * 90).toFixed(1);
     });
 
-    // Simulate occasional target detection
+    if (Math.random() > 0.95) {
+        const cmds = ['MOVJ', 'MOVL', 'SET_OUT', 'GET_POS'];
+        const randomCmd = cmds[Math.floor(Math.random() * cmds.length)];
+        robotService.sendCommand(randomCmd as string, { t: Date.now() % 1000 });
+    }
+
     if (Math.random() > 0.8) {
        state.camera.targets = [{ x: 50, y: 50, w: 10, h: 10, cls: 'TEST', conf: 0.99 }];
     } else {
        state.camera.targets = [];
     }
-
   }, 50);
 }
 
@@ -134,8 +169,8 @@ function stopSimulation() {
     clearInterval(simTimer);
     simTimer = null;
   }
-  // Reset values
   state.coordinates = { x: 0, y: 0, z: 0, r: 0, p: 0, y_rot: 0 };
   state.joints = [0, 0, 0, 0, 0, 0];
   state.camera.targets = [];
 }
+

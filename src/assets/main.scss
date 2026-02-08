@@ -6,7 +6,9 @@
   --color-panel: #14141d;
   --color-border: #2a2a35;
   --color-primary: #00ff9d; /* Neon Green */
+  --color-primary-rgb: 0, 255, 157;
   --color-danger: #ff0055; /* Neon Red */
+  --color-danger-rgb: 255, 0, 85;
   --color-info: #00d9ff; /* Cyan */
   --color-warning: #ffcc00;
   --color-text: #e0e0e0;
@@ -30,6 +32,7 @@ body {
   color: var(--color-text);
   font-family: var(--font-main);
   height: 100vh;
+  width: 100vw;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -39,6 +42,37 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
+}
+
+/* Custom Styled Scrollbars */
+* {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: var(--color-primary);
+      box-shadow: 0 0 10px var(--color-primary);
+    }
+  }
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) rgba(0, 0, 0, 0.2);
 }
 
 /* Utilities */

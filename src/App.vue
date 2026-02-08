@@ -56,10 +56,16 @@ const langs: Language[] = ['EN', 'RU', 'CN'];
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100%;
   padding: 1rem;
   gap: 1rem;
-  max-width: 1600px;
-  margin: 0 auto;
+  margin: 0;
+  box-sizing: border-box;
+
+  @media (max-width: 1200px) {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
 }
 
 header {
@@ -116,9 +122,15 @@ header {
 .dashboard-grid {
   flex-grow: 1;
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1.8fr 1fr;
   gap: 1rem;
-  min-height: 0; /* Important for scroll */
+  min-height: 0;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+    padding-right: 5px; /* Space for scrollbar if stacked */
+  }
 }
 
 .main-view {
