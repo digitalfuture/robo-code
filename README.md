@@ -2,9 +2,14 @@
 
 Local web interface for controlling the Robot Arm, designed to run on the secondary Windows 10 controller unit.
 
-<p align="center">
-  <img src="./images/desktop.png" alt="Desktop Interface" height="300" /> <img src="./images/mobile.png" alt="Mobile Interface" height="300" />
-</p>
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./images/desktop.png" height="300" /></td>
+      <td><img src="./images/mobile.png" height="300" /></td>
+    </tr>
+  </table>
+</div>
 
 
 ## Features
