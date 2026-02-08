@@ -2,6 +2,12 @@
 
 Local web interface for controlling the Robot Arm, designed to run on the secondary Windows 10 controller unit.
 
+<p align="center">
+  <img src="./images/desktop.png" alt="Desktop Interface" width="65%" />
+  <img src="./images/mobile.png" alt="Mobile Interface" width="25%" />
+</p>
+
+
 ## Features
 - **Virtual Network Interface**: Simulates connection to the robot controller via PoE.
 - **AI Camera Feed**: Visualizes the "AI action correction" with bounding boxes and status indicators.
