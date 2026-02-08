@@ -5,8 +5,8 @@ Local web interface for controlling the Robot Arm, designed to run on the second
 <div align="center">
   <table>
     <tr>
-      <td><img src="./images/desktop.png" height="300" /></td>
-      <td><img src="./images/mobile.png" height="300" /></td>
+      <td width="70%"><img src="./images/desktop.png" alt="Desktop Interface" /></td>
+      <td width="30%"><img src="./images/mobile.png" alt="Mobile Interface" /></td>
     </tr>
   </table>
 </div>
