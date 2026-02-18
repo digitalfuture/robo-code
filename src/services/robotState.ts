@@ -151,11 +151,11 @@ export const robotService = {
       ws?.send(handshake);
       this.addLog(`Handshake sent: ${handshake}`, 'cmd');
       
-      // Request robot position after connection
+      // Request robot position after connection (wait for robot to be ready)
       setTimeout(() => {
         this.addLog('Requesting robot position...', 'info');
         this.getCurrentWorldPosition();
-      }, 500);
+      }, 2000);
     };
 
     ws.onmessage = (event) => {

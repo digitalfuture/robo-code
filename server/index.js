@@ -266,11 +266,16 @@ function sendToRobot(command) {
 
         // Send command
         console.log('[Proxy] → Robot:', command);
-        robotSocket.write(command);
+        console.log('[Proxy] Robot socket writable:', robotSocket.writable);
+        console.log('[Proxy] Robot socket destroyed:', robotSocket.destroyed);
+        
+        const written = robotSocket.write(command);
+        console.log('[Proxy] Write result:', written);
 
         // Set timeout
         const timeout = setTimeout(() => {
             if (pendingCommand) {
+                console.log('[Proxy] Command timeout - no response from robot');
                 pendingCommand.reject(new Error('Command timeout'));
                 pendingCommand = null;
             }
