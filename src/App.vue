@@ -16,7 +16,7 @@ const showConsole = ref(false);
 // Auto-connect on app mount
 onMounted(() => {
   robotService.addLog('=== APPLICATION STARTED ===', 'success');
-  robotService.addLog(`Interface language: ${currentLang}`, 'info');
+  robotService.addLog(`Interface language: ${currentLang.value}`, 'info');
   robotService.addLog('Attempting initial connection...', 'info');
   robotService.connect();
   showConsole.value = true;
