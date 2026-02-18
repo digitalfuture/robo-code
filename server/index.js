@@ -53,8 +53,8 @@ const connectRobot = () => {
         console.log('[Proxy] ✓ TCP connection established with robot');
         isRobotConnected = true;
         
-        // Send a simple query to initialize the session and detect encoding
-        // Get robot run status - this is a safe read-only command
+        // Send init command immediately - robot expects commands in specific format
+        // Using getRobotRunStatus_IFace() as a test command (read-only, safe)
         const initCommand = `[getRobotRunStatus_IFace();id=999]`;
         console.log('[Proxy] → Sending init command:', initCommand);
         robotSocket.write(initCommand);
@@ -62,6 +62,7 @@ const connectRobot = () => {
 
     robotSocket.on('data', (data) => {
         // Auto-detect encoding on first response
+        // ER Series robots may use UTF-8, UTF-16LE, or GBK (Chinese)
         let chunk;
         if (robotEncoding === 'utf8') {
             // Try UTF-8 first
@@ -76,6 +77,17 @@ const connectRobot = () => {
                     robotEncoding = 'utf16le';
                     console.log('[Proxy] ✓ Auto-detected encoding: UTF-16LE');
                     chunk = utf16chunk;
+                } else {
+                    // Try GBK (Chinese) - common for Estun robots
+                    // GBK bytes that don't map to valid UTF-8/UTF-16
+                    const gbkChunk = data.toString('latin1');
+                    if (gbkChunk.match(/[\x80-\xFF]/)) {
+                        // Has high bytes - likely GBK
+                        robotEncoding = 'gbk';
+                        console.log('[Proxy] ✓ Auto-detected encoding: GBK (Chinese)');
+                        console.log('[Proxy] Note: Install "iconv-lite" for proper GBK decoding');
+                        chunk = gbkChunk + ' [GBK-encoded, needs iconv-lite]';
+                    }
                 }
             }
         } else {
