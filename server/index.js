@@ -144,27 +144,25 @@ wss.on('connection', (ws, req) => {
 
         try {
             // Read real Modbus data from robot
-            // Assuming registers contain 16-bit values
-            // Adjust addresses based on robot documentation
             const response = await client.readHoldingRegisters(0, 20);
             const registers = response.response.body.values;
             
-            // Parse registers into coordinates and joints
-            // This is a placeholder - adjust based on actual robot register map
-            // Example: assuming 32-bit values (2 registers per value)
+            console.log('[Proxy] Raw registers:', registers);
+            
+            // Try 16-bit values (no combining)
             const coords = {
-                x: registers[0] + (registers[1] << 16),  // Registers 0-1
-                y: registers[2] + (registers[3] << 16),  // Registers 2-3
-                z: registers[4] + (registers[5] << 16)   // Registers 4-5
+                x: registers[0],    // Register 0
+                y: registers[1],    // Register 1
+                z: registers[2]     // Register 2
             };
             
             const joints = [
-                registers[6] + (registers[7] << 16),   // J1: Registers 6-7
-                registers[8] + (registers[9] << 16),   // J2: Registers 8-9
-                registers[10] + (registers[11] << 16), // J3: Registers 10-11
-                registers[12] + (registers[13] << 16), // J4: Registers 12-13
-                registers[14] + (registers[15] << 16), // J5: Registers 14-15
-                registers[16] + (registers[17] << 16)  // J6: Registers 16-17
+                registers[3],   // J1
+                registers[4],   // J2
+                registers[5],   // J3
+                registers[6],   // J4
+                registers[7],   // J5
+                registers[8]    // J6
             ];
 
             ws.send(JSON.stringify({
