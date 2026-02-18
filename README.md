@@ -20,9 +20,11 @@ Local web interface for controlling the Robot Arm, designed to run on the second
 
 ## Setup & Run
 
-1. Install dependencies:
+1. Install dependencies (frontend + server):
    ```bash
    npm install
+   cd server && npm install
+   cd ..
    ```
 
 2. Configure environment (optional):
@@ -36,6 +38,7 @@ Local web interface for controlling the Robot Arm, designed to run on the second
    npm start
    ```
    This starts both the WebSocket proxy server and the Vite dev server.
+   Open http://localhost:5173 in your browser.
 
    Or run separately:
    ```bash
