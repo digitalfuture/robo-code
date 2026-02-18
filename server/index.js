@@ -3,6 +3,7 @@ import net from 'net';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import iconv from 'iconv-lite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -78,20 +79,32 @@ const connectRobot = () => {
                     console.log('[Proxy] ✓ Auto-detected encoding: UTF-16LE');
                     chunk = utf16chunk;
                 } else {
-                    // Try GBK (Chinese) - common for Estun robots
-                    // GBK bytes that don't map to valid UTF-8/UTF-16
-                    const gbkChunk = data.toString('latin1');
-                    if (gbkChunk.match(/[\x80-\xFF]/)) {
-                        // Has high bytes - likely GBK
+                    // Likely GBK (Chinese) - use iconv-lite for decoding
+                    try {
+                        chunk = iconv.decode(data, 'gbk');
                         robotEncoding = 'gbk';
                         console.log('[Proxy] ✓ Auto-detected encoding: GBK (Chinese)');
-                        console.log('[Proxy] Note: Install "iconv-lite" for proper GBK decoding');
-                        chunk = gbkChunk + ' [GBK-encoded, needs iconv-lite]';
+                    } catch (e) {
+                        // Fallback to hex dump
+                        robotEncoding = 'hex';
+                        console.log('[Proxy] Raw bytes:', data.toString('hex'));
+                        chunk = '[Encoded data - see hex dump]';
                     }
                 }
             }
+        } else if (robotEncoding === 'hex') {
+            // Show hex dump
+            console.log('[Proxy] Raw bytes:', data.toString('hex'));
+            chunk = '[Encoded data]';
+        } else if (robotEncoding === 'gbk') {
+            // Use iconv-lite for GBK
+            try {
+                chunk = iconv.decode(data, 'gbk');
+            } catch (e) {
+                chunk = '[GBK decode error]';
+            }
         } else {
-            // Use detected encoding
+            // Use detected encoding (utf16le)
             chunk = data.toString(robotEncoding);
         }
         
