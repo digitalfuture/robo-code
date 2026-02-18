@@ -26,11 +26,11 @@ const toggleDemo = () => {
 
 const setMode = (m: 'AUTO' | 'MANUAL') => {
   mode.value = m;
-  robotService.sendCommand('SET_MODE', { mode: m });
+  robotService.sendCommand('SET_MODE');
 };
 
-const handleJog = (axis: string) => {
-    robotService.sendCommand('JOG', { axis, speed: speed.value });
+const handleJog = (_axis: string) => {
+    robotService.sendCommand('JOG');
 };
 
 const handleAction = (action: string) => {

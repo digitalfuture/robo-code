@@ -1,4 +1,14 @@
 import { reactive, readonly } from 'vue';
+import {
+  ProtocolParser,
+  CommandBuilder,
+  RobotMode,
+  RunStatus,
+  Scope,
+  VarType,
+  IOType,
+  type CommandResponse
+} from './robotProtocol';
 
 // Define the shape of our robot state
 interface LogEntry {
@@ -15,16 +25,26 @@ interface RobotState {
     port: number;
     protocol: string;
   };
-  mode: 'MANUAL' | 'AUTO';
+  mode: 'MANUAL' | 'AUTO' | 'REMOTE';
   coordinates: {
     x: number;
     y: number;
     z: number;
-    r: number;
-    p: number;
-    y_rot: number;
+    a: number;
+    b: number;
+    c: number;
+    mod?: number;
+    cf1?: number;
+    cf2?: number;
+    cf3?: number;
+    cf4?: number;
+    cf5?: number;
+    cf6?: number;
   };
   joints: number[]; // J1 - J6
+  runStatus: RunStatus;
+  errorId: number | null;
+  servoEnabled: boolean;
   camera: {
     hasSignal: boolean;
     targets: any[];
@@ -38,11 +58,14 @@ const state = reactive<RobotState>({
   connection: {
     address: import.meta.env.VITE_ROBOT_IP || '192.168.1.100',
     port: Number(import.meta.env.VITE_ROBOT_PORT) || 502,
-    protocol: 'MODBUS-TCP'
+    protocol: 'TCP-STRING (ER Series RCS2 V1.5.3)'
   },
   mode: 'MANUAL',
-  coordinates: { x: 0, y: 0, z: 0, r: 0, p: 0, y_rot: 0 },
+  coordinates: { x: 0, y: 0, z: 0, a: 0, b: 0, c: 0 },
   joints: [0, 0, 0, 0, 0, 0],
+  runStatus: RunStatus.PROG_STOPPED,
+  errorId: null,
+  servoEnabled: false,
   camera: {
     hasSignal: false,
     targets: []
@@ -50,8 +73,11 @@ const state = reactive<RobotState>({
   logs: []
 });
 
+// WebSocket instance
+let ws: WebSocket | null = null;
+
 /**
- * Service to handle actual data flow.
+ * Service to handle actual data flow using ER Series Robot Protocol.
  */
 export const robotService = {
   state: readonly(state),
@@ -72,6 +98,9 @@ export const robotService = {
     this.addLog('Logs cleared', 'info');
   },
 
+  /**
+   * Connect to robot via proxy server using TCP string protocol
+   */
   connect() {
     if (state.isConnected) {
       this.addLog('Already connected, skipping...', 'warn');
@@ -80,21 +109,20 @@ export const robotService = {
 
     const proxyUrl = import.meta.env.VITE_PROXY_URL || 'ws://localhost:3000';
     const robotIp = import.meta.env.VITE_ROBOT_IP || '192.168.1.100';
-    const robotPort = import.meta.env.VITE_ROBOT_PORT || 502;
+    const robotPort = Number(import.meta.env.VITE_ROBOT_PORT) || 502;
 
     this.addLog('=== CONNECTION STARTED ===', 'info');
+    this.addLog(`Protocol: ER Series Robot TCP String (RCS2 V1.5.3)`, 'info');
     this.addLog(`ENV Settings:`, 'info');
     this.addLog(`  VITE_ROBOT_IP: ${robotIp}`, 'info');
     this.addLog(`  VITE_ROBOT_PORT: ${robotPort}`, 'info');
     this.addLog(`  VITE_PROXY_URL: ${proxyUrl}`, 'info');
     this.addLog(`Attempting WebSocket connection to: ${proxyUrl}`, 'info');
 
-    let ws: WebSocket;
     try {
       ws = new WebSocket(proxyUrl);
     } catch (e: any) {
       this.addLog(`CRITICAL ERROR: Failed to create WebSocket: ${e.message}`, 'error');
-      this.addLog(`Check if proxy URL is valid: ${proxyUrl}`, 'error');
       state.isConnected = false;
       return;
     }
@@ -103,49 +131,59 @@ export const robotService = {
       if (!state.isConnected) {
         this.addLog(`CONNECTION TIMEOUT: No response from proxy server after 10s`, 'error');
         this.addLog(`Possible causes:`, 'warn');
-        this.addLog(`  1. Proxy server is not running (start with: npm run server)`, 'warn');
+        this.addLog(`  1. Proxy server is not running (npm run server)`, 'warn');
         this.addLog(`  2. Wrong proxy address: ${proxyUrl}`, 'warn');
         this.addLog(`  3. Firewall blocking connection`, 'warn');
-        ws.close();
+        ws?.close();
       }
     }, 10000);
 
     ws.onopen = () => {
       clearTimeout(connectionTimeout);
       this.addLog('✓ WebSocket connection established', 'success');
-      this.addLog(`Sending handshake to robot at ${state.connection.address}:${state.connection.port}...`, 'info');
       state.isConnected = true;
-      
-      // Send initial handshake
+
+      // Send handshake to proxy
       const handshake = JSON.stringify({
         cmd: 'CONNECT',
-        target: { ip: state.connection.address, port: state.connection.port }
+        target: { ip: robotIp, port: robotPort }
       });
-      ws.send(handshake);
+      ws?.send(handshake);
       this.addLog(`Handshake sent: ${handshake}`, 'cmd');
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        this.addLog(`RECV: ${JSON.stringify(data)}`, 'info');
-
+        
         if (data.type === 'STATUS') {
           if (data.connected) {
             this.addLog('✓ Robot connection confirmed', 'success');
           } else {
             this.addLog(`✗ Robot connection failed: ${data.error || 'Unknown error'}`, 'error');
+            state.isConnected = false;
           }
         }
-        if (data.type === 'TELEMETRY') {
-          state.coordinates = data.coords || state.coordinates;
-          state.joints = data.joints || state.joints;
+        
+        if (data.type === 'ROBOT_RESPONSE') {
+          this.addLog(`← Robot: ${data.response}`, 'info');
+          
+          // Parse response and update state
+          const response = ProtocolParser.parseResponse(data.response);
+          if (response) {
+            this.handleRobotResponse(response);
+          }
         }
+        
+        if (data.type === 'HEARTBEAT') {
+          this.addLog('♥ Heartbeat received', 'info');
+        }
+        
         if (data.type === 'ERROR') {
           this.addLog(`ROBOT ERROR: ${data.message}`, 'error');
         }
       } catch (e: any) {
-        this.addLog(`Parse error: ${e.message} | Raw data: ${event.data}`, 'error');
+        this.addLog(`Parse error: ${e.message} | Raw: ${event.data}`, 'error');
       }
     };
 
@@ -153,85 +191,352 @@ export const robotService = {
       clearTimeout(connectionTimeout);
       state.isConnected = false;
       this.addLog('✗ WebSocket connection closed', 'error');
-      this.addLog(`Close code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`, 'error');
-      
+      this.addLog(`Code: ${event.code}, Reason: ${event.reason || 'No reason'}`, 'error');
+
       if (event.code === 1006) {
-        this.addLog('Code 1006: Abnormal closure - server unreachable', 'error');
-        this.addLog(`Troubleshooting:`, 'warn');
-        this.addLog(`  • Check if proxy server is running on localhost:3000`, 'warn');
-        this.addLog(`  • Verify .env file has correct VITE_PROXY_URL`, 'warn');
-        this.addLog(`  • Run: netstat -an | find "3000" to check if port is listening`, 'warn');
-      } else if (event.code === 1007) {
-        this.addLog('Code 1007: Invalid frame payload data', 'error');
-      } else if (event.code === 1008) {
-        this.addLog('Code 1008: Policy violation', 'error');
-      } else if (event.code === 1009) {
-        this.addLog('Code 1009: Message too big', 'error');
+        this.addLog('Code 1006: Server unreachable', 'error');
+        this.addLog(`Check: npm run server`, 'warn');
       }
     };
 
-    ws.onerror = (error) => {
-      this.addLog('✗ WebSocket error occurred', 'error');
-      this.addLog(`Error type: ${error.type || 'Unknown'}`, 'error');
-      this.addLog('Server may be offline - check if proxy is running', 'warn');
-      this.addLog('Start server with: npm start', 'warn');
+    ws.onerror = () => {
+      this.addLog('✗ WebSocket error', 'error');
+      this.addLog('Server may be offline', 'warn');
     };
   },
 
-  disconnect() {
-      this.addLog('Manual Disconnect Triggered', 'warn');
-      state.isConnected = false;
+  /**
+   * Handle parsed robot response and update state
+   */
+  handleRobotResponse(response: CommandResponse) {
+    // Update state based on response type
+    if (!response.success) {
+      this.addLog(`Command ${response.id} failed: ${response.error}`, 'error');
+      return;
+    }
+
+    // Response data handling based on command type
+    if (response.data) {
+      // Check for motion finish
+      if (response.data.type === 'MOVE_FINISH') {
+        this.addLog(`Motion completed (ID: ${response.id})`, 'success');
+      }
+      if (response.data.type === 'ROBOT_STOP') {
+        this.addLog(`Robot stopped (ID: ${response.id})`, 'warn');
+        state.runStatus = RunStatus.PROG_STOPPED;
+      }
+      if (response.data.type === 'SAFE_DOOR_OPEN') {
+        this.addLog(`Safety door open! (ID: ${response.id})`, 'error');
+      }
+    }
   },
 
-  sendCommand(cmd: string, params: any = {}) {
-    if (!state.isConnected) {
-        this.addLog(`Failed to send ${cmd}: No connection`, 'error');
-        return;
-    }
-    // const payload = JSON.stringify({ cmd, params });
-    this.addLog(`SENT: ${cmd} ${JSON.stringify(params)}`, 'cmd');
-    // In real app: ws.send(payload);
+  disconnect() {
+    this.addLog('Manual Disconnect', 'warn');
+    state.isConnected = false;
+    ws?.close();
+    ws = null;
   },
+
+  /**
+   * Send raw command to robot
+   */
+  async sendCommand(command: string): Promise<CommandResponse | null> {
+    if (!ws || !state.isConnected) {
+      this.addLog(`Failed to send: No connection`, 'error');
+      return null;
+    }
+
+    return new Promise((resolve) => {
+      const handler = (event: MessageEvent) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'ROBOT_RESPONSE') {
+            const response = ProtocolParser.parseResponse(data.response);
+            if (response) {
+              ws?.removeEventListener('message', handler);
+              resolve(response);
+            }
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      };
+
+      ws?.addEventListener('message', handler);
+
+      // Send command through proxy
+      ws?.send(JSON.stringify({
+        type: 'ROBOT_COMMAND',
+        command
+      }));
+
+      this.addLog(`→ Robot: ${command}`, 'cmd');
+
+      // Timeout
+      setTimeout(() => {
+        ws?.removeEventListener('message', handler);
+        resolve({ id: 0, success: false, error: 'Timeout' });
+      }, 5000);
+    });
+  },
+
+  // ========== HIGH-LEVEL ROBOT COMMANDS ==========
+
+  /**
+   * Get current joint position (Section 3.5)
+   */
+  async getCurrentJointPosition() {
+    const command = CommandBuilder.getCurJPos();
+    const response = await this.sendCommand(command);
+    if (response?.success && response.data) {
+      const joints = ProtocolParser.parseJointPosition(response.data);
+      if (joints) {
+        state.joints = [joints.j1, joints.j2, joints.j3, joints.j4, joints.j5, joints.j6];
+        this.addLog(`Joints: ${state.joints.map(j => j.toFixed(2)).join(', ')}`, 'info');
+      }
+    }
+    return response;
+  },
+
+  /**
+   * Get current world position with CFG (Section 3.39)
+   */
+  async getCurrentWorldPosition() {
+    const command = CommandBuilder.getCurWPosV3();
+    const response = await this.sendCommand(command);
+    if (response?.success && response.data) {
+      const pos = ProtocolParser.parseWorldPositionV3(response.data);
+      if (pos) {
+        state.coordinates = {
+          x: pos.x, y: pos.y, z: pos.z,
+          a: pos.a, b: pos.b, c: pos.c,
+          mod: pos.mod,
+          cf1: pos.cf1, cf2: pos.cf2, cf3: pos.cf3,
+          cf4: pos.cf4, cf5: pos.cf5, cf6: pos.cf6
+        };
+        this.addLog(`Position: X=${pos.x.toFixed(2)}, Y=${pos.y.toFixed(2)}, Z=${pos.z.toFixed(2)}`, 'info');
+      }
+    }
+    return response;
+  },
+
+  /**
+   * Move to joint position (Section 3.42)
+   */
+  async moveToJointPosition(joints: number[], speed: number = 50, blend: number = 100) {
+    const pointPos = joints.map(j => j.toFixed(3)).join('_');
+    const param = `0_${speed}_${blend}`;
+    const command = CommandBuilder.movePointV3(1, pointPos, '', param);
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      this.addLog(`MoveJ started (ID: ${response.id})`, 'success');
+    }
+    return response;
+  },
+
+  /**
+   * Move to world position (Section 3.42)
+   */
+  async moveToWorldPosition(x: number, y: number, z: number, a: number, b: number, c: number,
+                            speed: number = 50, blend: number = 100) {
+    const pointPos = `${x.toFixed(3)}_${y.toFixed(3)}_${z.toFixed(3)}_${a.toFixed(3)}_${b.toFixed(3)}_${c.toFixed(3)}`;
+    const param = `0_${speed}_${blend}`;
+    const command = CommandBuilder.movePointV3(2, pointPos, '', param);
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      this.addLog(`MoveL started (ID: ${response.id})`, 'success');
+    }
+    return response;
+  },
+
+  /**
+   * Set digital output (Section 3.7)
+   */
+  async setDigitalOutput(ioIndex: number, value: number) {
+    const command = CommandBuilder.setIOValue(ioIndex, IOType.DOUT, value);
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      this.addLog(`DO[${ioIndex}] = ${value}`, 'success');
+    }
+    return response;
+  },
+
+  /**
+   * Get digital input (Section 3.8)
+   */
+  async getDigitalInput(ioIndex: number) {
+    const command = CommandBuilder.ioGetDin(ioIndex);
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      this.addLog(`DI[${ioIndex}] = ${response.data}`, 'info');
+    }
+    return response;
+  },
+
+  /**
+   * Set variable (Section 3.41)
+   */
+  async setVariable(varType: VarType, varName: string, value: string, scope: Scope = Scope.GLOBAL) {
+    const command = CommandBuilder.setVarV3(varType, varName, value, scope);
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      this.addLog(`Set ${varName} = ${value}`, 'success');
+    }
+    return response;
+  },
+
+  /**
+   * Get variable (Section 3.40)
+   */
+  async getVariable(varType: VarType, varName: string, scope: Scope = Scope.GLOBAL) {
+    const command = CommandBuilder.getVarV3(varType, varName, scope);
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      this.addLog(`${varName} = ${response.data}`, 'info');
+    }
+    return response;
+  },
+
+  /**
+   * Change robot mode (Section 3.9)
+   */
+  async changeMode(mode: RobotMode) {
+    const command = CommandBuilder.changeMode(mode);
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      state.mode = mode === RobotMode.MANUAL ? 'MANUAL' : mode === RobotMode.AUTO ? 'AUTO' : 'REMOTE';
+      this.addLog(`Mode changed to: ${state.mode}`, 'success');
+    }
+    return response;
+  },
+
+  /**
+   * Get robot run status (Section 3.13)
+   */
+  async getRunStatus() {
+    const command = CommandBuilder.getRobotRunStatus();
+    const response = await this.sendCommand(command);
+    if (response?.success && typeof response.data === 'number') {
+      state.runStatus = response.data as RunStatus;
+      const statusText = ['INIT', 'RUNNING', 'PAUSED', 'STOPPED', 'ERROR'][response.data];
+      this.addLog(`Run status: ${statusText}`, 'info');
+    }
+    return response;
+  },
+
+  /**
+   * Reset error (Section 3.14)
+   */
+  async resetError() {
+    const command = CommandBuilder.resetErrorId();
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      state.errorId = null;
+      this.addLog('Error reset', 'success');
+    }
+    return response;
+  },
+
+  /**
+   * Get error ID (Section 3.15)
+   */
+  async getErrorId() {
+    const command = CommandBuilder.getErrorId();
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      state.errorId = response.data;
+      this.addLog(`Error ID: ${response.data}`, response.data ? 'error' : 'info');
+    }
+    return response;
+  },
+
+  /**
+   * Enable/disable servo (Section 3.23)
+   */
+  async setServoEnabled(enabled: boolean) {
+    const command = CommandBuilder.setMotServoStatus(enabled);
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      state.servoEnabled = enabled;
+      this.addLog(`Servo ${enabled ? 'ON' : 'OFF'}`, 'success');
+    }
+    return response;
+  },
+
+  /**
+   * Stop all motion (Section 3.17)
+   */
+  async stopMotion() {
+    const command = CommandBuilder.stopRun();
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      this.addLog('Motion stopped', 'warn');
+      state.runStatus = RunStatus.PROG_STOPPED;
+    }
+    return response;
+  },
+
+  /**
+   * Start program (Section 3.16)
+   */
+  async startProgram() {
+    const command = CommandBuilder.startRun();
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      this.addLog('Program started', 'success');
+      state.runStatus = RunStatus.PROG_RUNNING;
+    }
+    return response;
+  },
+
+  /**
+   * Set global speed (Section 3.11)
+   */
+  async setGlobalSpeed(speed: number) {
+    const command = CommandBuilder.setGoableSpeed(speed);
+    const response = await this.sendCommand(command);
+    if (response?.success) {
+      this.addLog(`Global speed: ${speed}%`, 'success');
+    }
+    return response;
+  },
+
+  // ========== DEMO MODE ==========
 
   toggleDemoMode(enabled: boolean) {
     if (enabled) {
-        this.addLog('DEMO MODE STARTED', 'success');
-        state.isConnected = true;
-        state.camera.hasSignal = true;
-        startSimulation();
+      this.addLog('DEMO MODE STARTED', 'success');
+      state.isConnected = true;
+      state.camera.hasSignal = true;
+      startSimulation();
     } else {
-        this.addLog('DEMO MODE STOPPED', 'warn');
-        state.isConnected = false;
-        state.camera.hasSignal = false;
-        stopSimulation();
+      this.addLog('DEMO MODE STOPPED', 'warn');
+      state.isConnected = false;
+      state.camera.hasSignal = false;
+      stopSimulation();
     }
   }
 };
 
-// --- SIMULATION LOGIC ---
+// --- SIMULATION LOGIC (for demo/testing) ---
 let simTimer: number | null = null;
 
 function startSimulation() {
   if (simTimer) return;
   const start = Date.now();
-  
+
   simTimer = window.setInterval(() => {
     const elapsed = (Date.now() - start) / 1000;
-    
+
     state.coordinates.x = +(300 + Math.sin(elapsed) * 15).toFixed(1);
     state.coordinates.y = +(150 + Math.cos(elapsed * 0.8) * 15).toFixed(1);
     state.coordinates.z = +(50 + Math.sin(elapsed * 0.5) * 10).toFixed(1);
-    
+
     state.joints = state.joints.map((_, i) => {
        const offset = i * 0.5;
        return +(Math.sin(elapsed * 0.5 + offset) * 90).toFixed(1);
     });
-
-    if (Math.random() > 0.95) {
-        const cmds = ['MOVJ', 'MOVL', 'SET_OUT', 'GET_POS'];
-        const randomCmd = cmds[Math.floor(Math.random() * cmds.length)];
-        robotService.sendCommand(randomCmd as string, { t: Date.now() % 1000 });
-    }
 
     if (Math.random() > 0.8) {
        state.camera.targets = [{ x: 50, y: 50, w: 10, h: 10, cls: 'TEST', conf: 0.99 }];
@@ -246,8 +551,7 @@ function stopSimulation() {
     clearInterval(simTimer);
     simTimer = null;
   }
-  state.coordinates = { x: 0, y: 0, z: 0, r: 0, p: 0, y_rot: 0 };
+  state.coordinates = { x: 0, y: 0, z: 0, a: 0, b: 0, c: 0 };
   state.joints = [0, 0, 0, 0, 0, 0];
   state.camera.targets = [];
 }
-

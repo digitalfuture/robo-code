@@ -1,6 +1,5 @@
 import { WebSocketServer } from 'ws';
 import net from 'net';
-import jsmodbus from 'jsmodbus';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -19,210 +18,307 @@ console.log(`  VITE_ROBOT_IP: ${ROBOT_IP}`);
 console.log(`  VITE_ROBOT_PORT: ${ROBOT_PORT}`);
 console.log('─────────────────────────────────');
 
-// --- MODBUS REGISTER MAP (PLACEHOLDERS based on standard industrial robots) ---
-// We need to verify these exact addresses from "ECM04101-EN-04..." PDF
-const REG_COORDS_START = 1000; // X, Y, Z, R, P, Y
-const REG_JOINTS_START = 1100; // J1 - J6
-const REG_STATUS       = 2000; // Status / Alarms
+// Protocol constants
+const COMMAND_TIMEOUT = 5000; // 5 seconds
+const HEARTBEAT_INTERVAL = 30000; // 30 seconds (per manual Section 5.1)
 
 const wss = new WebSocketServer({ port: PORT });
-const socket = new net.Socket();
-const client = new jsmodbus.client.TCP(socket);
-
+let robotSocket: net.Socket | null = null;
 let isRobotConnected = false;
 let robotConnectAttempted = false;
+let responseBuffer = '';
+let pendingCommand: {
+  id: number;
+  resolve: (response: string) => void;
+  reject: (error: Error) => void;
+  timeout: NodeJS.Timeout;
+} | null = null;
+
+let frontendClient: WebSocket | null = null;
 
 console.log(`[Proxy] WebSocket server listening on port ${PORT}`);
 
-// Connect to Robot
+// Connect to Robot (TCP Client)
 const connectRobot = () => {
     if (robotConnectAttempted && isRobotConnected) return;
     robotConnectAttempted = true;
-    
+
     console.log(`[Proxy] Attempting TCP connection to Robot at ${ROBOT_IP}:${ROBOT_PORT}...`);
-    
-    socket.connect({ host: ROBOT_IP, port: ROBOT_PORT }, () => {
-        console.log('[Proxy] ✓ TCP connection established');
+
+    if (robotSocket) {
+        robotSocket.destroy();
+    }
+
+    robotSocket = new net.Socket();
+
+    robotSocket.connect({ host: ROBOT_IP, port: ROBOT_PORT }, () => {
+        console.log('[Proxy] ✓ TCP connection established with robot');
     });
-};
 
-socket.on('connect', () => {
-    console.log('[Proxy] ✓ Robot connected via Modbus TCP');
-    isRobotConnected = true;
-
-    // Try to read a register to verify connection
-    setTimeout(async () => {
-        try {
-            console.log('[Proxy] Testing Modbus communication...');
-            // Try to read holding registers (common for robot status)
-            const response = await client.readHoldingRegisters(0, 10);
-            console.log('[Proxy] ✓ Modbus test read successful:', response.response.body.values);
-        } catch (err) {
-            console.warn('[Proxy] Modbus test read failed:', err.message);
-            console.warn('[Proxy] This may indicate wrong register addresses or robot not in Modbus mode');
-        }
-    }, 500);
-
-    // Broadcast status to all connected clients
-    wss.clients.forEach(clientWs => {
-        if (clientWs.readyState === 1) {
-            clientWs.send(JSON.stringify({ type: 'STATUS', connected: true }));
-        }
+    robotSocket.on('data', (data: Buffer) => {
+        const chunk = data.toString('utf8');
+        console.log('[Proxy] ← Robot raw:', chunk);
+        
+        // Accumulate response buffer
+        responseBuffer += chunk;
+        
+        // Try to parse complete responses
+        // Response format: [id = X; Ok; data] or [id = X; FAIL]
+        // Also: [FeedMovFinish: X], [ActMovFinish: X], [RobotStop: X], [SafeDoorIsOpen: X]
+        processResponseBuffer();
     });
-});
 
-socket.on('error', (err) => {
-    console.warn(`[Proxy] ✗ Robot Connection Error: ${err.message}`);
-    console.warn(`[Proxy] Error code: ${err.code}`);
+    robotSocket.on('error', (err) => {
+        console.warn(`[Proxy] ✗ Robot Connection Error: ${err.message}`);
+        console.warn(`[Proxy] Error code: ${err.code}`);
+
+        if (err.code === 'ENOTFOUND') {
+            console.warn(`[Proxy] Host ${ROBOT_IP} not found - check IP address`);
+        } else if (err.code === 'ECONNREFUSED') {
+            console.warn(`[Proxy] Connection refused on port ${ROBOT_PORT} - robot may be offline or not in TCP server mode`);
+        } else if (err.code === 'ETIMEDOUT') {
+            console.warn(`[Proxy] Connection timed out - firewall or network issue`);
+        }
+
+        isRobotConnected = false;
+        robotSocket = null;
+
+        // Broadcast error to frontend
+        broadcastToClient(JSON.stringify({
+            type: 'STATUS',
+            connected: false,
+            error: err.message
+        }));
+
+        // Retry logic
+        console.log('[Proxy] Retrying in 5 seconds...');
+        setTimeout(connectRobot, 5000);
+    });
+
+    robotSocket.on('close', () => {
+        console.log('[Proxy] Robot connection closed');
+        isRobotConnected = false;
+        robotSocket = null;
+
+        broadcastToClient(JSON.stringify({
+            type: 'STATUS',
+            connected: false,
+            reason: 'Robot closed connection'
+        }));
+
+        // Reject pending command
+        if (pendingCommand) {
+            pendingCommand.reject(new Error('Robot connection closed'));
+            clearTimeout(pendingCommand.timeout);
+            pendingCommand = null;
+        }
+
+        // Retry logic
+        console.log('[Proxy] Retrying connection in 5 seconds...');
+        setTimeout(connectRobot, 5000);
+    });
+}
+
+/**
+ * Process accumulated response buffer to extract complete commands
+ */
+function processResponseBuffer() {
+    // Look for complete responses in buffer
+    // Each response is enclosed in [] and ends with ]
+    let match;
+    const responseRegex = /\[([^\]]+)\]/g;
     
-    if (err.code === 'ENOTFOUND') {
-        console.warn(`[Proxy] Host ${ROBOT_IP} not found - check IP address`);
-    } else if (err.code === 'ECONNREFUSED') {
-        console.warn(`[Proxy] Connection refused on port ${ROBOT_PORT} - robot may be offline`);
-    } else if (err.code === 'ETIMEDOUT') {
-        console.warn(`[Proxy] Connection timed out - firewall or network issue`);
+    while ((match = responseRegex.exec(responseBuffer)) !== null) {
+        const fullMatch = match[0];
+        console.log('[Proxy] Parsed response:', fullMatch);
+        
+        // Handle the complete response
+        handleRobotResponse(fullMatch);
     }
     
-    isRobotConnected = false;
+    // Clear processed data from buffer
+    const lastCompleteResponse = responseBuffer.lastIndexOf(']');
+    if (lastCompleteResponse >= 0) {
+        responseBuffer = responseBuffer.substring(lastCompleteResponse + 1);
+    }
+}
+
+/**
+ * Handle a complete robot response
+ */
+function handleRobotResponse(response: string) {
+    // Parse response to extract ID
+    // Format: [id = X; Ok; data] or [id = X; FAIL]
+    const idMatch = response.match(/\[id\s*=\s*(\d+)/i);
+    const motionFinishMatch = response.match(/\[(FeedMovFinish|ActMovFinish):\s*(\d+)/i);
+    const robotStopMatch = response.match(/\[RobotStop:\s*(\d+)/i);
+    const safeDoorMatch = response.match(/\[SafeDoorIsOpen:\s*(\d+)/i);
     
-    // Broadcast error to all connected clients
-    wss.clients.forEach(clientWs => {
-        if (clientWs.readyState === 1) {
-            clientWs.send(JSON.stringify({ 
-                type: 'STATUS', 
-                connected: false,
-                error: err.message 
-            }));
-        }
-    });
+    let responseId: number | null = null;
     
-    // Retry logic
-    console.log('[Proxy] Retrying in 5 seconds...');
-    setTimeout(connectRobot, 5000);
-});
+    if (idMatch) {
+        responseId = parseInt(idMatch[1]);
+    } else if (motionFinishMatch) {
+        responseId = parseInt(motionFinishMatch[2]);
+    } else if (robotStopMatch) {
+        responseId = parseInt(robotStopMatch[1]);
+    } else if (safeDoorMatch) {
+        responseId = parseInt(safeDoorMatch[1]);
+    }
+    
+    // Resolve pending command if ID matches
+    if (pendingCommand && responseId === pendingCommand.id) {
+        clearTimeout(pendingCommand.timeout);
+        pendingCommand.resolve(response);
+        pendingCommand = null;
+    }
+    
+    // Forward response to frontend
+    broadcastToClient(JSON.stringify({
+        type: 'ROBOT_RESPONSE',
+        response: response
+    }));
+}
 
-socket.on('close', () => {
-    console.log('[Proxy] Robot connection closed');
-    console.log('[Proxy] Possible reasons:');
-    console.log('[Proxy]   1. Robot closed connection (timeout or error)');
-    console.log('[Proxy]   2. Network issue');
-    console.log('[Proxy]   3. Wrong Modbus configuration');
-    isRobotConnected = false;
-
-    // Broadcast disconnection
-    wss.clients.forEach(clientWs => {
-        if (clientWs.readyState === 1) {
-            clientWs.send(JSON.stringify({ 
-                type: 'STATUS', 
-                connected: false,
-                reason: 'Robot closed connection'
-            }));
+/**
+ * Send command to robot
+ */
+function sendToRobot(command: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        if (!robotSocket || !isRobotConnected) {
+            reject(new Error('Not connected to robot'));
+            return;
         }
-    });
 
-    // Retry logic
-    console.log('[Proxy] Retrying connection in 5 seconds...');
-    setTimeout(connectRobot, 5000);
-});
+        // Extract command ID
+        const idMatch = command.match(/id=(\d+)/);
+        if (!idMatch) {
+            reject(new Error('Invalid command format - missing ID'));
+            return;
+        }
+
+        const commandId = parseInt(idMatch[1]);
+
+        // Clear any previous pending command
+        if (pendingCommand) {
+            clearTimeout(pendingCommand.timeout);
+            pendingCommand = null;
+        }
+
+        // Send command
+        console.log('[Proxy] → Robot:', command);
+        robotSocket.write(command);
+
+        // Set timeout
+        const timeout = setTimeout(() => {
+            if (pendingCommand) {
+                pendingCommand.reject(new Error('Command timeout'));
+                pendingCommand = null;
+            }
+        }, COMMAND_TIMEOUT);
+
+        pendingCommand = {
+            id: commandId,
+            resolve,
+            reject,
+            timeout
+        };
+    });
+}
 
 // Handle Frontend Connections
 wss.on('connection', (ws, req) => {
     const clientIp = req.socket.remoteAddress || 'unknown';
     console.log(`[Proxy] ✓ Frontend client connected from ${clientIp}`);
+    
+    frontendClient = ws;
 
     // Send initial connection status
-    ws.send(JSON.stringify({ 
-        type: 'STATUS', 
+    ws.send(JSON.stringify({
+        type: 'STATUS',
         connected: isRobotConnected,
         robotIp: ROBOT_IP,
         robotPort: ROBOT_PORT
     }));
 
-    // Poll Robot Data Loop
-    const pollInterval = setInterval(async () => {
-        if (!isRobotConnected) return;
-
-        try {
-            // Read real Modbus data from robot
-            const response = await client.readHoldingRegisters(0, 20);
-            const registers = response.response.body.values;
-            
-            console.log('[Proxy] Raw registers:', registers);
-            
-            // Try 16-bit values (no combining)
-            const coords = {
-                x: registers[0],    // Register 0
-                y: registers[1],    // Register 1
-                z: registers[2]     // Register 2
-            };
-            
-            const joints = [
-                registers[3],   // J1
-                registers[4],   // J2
-                registers[5],   // J3
-                registers[6],   // J4
-                registers[7],   // J5
-                registers[8]    // J6
-            ];
-
-            ws.send(JSON.stringify({
-                type: 'TELEMETRY',
-                coords: coords,
-                joints: joints
-            }));
-
-        } catch (e) {
-            console.error('[Proxy] Read Error:', e.message);
-            // Send zeros on error to keep frontend updated
-            ws.send(JSON.stringify({
-                type: 'TELEMETRY',
-                coords: { x: 0, y: 0, z: 0 },
-                joints: [0, 0, 0, 0, 0, 0]
-            }));
-        }
-    }, 100); // 10Hz
-
     ws.on('close', () => {
         console.log('[Proxy] Frontend client disconnected');
-        clearInterval(pollInterval);
+        frontendClient = null;
     });
 
     ws.on('error', (err) => {
         console.error('[Proxy] Frontend WebSocket error:', err.message);
+        frontendClient = null;
     });
 
-    // Handle Commands from Frontend (Write Registers)
-    ws.on('message', (msg) => {
+    // Handle Commands from Frontend
+    ws.on('message', async (msg) => {
         try {
-            const cmd = JSON.parse(msg.toString());
-            console.log(`[Proxy] ← CMD: ${cmd.cmd || 'UNKNOWN'}`, cmd.params ? JSON.stringify(cmd.params) : '');
+            const message = JSON.parse(msg.toString());
+            console.log(`[Proxy] ← Frontend: ${message.type || message.cmd || 'UNKNOWN'}`, 
+                       message.params ? JSON.stringify(message.params) : '');
 
-            if (cmd.cmd === 'CONNECT') {
-                console.log(`[Proxy] Handshake request received for robot at ${cmd.target?.ip}:${cmd.target?.port}`);
-                
+            if (message.cmd === 'CONNECT' || message.type === 'CONNECT') {
+                console.log(`[Proxy] Handshake request received for robot at ${message.target?.ip}:${message.target?.port}`);
+
+                // Update robot connection settings if provided
+                const targetIp = message.target?.ip || ROBOT_IP;
+                const targetPort = message.target?.port || ROBOT_PORT;
+
                 // Send confirmation to client
                 ws.send(JSON.stringify({
                     type: 'STATUS',
                     connected: isRobotConnected,
-                    robotIp: cmd.target?.ip || ROBOT_IP,
-                    robotPort: cmd.target?.port || ROBOT_PORT
+                    robotIp: targetIp,
+                    robotPort: targetPort
                 }));
-                
-                // Attempt to connect or reconnect
+
+                // Attempt to connect or reconnect if not connected
                 if (!isRobotConnected) {
                     connectRobot();
                 }
             }
 
-            if (cmd.type === 'WRITE_REGISTER') {
-                // client.writeSingleRegister(cmd.addr, cmd.val);
-                console.log(`[Proxy] Write Reg ${cmd.addr} -> ${cmd.val}`);
+            if (message.type === 'ROBOT_COMMAND') {
+                // Forward command to robot
+                try {
+                    const response = await sendToRobot(message.command);
+                    console.log('[Proxy] Command completed:', response);
+                } catch (error: any) {
+                    console.error('[Proxy] Command failed:', error.message);
+                    ws.send(JSON.stringify({
+                        type: 'COMMAND_ERROR',
+                        error: error.message
+                    }));
+                }
             }
-        } catch (e) {
+
+            if (message.type === 'WRITE_REGISTER') {
+                // Legacy modbus support - log warning
+                console.warn('[Proxy] WRITE_REGISTER received but Modbus is not supported. Use ROBOT_COMMAND instead.');
+                ws.send(JSON.stringify({
+                    type: 'ERROR',
+                    message: 'Modbus not supported. Use TCP string protocol with ROBOT_COMMAND type.'
+                }));
+            }
+        } catch (e: any) {
             console.error('[Proxy] Message parse error:', e.message);
+            ws.send(JSON.stringify({
+                type: 'ERROR',
+                message: `Parse error: ${e.message}`
+            }));
         }
     });
 });
+
+/**
+ * Broadcast message to connected frontend client
+ */
+function broadcastToClient(data: string) {
+    if (frontendClient && frontendClient.readyState === 1) {
+        frontendClient.send(data);
+    }
+}
 
 // Handle server errors
 wss.on('error', (err) => {
@@ -236,3 +332,15 @@ wss.on('error', (err) => {
 // Start initial connection attempt
 console.log('[Proxy] Initiating robot connection...');
 connectRobot();
+
+// Heartbeat check (optional - per manual Section 5.1)
+setInterval(() => {
+    if (isRobotConnected && frontendClient) {
+        // Send heartbeat status
+        broadcastToClient(JSON.stringify({
+            type: 'HEARTBEAT',
+            connected: true,
+            timestamp: Date.now()
+        }));
+    }
+}, HEARTBEAT_INTERVAL);
