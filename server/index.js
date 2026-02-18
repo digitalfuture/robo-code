@@ -143,27 +143,44 @@ wss.on('connection', (ws, req) => {
         if (!isRobotConnected) return;
 
         try {
-            // READ CARTESIAN (Assuming 6 registers * 2 bytes, or 32-bit float?)
-            // Industrial robots often use 32-bit floats for precision, taking 2 registers per value.
-            // Start with simple holding register read
+            // Read real Modbus data from robot
+            // Assuming registers contain 16-bit values
+            // Adjust addresses based on robot documentation
+            const response = await client.readHoldingRegisters(0, 20);
+            const registers = response.response.body.values;
+            
+            // Parse registers into coordinates and joints
+            // This is a placeholder - adjust based on actual robot register map
+            // Example: assuming 32-bit values (2 registers per value)
+            const coords = {
+                x: registers[0] + (registers[1] << 16),  // Registers 0-1
+                y: registers[2] + (registers[3] << 16),  // Registers 2-3
+                z: registers[4] + (registers[5] << 16)   // Registers 4-5
+            };
+            
+            const joints = [
+                registers[6] + (registers[7] << 16),   // J1: Registers 6-7
+                registers[8] + (registers[9] << 16),   // J2: Registers 8-9
+                registers[10] + (registers[11] << 16), // J3: Registers 10-11
+                registers[12] + (registers[13] << 16), // J4: Registers 12-13
+                registers[14] + (registers[15] << 16), // J5: Registers 14-15
+                registers[16] + (registers[17] << 16)  // J6: Registers 16-17
+            ];
 
-            // Example Poll: Read 12 registers starting at REG_COORDS_START
-            // const coords = await client.readHoldingRegisters(REG_COORDS_START, 12);
-
-            // MOCK DATA for "Blind" Implementation until we can test
-            // In reality, we would do:
-            // const res = await client.readHoldingRegisters(100, 10);
-            // const data = res.response.body.values;
-
-            // Sending Mock "Real" data structure
             ws.send(JSON.stringify({
                 type: 'TELEMETRY',
-                coords: { x: 0, y: 0, z: 0 }, // Replace with parsed Modbus data
-                joints: [0,0,0,0,0,0]
+                coords: coords,
+                joints: joints
             }));
 
         } catch (e) {
             console.error('[Proxy] Read Error:', e.message);
+            // Send zeros on error to keep frontend updated
+            ws.send(JSON.stringify({
+                type: 'TELEMETRY',
+                coords: { x: 0, y: 0, z: 0 },
+                joints: [0, 0, 0, 0, 0, 0]
+            }));
         }
     }, 100); // 10Hz
 
