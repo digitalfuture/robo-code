@@ -1,12 +1,22 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import CameraFeed from './components/CameraFeed.vue';
 import RobotStatus from './components/RobotStatus.vue';
 import ConsoleLog from './components/ConsoleLog.vue';
 import ControlPanel from './components/ControlPanel.vue';
 import { currentLang, setLanguage, t } from './services/i18n';
+import { robotService } from './services/robotState';
 import type { Language } from './services/i18n';
 
 const langs: Language[] = ['EN', 'RU', 'CN'];
+
+// Auto-connect on app mount
+onMounted(() => {
+  robotService.addLog('=== APPLICATION STARTED ===', 'success');
+  robotService.addLog(`Interface language: ${currentLang}`, 'info');
+  robotService.addLog('Attempting initial connection...', 'info');
+  robotService.connect();
+});
 </script>
 
 <template>
