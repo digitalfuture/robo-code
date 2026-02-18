@@ -249,8 +249,8 @@ function sendToRobot(command) {
             return;
         }
 
-        // Extract command ID
-        const idMatch = command.match(/id=(\d+)/);
+        // Extract command ID - support both formats: "id=X" and "id = X"
+        const idMatch = command.match(/id\s*=\s*(\d+)/);
         if (!idMatch) {
             reject(new Error('Invalid command format - missing ID'));
             return;
