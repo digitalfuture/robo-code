@@ -48,6 +48,13 @@ const connectRobot = () => {
 
     robotSocket.connect({ host: ROBOT_IP, port: ROBOT_PORT }, () => {
         console.log('[Proxy] ✓ TCP connection established with robot');
+        isRobotConnected = true;
+        
+        // Send a simple query to initialize the session
+        // Get robot run status - this is a safe read-only command
+        const initCommand = `[GetRobotRunStatus();id=999]`;
+        console.log('[Proxy] → Sending init command:', initCommand);
+        robotSocket.write(initCommand);
     });
 
     robotSocket.on('data', (data) => {
@@ -79,11 +86,14 @@ const connectRobot = () => {
         robotSocket = null;
 
         // Broadcast error to frontend
-        broadcastToClient(JSON.stringify({
-            type: 'STATUS',
-            connected: false,
-            error: err.message
-        }));
+        if (frontendClient && frontendClient.readyState === 1) {
+            frontendClient.send(JSON.stringify({
+                type: 'STATUS',
+                connected: false,
+                error: err.message,
+                errorCode: err.code
+            }));
+        }
 
         // Retry logic
         console.log('[Proxy] Retrying in 5 seconds...');
@@ -95,11 +105,13 @@ const connectRobot = () => {
         isRobotConnected = false;
         robotSocket = null;
 
-        broadcastToClient(JSON.stringify({
-            type: 'STATUS',
-            connected: false,
-            reason: 'Robot closed connection'
-        }));
+        if (frontendClient && frontendClient.readyState === 1) {
+            frontendClient.send(JSON.stringify({
+                type: 'STATUS',
+                connected: false,
+                reason: 'Robot closed connection'
+            }));
+        }
 
         // Reject pending command
         if (pendingCommand) {
@@ -226,6 +238,7 @@ wss.on('connection', (ws, req) => {
     const clientIp = req.socket.remoteAddress || 'unknown';
     console.log(`[Proxy] ✓ Frontend client connected from ${clientIp}`);
     
+    // Store frontend client immediately for broadcasts
     frontendClient = ws;
 
     // Send initial connection status
