@@ -172,8 +172,9 @@ export const robotService = {
 
     ws.onerror = (error) => {
       this.addLog('✗ WebSocket error occurred', 'error');
-      this.addLog(`Error details: ${error}`, 'error');
-      this.addLog('Check browser console (F12) for more details', 'warn');
+      this.addLog(`Error type: ${error.type || 'Unknown'}`, 'error');
+      this.addLog('Server may be offline - check if proxy is running', 'warn');
+      this.addLog('Start server with: npm start', 'warn');
     };
   },
 
