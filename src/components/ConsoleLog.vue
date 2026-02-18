@@ -25,26 +25,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="console-log panel">
-    <div class="console-header">
-      <h3 class="title mono">{{ t('log.title') }}</h3>
-      
-      <div class="connection-details mono">
-        <div class="detail-item">
-          <span class="label">{{ t('log.address') }}:</span>
-          <span class="value">{{ state.connection.address }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">{{ t('log.port') }}:</span>
-          <span class="value">{{ state.connection.port }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">{{ t('log.protocol') }}:</span>
-          <span class="value">{{ state.connection.protocol }}</span>
-        </div>
-      </div>
-    </div>
-
+  <div class="console-log">
     <div v-if="!state.isConnected" class="offline-overlay mono">
       <div class="pulse-icon"></div>
       <span>{{ t('log.no_connection') }}</span>
@@ -67,34 +48,14 @@ onMounted(() => {
   height: 100%;
   overflow: hidden;
   position: relative;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
 }
 
 .console-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.25rem;
-}
-
-.title {
-  color: var(--color-text-dim);
-  font-size: 0.8rem;
-  margin: 0;
-}
-
-.connection-details {
-  display: flex;
-  gap: 15px;
-  font-size: 0.7rem;
-  
-  .detail-item {
-    display: flex;
-    gap: 4px;
-    .label { color: var(--color-text-dim); }
-    .value { color: var(--color-primary); }
-  }
+  display: none;
 }
 
 .offline-overlay {

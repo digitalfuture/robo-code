@@ -70,6 +70,9 @@ const translations: Record<Language, Record<string, string>> = {
     'log.sending': 'SENDING',
     'log.received': 'RECEIVED',
     'log.no_connection': 'OFFLINE: WAITING FOR LINK',
+    'log.show': 'SHOW LOGS',
+    'log.hide': 'HIDE LOGS',
+    'log.clear': 'CLEAR',
   },
   RU: {
     'header.subtitle': 'СЕТЕВОЙ ИНТЕРФЕЙС // POE-КЛАСТЕР-04',
@@ -123,6 +126,9 @@ const translations: Record<Language, Record<string, string>> = {
     'log.sending': 'ОТПРАВКА',
     'log.received': 'ПРИЕМ',
     'log.no_connection': 'ОФФЛАЙН: ОЖИДАНИЕ СВЯЗИ',
+    'log.show': 'ПОКАЗАТЬ',
+    'log.hide': 'СКРЫТЬ',
+    'log.clear': 'ОЧИСТИТЬ',
   },
   CN: {
     'header.subtitle': '网络接口 // POE-集群-04',

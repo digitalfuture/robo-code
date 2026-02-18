@@ -67,6 +67,11 @@ export const robotService = {
     if (state.logs.length > 100) state.logs.shift();
   },
 
+  clearLogs() {
+    state.logs = [];
+    this.addLog('Logs cleared', 'info');
+  },
+
   connect() {
     if (state.isConnected) {
       this.addLog('Already connected, skipping...', 'warn');

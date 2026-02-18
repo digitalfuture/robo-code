@@ -111,9 +111,9 @@ const getPropColor = (val: number) => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  height: 100%;
-  border-left: 2px solid var(--color-primary); /* Sci-fi accent left border */
+  border-left: 2px solid var(--color-primary);
   overflow-y: auto;
+  max-height: 100%;
 }
 
 .header-row {

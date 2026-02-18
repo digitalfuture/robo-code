@@ -25,12 +25,25 @@ Local web interface for controlling the Robot Arm, designed to run on the second
    npm install
    ```
 
-2. Run locally (Dev mode):
+2. Configure environment (optional):
    ```bash
-   npm run dev
+   cp .env.example .env
+   ```
+   Edit `.env` to set custom robot IP, port, or proxy URL.
+
+3. Run everything (frontend + backend server):
+   ```bash
+   npm start
+   ```
+   This starts both the WebSocket proxy server and the Vite dev server.
+
+   Or run separately:
+   ```bash
+   npm run dev      # Frontend only
+   npm run server   # Backend server only
    ```
 
-3. Build for production:
+4. Build for production:
    ```bash
    npm run build
    ```
