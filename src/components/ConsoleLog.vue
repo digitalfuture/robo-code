@@ -99,10 +99,14 @@ onMounted(() => {
   display: flex;
   gap: 8px;
   align-items: baseline;
-  
-  .time { color: var(--color-text-dim); width: 68px; flex-shrink: 0; }
-  .msg { 
-    white-space: pre-wrap; 
+
+  .time { 
+    color: var(--color-text-dim); 
+    white-space: nowrap;
+    font-size: 0.7rem;
+  }
+  .msg {
+    white-space: pre-wrap;
     word-break: break-all;
   }
   
