@@ -6,6 +6,7 @@ import { robotService } from '../services/robotState';
 const logContainer = ref<HTMLElement | null>(null);
 const state = robotService.state;
 const isUserScrolledUp = ref(false);
+const isPaused = ref(false);
 
 // Track if user scrolled up to read old logs
 const onScroll = () => {
@@ -18,10 +19,17 @@ const onScroll = () => {
 
 const scrollToBottom = () => {
   nextTick(() => {
-    if (logContainer.value && !isUserScrolledUp.value) {
+    if (logContainer.value && !isUserScrolledUp.value && !isPaused.value) {
       logContainer.value.scrollTop = logContainer.value.scrollHeight;
     }
   });
+};
+
+const togglePause = () => {
+  isPaused.value = !isPaused.value;
+  if (!isPaused.value) {
+    scrollToBottom();
+  }
 };
 
 watch(() => state.logs.length, scrollToBottom);
@@ -36,6 +44,14 @@ onMounted(() => {
 
 <template>
   <div class="console-log">
+    <div class="logs-header">
+      <button class="pause-btn" @click="togglePause" :class="{ paused: isPaused }">
+        <span v-if="isPaused">▶</span>
+        <span v-else>⏸</span>
+        {{ isPaused ? t('log.resumed') : t('log.paused') }}
+      </button>
+    </div>
+
     <div v-if="!state.isConnected" class="offline-overlay mono">
       <div class="pulse-icon"></div>
       <span>{{ t('log.no_connection') }}</span>
@@ -62,6 +78,39 @@ onMounted(() => {
   border: none;
   padding: 0;
   box-shadow: none;
+}
+
+.logs-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 8px;
+  background: var(--color-bg-panel);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pause-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  background: var(--color-bg-element);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--color-bg-element-hover);
+    border-color: var(--color-primary);
+  }
+
+  &.paused {
+    background: var(--color-warning);
+    color: var(--color-bg);
+    border-color: var(--color-warning);
+  }
 }
 
 .console-header {
