@@ -44,13 +44,14 @@ onMounted(() => {
              </button>
           </div>
           <div class="network-status mono">
+            <button class="console-toggle-btn" @click="showConsole = !showConsole">
+              <span class="icon">📋</span>
+              <span class="label">{{ showConsole ? t('log.hide') : t('log.show') }}</span>
+            </button>
+            <span class="divider">|</span>
             {{ t('header.net') }}: <span :class="isConnected ? 'online' : 'offline'">{{ isConnected ? t('header.online') : t('status.offline') }}</span>
             <template v-if="isConnected">| {{ t('header.ping') }}: 24ms</template>
           </div>
-          <button class="console-toggle-btn" @click="showConsole = !showConsole">
-            <span class="icon">📋</span>
-            <span class="label">{{ showConsole ? t('log.hide') : t('log.show') }}</span>
-          </button>
       </div>
     </header>
 
@@ -122,6 +123,11 @@ header {
   .network-status {
     font-size: 0.9rem;
     color: var(--color-text-dim);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .divider { color: var(--color-border); }
     .online { color: var(--color-primary); text-shadow: 0 0 5px var(--color-primary); }
     .offline { color: var(--color-danger); }
   }
@@ -150,11 +156,33 @@ header {
   font-size: 0.7rem;
   padding: 2px 8px;
   cursor: pointer;
-  
+
   &:hover { color: var(--color-text); }
   &.active {
     background: var(--color-primary);
     color: #000;
+  }
+}
+
+/* Console Toggle Button */
+.console-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  color: var(--color-text-dim);
+
+  .icon { font-size: 0.9rem; }
+
+  &:hover {
+    background: var(--color-primary);
+    color: #000;
+    border-color: var(--color-primary);
   }
 }
 
@@ -168,7 +196,7 @@ header {
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
     overflow-y: auto;
-    padding-right: 5px; /* Space for scrollbar if stacked */
+    padding-right: 5px;
   }
 }
 
@@ -184,7 +212,6 @@ header {
   min-height: 0;
   height: 100%;
 
-  /* RobotStatus takes fixed space */
   :deep(.robot-status) {
     flex: 0 0 auto;
     max-height: 100%;
@@ -193,27 +220,6 @@ header {
 
 footer {
   margin-top: auto;
-}
-
-/* Console Toggle Button */
-.console-toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--color-border);
-  padding: 4px 10px;
-  font-size: 0.7rem;
-  margin-top: 5px;
-  align-self: flex-end;
-
-  .icon { font-size: 0.9rem; }
-  .label { font-family: var(--font-mono); }
-
-  &:hover {
-    background: var(--color-primary);
-    color: #000;
-  }
 }
 
 /* Modal Styles */
