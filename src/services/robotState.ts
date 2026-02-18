@@ -151,10 +151,10 @@ export const robotService = {
       ws?.send(handshake);
       this.addLog(`Handshake sent: ${handshake}`, 'cmd');
       
-      // Request robot position after connection (wait for robot to be ready)
+      // Request robot run status first (basic command from manual)
       setTimeout(() => {
-        this.addLog('Requesting robot position...', 'info');
-        this.getCurrentWorldPosition();
+        this.addLog('Requesting robot status...', 'info');
+        this.getRunStatus();
       }, 2000);
     };
 
