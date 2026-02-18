@@ -5,10 +5,20 @@ import { robotService } from '../services/robotState';
 
 const logContainer = ref<HTMLElement | null>(null);
 const state = robotService.state;
+const isUserScrolledUp = ref(false);
+
+// Track if user scrolled up to read old logs
+const onScroll = () => {
+  if (logContainer.value) {
+    const { scrollTop, scrollHeight, clientHeight } = logContainer.value;
+    // User is scrolled up if they're more than 50px from bottom
+    isUserScrolledUp.value = scrollHeight - scrollTop - clientHeight > 50;
+  }
+};
 
 const scrollToBottom = () => {
   nextTick(() => {
-    if (logContainer.value) {
+    if (logContainer.value && !isUserScrolledUp.value) {
       logContainer.value.scrollTop = logContainer.value.scrollHeight;
     }
   });
@@ -31,7 +41,7 @@ onMounted(() => {
       <span>{{ t('log.no_connection') }}</span>
     </div>
 
-    <div class="logs-container mono" ref="logContainer">
+    <div class="logs-container mono" ref="logContainer" @scroll="onScroll">
       <div v-for="log in state.logs" :key="log.id" class="log-entry" :class="log.type">
         <span class="time">[{{ log.time }}]</span>
         <span class="type-badge" v-if="log.type === 'cmd'">CMD</span>

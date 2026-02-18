@@ -71,7 +71,7 @@ onMounted(() => {
     <!-- Console Modal -->
     <Teleport to="body">
       <Transition name="modal">
-        <div v-if="showConsole" class="console-modal-overlay" @click="showConsole = false">
+        <div v-if="showConsole" class="console-modal-overlay">
           <div class="console-modal" @click.stop>
             <div class="modal-header">
               <h3 class="modal-title mono">{{ t('log.title') }}</h3>
