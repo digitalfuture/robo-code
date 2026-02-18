@@ -416,9 +416,10 @@ export class CommandBuilder {
 
   /**
    * Format command for sending to robot
+   * Per manual: [Command(); id = X] with spaces around =
    */
   static formatCommand(command: string, id: number = this.generateId()): string {
-    return `[${command};id=${id}]`;
+    return `[${command}; id = ${id}]`;
   }
 
   // ========== POSITION COMMANDS (Section 3.1-3.2) ==========

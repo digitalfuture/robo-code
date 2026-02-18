@@ -54,9 +54,9 @@ const connectRobot = () => {
         console.log('[Proxy] ✓ TCP connection established with robot');
         isRobotConnected = true;
         
-        // Send init command immediately - robot expects commands in specific format
-        // Using getRobotRunStatus_IFace() as a test command (read-only, safe)
-        const initCommand = `[getRobotRunStatus_IFace();id=999]`;
+        // Send init command with proper spacing (per manual format)
+        // Format: [Command(); id = X] with spaces around =
+        const initCommand = `[getRobotRunStatus_IFace(); id = 999]`;
         console.log('[Proxy] → Sending init command:', initCommand);
         robotSocket.write(initCommand);
     });
