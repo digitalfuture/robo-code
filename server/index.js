@@ -50,7 +50,7 @@ const connectRobot = () => {
         console.log('[Proxy] ✓ TCP connection established with robot');
     });
 
-    robotSocket.on('data', (data: Buffer) => {
+    robotSocket.on('data', (data) => {
         const chunk = data.toString('utf8');
         console.log('[Proxy] ← Robot raw:', chunk);
         
@@ -279,7 +279,7 @@ wss.on('connection', (ws, req) => {
                 try {
                     const response = await sendToRobot(message.command);
                     console.log('[Proxy] Command completed:', response);
-                } catch (error: any) {
+                } catch (error) {
                     console.error('[Proxy] Command failed:', error.message);
                     ws.send(JSON.stringify({
                         type: 'COMMAND_ERROR',
@@ -296,7 +296,7 @@ wss.on('connection', (ws, req) => {
                     message: 'Modbus not supported. Use TCP string protocol with ROBOT_COMMAND type.'
                 }));
             }
-        } catch (e: any) {
+        } catch (e) {
             console.error('[Proxy] Message parse error:', e.message);
             ws.send(JSON.stringify({
                 type: 'ERROR',
