@@ -63,6 +63,12 @@ onUnmounted(() => {
 });
 
 const signalLabel = computed(() => hasSignal.value ? t('camera.signal') : t('camera.no_signal'));
+const noCameraText = computed(() => {
+    if (state.isConnected) {
+        return 'CAMERA NOT CONFIGURED';
+    }
+    return t('camera.connection_lost');
+});
 </script>
 
 <template>
@@ -87,7 +93,7 @@ const signalLabel = computed(() => hasSignal.value ? t('camera.signal') : t('cam
         <div v-if="!hasSignal" class="no-signal-overlay">
             <div class="warning-box">
                 <span class="icon">⚠</span>
-                <span>{{ t('camera.connection_lost') }}</span>
+                <span>{{ noCameraText }}</span>
                 <small>{{ t('camera.retrying') }}</small>
             </div>
         </div>
