@@ -23,18 +23,13 @@ const COMMAND_TIMEOUT = 5000; // 5 seconds
 const HEARTBEAT_INTERVAL = 30000; // 30 seconds (per manual Section 5.1)
 
 const wss = new WebSocketServer({ port: PORT });
-let robotSocket: net.Socket | null = null;
+let robotSocket = null;
 let isRobotConnected = false;
 let robotConnectAttempted = false;
 let responseBuffer = '';
-let pendingCommand: {
-  id: number;
-  resolve: (response: string) => void;
-  reject: (error: Error) => void;
-  timeout: NodeJS.Timeout;
-} | null = null;
+let pendingCommand = null;
 
-let frontendClient: WebSocket | null = null;
+let frontendClient = null;
 
 console.log(`[Proxy] WebSocket server listening on port ${PORT}`);
 
@@ -146,15 +141,15 @@ function processResponseBuffer() {
 /**
  * Handle a complete robot response
  */
-function handleRobotResponse(response: string) {
+function handleRobotResponse(response) {
     // Parse response to extract ID
     // Format: [id = X; Ok; data] or [id = X; FAIL]
     const idMatch = response.match(/\[id\s*=\s*(\d+)/i);
     const motionFinishMatch = response.match(/\[(FeedMovFinish|ActMovFinish):\s*(\d+)/i);
     const robotStopMatch = response.match(/\[RobotStop:\s*(\d+)/i);
     const safeDoorMatch = response.match(/\[SafeDoorIsOpen:\s*(\d+)/i);
-    
-    let responseId: number | null = null;
+
+    let responseId = null;
     
     if (idMatch) {
         responseId = parseInt(idMatch[1]);
@@ -183,7 +178,7 @@ function handleRobotResponse(response: string) {
 /**
  * Send command to robot
  */
-function sendToRobot(command: string): Promise<string> {
+function sendToRobot(command) {
     return new Promise((resolve, reject) => {
         if (!robotSocket || !isRobotConnected) {
             reject(new Error('Not connected to robot'));
@@ -314,7 +309,7 @@ wss.on('connection', (ws, req) => {
 /**
  * Broadcast message to connected frontend client
  */
-function broadcastToClient(data: string) {
+function broadcastToClient(data) {
     if (frontendClient && frontendClient.readyState === 1) {
         frontendClient.send(data);
     }
