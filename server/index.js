@@ -22,6 +22,9 @@ console.log('──────────────────────�
 const COMMAND_TIMEOUT = 5000; // 5 seconds
 const HEARTBEAT_INTERVAL = 30000; // 30 seconds (per manual Section 5.1)
 
+// Robot encoding - will be auto-detected on first connection
+let robotEncoding = 'utf8';
+
 const wss = new WebSocketServer({ port: PORT });
 let robotSocket = null;
 let isRobotConnected = false;
@@ -50,15 +53,36 @@ const connectRobot = () => {
         console.log('[Proxy] ✓ TCP connection established with robot');
         isRobotConnected = true;
         
-        // Send a simple query to initialize the session
+        // Send a simple query to initialize the session and detect encoding
         // Get robot run status - this is a safe read-only command
-        const initCommand = `[GetRobotRunStatus();id=999]`;
+        const initCommand = `[getRobotRunStatus_IFace();id=999]`;
         console.log('[Proxy] → Sending init command:', initCommand);
         robotSocket.write(initCommand);
     });
 
     robotSocket.on('data', (data) => {
-        const chunk = data.toString('utf8');
+        // Auto-detect encoding on first response
+        let chunk;
+        if (robotEncoding === 'utf8') {
+            // Try UTF-8 first
+            chunk = data.toString('utf8');
+            
+            // Check for garbage characters (replacement character or unusual patterns)
+            if (/[\uFFFD]/.test(chunk) || chunk.includes('')) {
+                // UTF-8 failed, try UTF-16LE
+                const utf16chunk = data.toString('utf16le');
+                // If UTF-16LE looks more valid (has brackets and semicolons), switch to it
+                if (utf16chunk.includes('[') && utf16chunk.includes(';')) {
+                    robotEncoding = 'utf16le';
+                    console.log('[Proxy] ✓ Auto-detected encoding: UTF-16LE');
+                    chunk = utf16chunk;
+                }
+            }
+        } else {
+            // Use detected encoding
+            chunk = data.toString(robotEncoding);
+        }
+        
         console.log('[Proxy] ← Robot raw:', chunk);
         
         // Accumulate response buffer
@@ -104,6 +128,9 @@ const connectRobot = () => {
         console.log('[Proxy] Robot connection closed');
         isRobotConnected = false;
         robotSocket = null;
+        
+        // Reset encoding detection on disconnect
+        robotEncoding = 'utf8';
 
         if (frontendClient && frontendClient.readyState === 1) {
             frontendClient.send(JSON.stringify({
