@@ -32,6 +32,10 @@ const togglePause = () => {
   }
 };
 
+const exportLogs = () => {
+  robotService.exportLogsToFile();
+};
+
 // Disable auto-scroll completely
 // watch(() => state.logs.length, scrollToBottom);
 
@@ -46,6 +50,9 @@ onMounted(() => {
 <template>
   <div class="console-log">
     <div class="logs-header">
+      <button class="export-btn" @click="exportLogs" title="Export logs to file">
+        📥 Export
+      </button>
       <button class="pause-btn" @click="togglePause" :class="{ paused: isPaused }">
         <span v-if="isPaused">▶</span>
         <span v-else>⏸</span>
@@ -87,6 +94,26 @@ onMounted(() => {
   padding: 4px 8px;
   background: var(--color-bg-panel);
   border-bottom: 1px solid var(--color-border);
+  gap: 8px;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  background: var(--color-success);
+  border: 1px solid var(--color-success);
+  border-radius: 4px;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: bold;
+
+  &:hover {
+    background: var(--color-success-light);
+  }
 }
 
 .pause-btn {

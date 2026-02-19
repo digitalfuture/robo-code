@@ -151,13 +151,13 @@ export const robotService = {
       });
       ws?.send(handshake);
       this.addLog(`Handshake sent: ${handshake}`, 'cmd');
-      
-      // Request robot data after connection
-      setTimeout(() => {
-        if (robotPort === 502) {
-          // Modbus TCP - read holding registers
-          this.addLog('Reading Modbus registers...', 'info');
-          this.readModbusRegisters(0, 20);
+
+      // Start automatic register scanning for Modbus TCP
+      if (robotPort === 502) {
+        this.addLog('Starting automatic Modbus register scan...', 'info');
+        this.addLog('Scanning registers 0-999 in batches of 100...', 'info');
+        this.scanAllModbusRegisters();
+      }
         } else {
           // TCP String Protocol
           this.addLog('Requesting robot status...', 'info');
@@ -401,6 +401,99 @@ export const robotService = {
    */
   togglePause(_paused: boolean) {
     // Placeholder - pause is handled by ConsoleLog component for scrolling only
+  },
+
+  /**
+   * Scan all Modbus registers automatically (0-999 in batches)
+   * Called automatically on connect for Modbus TCP
+   */
+  scanAllModbusRegisters() {
+    if (!ws || !state.isConnected) {
+      this.addLog('Cannot scan: No connection', 'error');
+      return;
+    }
+
+    const batches = [
+      { addr: 0, count: 100 },
+      { addr: 100, count: 100 },
+      { addr: 200, count: 100 },
+      { addr: 300, count: 100 },
+      { addr: 400, count: 100 },
+      { addr: 500, count: 100 },
+      { addr: 600, count: 100 },
+      { addr: 700, count: 100 },
+      { addr: 800, count: 100 },
+      { addr: 900, count: 100 }
+    ];
+
+    let batchIndex = 0;
+
+    const scanNextBatch = () => {
+      if (batchIndex >= batches.length) {
+        this.addLog('=== AUTOMATIC SCAN COMPLETE ===', 'success');
+        this.addLog('Check logs for non-zero register values', 'info');
+        this.addLog('Use "Export Logs" button to save to file', 'info');
+        return;
+      }
+
+      const batch = batches[batchIndex];
+      this.addLog(`Scanning batch ${batchIndex + 1}/${batches.length}: registers ${batch.addr}-${batch.addr + batch.count - 1}`, 'info');
+
+      const handler = (event: MessageEvent) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'REGISTER_DATA') {
+            // Log only non-zero values
+            const nonZeroValues = data.values
+              .map((v: number, i: number) => ({ addr: batch.addr + i, value: v }))
+              .filter((item: { addr: number; value: number }) => item.value !== 0);
+
+            if (nonZeroValues.length > 0) {
+              const logStr = nonZeroValues
+                .map((item: { addr: number; value: number }) => `R${item.addr}=${item.value}`)
+                .join(', ');
+              this.addLog(`Non-zero: [${logStr}]`, 'info');
+            }
+
+            ws?.removeEventListener('message', handler);
+            batchIndex++;
+            setTimeout(scanNextBatch, 500); // Delay between batches
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      };
+
+      ws?.addEventListener('message', handler);
+
+      ws?.send(JSON.stringify({
+        type: 'READ_REGISTER',
+        addr: batch.addr,
+        count: batch.count
+      }));
+    };
+
+    // Start scanning
+    scanNextBatch();
+  },
+
+  /**
+   * Export logs to text file
+   */
+  exportLogsToFile() {
+    const logText = state.logs
+      .map(log => `[${log.time}] ${log.msg}`)
+      .join('\n');
+
+    const blob = new Blob([logText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `robot-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    this.addLog('Logs exported to file', 'success');
   },
 
   /**
