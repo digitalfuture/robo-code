@@ -58,7 +58,7 @@ const state = reactive<RobotState>({
   connection: {
     address: import.meta.env.VITE_ROBOT_IP || '192.168.1.100',
     port: Number(import.meta.env.VITE_ROBOT_PORT) || 502,
-    protocol: 'TCP-STRING (ER Series RCS2 V1.5.3)'
+    protocol: 'Modbus TCP'
   },
   mode: 'MANUAL',
   coordinates: { x: 0, y: 0, z: 0, a: 0, b: 0, c: 0 },
@@ -110,9 +110,10 @@ export const robotService = {
     const proxyUrl = import.meta.env.VITE_PROXY_URL || 'ws://localhost:3000';
     const robotIp = import.meta.env.VITE_ROBOT_IP || '192.168.1.100';
     const robotPort = Number(import.meta.env.VITE_ROBOT_PORT) || 502;
+    const protocol = robotPort === 502 ? 'Modbus TCP' : 'TCP String (ER Series RCS2 V1.5.3)';
 
     this.addLog('=== CONNECTION STARTED ===', 'info');
-    this.addLog(`Protocol: ER Series Robot TCP String (RCS2 V1.5.3)`, 'info');
+    this.addLog(`Protocol: ${protocol}`, 'info');
     this.addLog(`ENV Settings:`, 'info');
     this.addLog(`  VITE_ROBOT_IP: ${robotIp}`, 'info');
     this.addLog(`  VITE_ROBOT_PORT: ${robotPort}`, 'info');
@@ -151,40 +152,57 @@ export const robotService = {
       ws?.send(handshake);
       this.addLog(`Handshake sent: ${handshake}`, 'cmd');
       
-      // Request robot run status first (basic command from manual)
+      // Request robot data after connection
       setTimeout(() => {
-        this.addLog('Requesting robot status...', 'info');
-        this.getRunStatus();
+        if (robotPort === 502) {
+          // Modbus TCP - read holding registers
+          this.addLog('Reading Modbus registers...', 'info');
+          this.readModbusRegisters(0, 20);
+        } else {
+          // TCP String Protocol
+          this.addLog('Requesting robot status...', 'info');
+          this.getRunStatus();
+        }
       }, 2000);
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        
+
         if (data.type === 'STATUS') {
           if (data.connected) {
             this.addLog('✓ Robot connection confirmed', 'success');
+            // Update protocol if provided by server
+            if (data.protocol) {
+              state.connection.protocol = data.protocol;
+            }
           } else {
             this.addLog(`✗ Robot connection failed: ${data.error || 'Unknown error'}`, 'error');
             state.isConnected = false;
           }
         }
-        
+
         if (data.type === 'ROBOT_RESPONSE') {
           this.addLog(`← Robot: ${data.response}`, 'info');
-          
+
           // Parse response and update state
           const response = ProtocolParser.parseResponse(data.response);
           if (response) {
             this.handleRobotResponse(response);
           }
         }
-        
+
+        if (data.type === 'REGISTER_DATA') {
+          // Modbus TCP register data received
+          this.addLog(`Modbus registers: ${JSON.stringify(data.values)}`, 'info');
+          this.handleModbusData(data.values);
+        }
+
         if (data.type === 'HEARTBEAT') {
           this.addLog('♥ Heartbeat received', 'info');
         }
-        
+
         if (data.type === 'ERROR') {
           this.addLog(`ROBOT ERROR: ${data.message}`, 'error');
         }
@@ -242,6 +260,64 @@ export const robotService = {
     state.isConnected = false;
     ws?.close();
     ws = null;
+  },
+
+  /**
+   * Read Modbus holding registers
+   */
+  readModbusRegisters(address: number, count: number) {
+    if (!ws || !state.isConnected) {
+      this.addLog('Cannot read Modbus: No connection', 'error');
+      return;
+    }
+
+    ws.send(JSON.stringify({
+      type: 'READ_REGISTER',
+      addr: address,
+      count: count
+    }));
+
+    this.addLog(`Reading Modbus registers ${address}-${address + count - 1}`, 'cmd');
+  },
+
+  /**
+   * Write Modbus holding register
+   */
+  writeModbusRegister(address: number, value: number) {
+    if (!ws || !state.isConnected) {
+      this.addLog('Cannot write Modbus: No connection', 'error');
+      return;
+    }
+
+    ws.send(JSON.stringify({
+      type: 'WRITE_REGISTER',
+      addr: address,
+      val: value
+    }));
+
+    this.addLog(`Write Modbus ${address} -> ${value}`, 'cmd');
+  },
+
+  /**
+   * Handle Modbus register data
+   */
+  handleModbusData(values: number[]) {
+    // Try to extract coordinates and joints from registers
+    // This is a placeholder - actual register mapping depends on robot configuration
+    
+    // Registers 0-2: X, Y, Z coordinates (example)
+    if (values.length >= 3) {
+      state.coordinates.x = values[0] || 0;
+      state.coordinates.y = values[1] || 0;
+      state.coordinates.z = values[2] || 0;
+    }
+
+    // Registers 3-8: Joint angles J1-J6 (example)
+    if (values.length >= 9) {
+      state.joints = values.slice(3, 9);
+    }
+
+    this.addLog(`Coordinates: X=${state.coordinates.x}, Y=${state.coordinates.y}, Z=${state.coordinates.z}`, 'info');
   },
 
   /**
