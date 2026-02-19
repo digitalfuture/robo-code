@@ -54,6 +54,22 @@ const readModbusTest = () => {
 const scanModbusRegisters = () => {
     robotService.scanModbusRegisters(0, 50, 15000); // Scan 0-49 for 15 seconds
 };
+
+const startProgram = () => {
+    robotService.startRobotProgram();
+};
+
+const stopProgram = () => {
+    robotService.stopRobotProgram();
+};
+
+const resetErrors = () => {
+    robotService.resetRobotErrors();
+};
+
+const setSpeed = () => {
+    robotService.setGlobalSpeed(speed.value);
+};
 </script>
 
 <template>
@@ -131,7 +147,37 @@ const scanModbusRegisters = () => {
 
   <!-- Modbus Test Panel -->
   <div class="modbus-test-panel">
-    <div class="label-heading mono">Modbus TCP Test</div>
+    <div class="label-heading mono">Modbus TCP Control</div>
+    <div class="modbus-controls">
+      <button @click="startProgram" class="start-btn mono">
+        ▶ Start Program
+      </button>
+      <button @click="stopProgram" class="stop-btn mono">
+        ⏹ Stop Program
+      </button>
+      <button @click="resetErrors" class="reset-btn mono">
+        ↺ Reset Errors
+      </button>
+    </div>
+    <div class="modbus-controls" style="margin-top: 0.5rem;">
+      <div class="input-group">
+        <label>Speed: {{speed}}%</label>
+        <input type="range" v-model="speed" min="0" max="100" class="speed-slider" />
+      </div>
+      <button @click="setSpeed" class="set-btn mono">
+        Set Speed
+      </button>
+    </div>
+    <div class="modbus-hint mono">
+      <strong>Commands:</strong> Start (0x04), Stop (0x08), Reset (0x10)<br/>
+      <strong>Command Flag:</strong> 40051 = 0x11 (enable)<br/>
+      <strong>Commands Register:</strong> 40052 (rising edge trigger)
+    </div>
+  </div>
+
+  <!-- Modbus Test Panel -->
+  <div class="modbus-test-panel">
+    <div class="label-heading mono">Modbus TCP Scanner</div>
     <div class="modbus-controls">
       <div class="input-group">
         <label>Address:</label>
@@ -150,8 +196,8 @@ const scanModbusRegisters = () => {
     </div>
     <div class="modbus-hint mono">
       <strong>Read Registers:</strong> Read specific address range<br/>
-      <strong>Scan for Changes:</strong> Monitor registers 0-49 for 15s to find dynamic data (coordinates, joints)<br/>
-      <strong>Try:</strong> 0-20 (base), 270-275 (joints), 1000-1005 (coords), 1300-1305 (joints), 40000-40050 (full map)
+      <strong>Scan for Changes:</strong> Monitor registers for 15s to find dynamic data (coordinates, joints)<br/>
+      <strong>Try:</strong> 0-20 (base), 40000-40050 (full map)
     </div>
   </div>
 </template>
@@ -425,6 +471,79 @@ const scanModbusRegisters = () => {
     margin-top: 0.75rem;
     font-size: 0.7rem;
     color: var(--color-text-dim);
+  }
+}
+
+/* Modbus Control Buttons */
+.modbus-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .start-btn {
+    padding: 0.5rem 1rem;
+    background: var(--color-success);
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-success-light);
+    }
+  }
+
+  .stop-btn {
+    padding: 0.5rem 1rem;
+    background: var(--color-warning);
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-warning-light);
+    }
+  }
+
+  .reset-btn {
+    padding: 0.5rem 1rem;
+    background: var(--color-danger);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-danger-light);
+    }
+  }
+
+  .set-btn {
+    padding: 0.5rem 1rem;
+    background: var(--color-info);
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-info-light);
+    }
+  }
+
+  .speed-slider {
+    width: 150px;
+    accent-color: var(--color-info);
   }
 }
 

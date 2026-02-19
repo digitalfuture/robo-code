@@ -299,28 +299,61 @@ export const robotService = {
   },
 
   /**
-   * Jog robot via Modbus (placeholder - needs actual register addresses)
+   * Start robot program via Modbus
    */
-  jogRobotModbus(axis: string, direction: number) {
-    // This is a placeholder - actual implementation depends on robot's Modbus register map
-    // Common pattern: write to jog command register
-    // axis: 'X', 'Y', 'Z', 'Rx', 'Ry', 'Rz' or 'J1'-'J6'
-    // direction: 1 for positive, -1 for negative
-    
-    // Example (addresses are placeholders):
-    const jogRegisters: Record<string, number> = {
-      'X': 100, 'Y': 101, 'Z': 102,
-      'Rx': 103, 'Ry': 104, 'Rz': 105,
-      'J1': 110, 'J2': 111, 'J3': 112,
-      'J4': 113, 'J5': 114, 'J6': 115
-    };
-    
-    const reg = jogRegisters[axis];
-    if (reg) {
-      const value = direction * 100; // Speed value
-      this.writeModbusRegister(reg, value);
-      this.addLog(`Jog ${axis}${direction > 0 ? '+' : '-'}`, 'cmd');
-    }
+  startRobotProgram() {
+    this.addLog('Starting robot program...', 'cmd');
+    // Set command flag (40051 = 0x11)
+    this.writeModbusRegister(40051, 0x11);
+    // Send Start command (40052 = 0x04)
+    setTimeout(() => {
+      this.writeModbusRegister(40052, 0x04);
+    }, 100);
+  },
+
+  /**
+   * Stop robot program via Modbus
+   */
+  stopRobotProgram() {
+    this.addLog('Stopping robot program...', 'cmd');
+    // Set command flag (40051 = 0x11)
+    this.writeModbusRegister(40051, 0x11);
+    // Send Stop command (40052 = 0x08)
+    setTimeout(() => {
+      this.writeModbusRegister(40052, 0x08);
+    }, 100);
+  },
+
+  /**
+   * Reset robot errors via Modbus
+   */
+  resetRobotErrors() {
+    this.addLog('Resetting robot errors...', 'cmd');
+    // Set command flag (40051 = 0x11)
+    this.writeModbusRegister(40051, 0x11);
+    // Send Reset command (40052 = 0x10)
+    setTimeout(() => {
+      this.writeModbusRegister(40052, 0x10);
+    }, 100);
+  },
+
+  /**
+   * Set global speed via Modbus
+   */
+  setGlobalSpeed(speed: number) {
+    this.addLog(`Setting global speed: ${speed}%`, 'cmd');
+    this.writeModbusRegister(40053, speed);
+  },
+
+  /**
+   * Reset command state machine (use after errors)
+   */
+  resetStateMachine() {
+    this.addLog('Resetting command state machine...', 'warn');
+    this.writeModbusRegister(40051, 0x11);
+    setTimeout(() => {
+      this.writeModbusRegister(40052, 0x400);
+    }, 100);
   },
 
   /**
@@ -328,9 +361,9 @@ export const robotService = {
    */
   handleModbusData(values: number[]) {
     // Try to extract coordinates and joints from registers
-    // This is a placeholder - actual register mapping depends on robot configuration
-
-    // Registers 0-2: X, Y, Z coordinates (example)
+    // Testing multiple possible register mappings
+    
+    // Mapping 1: Registers 0-2 = X, Y, Z (current default)
     if (values.length >= 3) {
       const newX = values[0] || 0;
       const newY = values[1] || 0;
@@ -346,14 +379,47 @@ export const robotService = {
       state.coordinates.z = newZ;
 
       if (changed) {
-        this.addLog(`Coordinates: X=${state.coordinates.x}, Y=${state.coordinates.y}, Z=${state.coordinates.z}`, 'info');
+        this.addLog(`Coordinates (0-2): X=${state.coordinates.x}, Y=${state.coordinates.y}, Z=${state.coordinates.z}`, 'info');
       }
     }
 
-    // Registers 3-8: Joint angles J1-J6 (example)
-    if (values.length >= 9) {
-      state.joints = values.slice(3, 9);
+    // Mapping 2: Try registers 3-5 = X, Y, Z (alternative)
+    if (values.length >= 6) {
+      const altX = values[3] || 0;
+      const altY = values[4] || 0;
+      const altZ = values[5] || 0;
+      
+      // Log if these look like coordinates (values between -10000 and 10000)
+      if (Math.abs(altX) < 10000 && Math.abs(altY) < 10000 && Math.abs(altZ) < 10000) {
+        if (altX !== 0 || altY !== 0 || altZ !== 0) {
+          this.addLog(`Alt Coordinates (3-5): X=${altX}, Y=${altY}, Z=${altZ}`, 'info');
+        }
+      }
     }
+
+    // Mapping 3: Try registers 6-11 = J1-J6 (joints)
+    if (values.length >= 12) {
+      const joints = values.slice(6, 12);
+      // Check if values look like joint angles (typically -180 to 180, or scaled)
+      const looksLikeJoints = joints.some(j => j > 0 && j < 36000);
+      if (looksLikeJoints) {
+        state.joints = joints;
+        this.addLog(`Joints (6-11): ${joints.map(j => j.toFixed(1)).join(', ')}`, 'info');
+      }
+    }
+
+    // Mapping 4: Try registers 12-17 = J1-J6 (alternative joint mapping)
+    if (values.length >= 18) {
+      const altJoints = values.slice(12, 18);
+      const looksLikeJoints = altJoints.some(j => j > 0 && j < 36000);
+      if (looksLikeJoints && JSON.stringify(altJoints) !== JSON.stringify(state.joints)) {
+        this.addLog(`Alt Joints (12-17): ${altJoints.map(j => j.toFixed(1)).join(', ')}`, 'info');
+      }
+    }
+
+    // Log all raw values for debugging (only first 20)
+    const debugStr = values.slice(0, 20).map((v, i) => `${i}:${v}`).join(', ');
+    console.log('[Modbus] Raw registers:', debugStr);
   },
 
   /**
