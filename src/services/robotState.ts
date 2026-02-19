@@ -98,6 +98,9 @@ export const robotService = {
     this.addLog('Logs cleared', 'info');
   },
 
+  // Flag to prevent duplicate logging
+  private _loggedAltCoords = false,
+
   /**
    * Connect to robot via proxy server using TCP string protocol
    */
@@ -364,22 +367,28 @@ export const robotService = {
     // Testing multiple possible register mappings
     
     // Mapping 1: Registers 0-2 = X, Y, Z (current default)
+    // Skip if register 0 looks like a timer (continuously incrementing)
     if (values.length >= 3) {
       const newX = values[0] || 0;
       const newY = values[1] || 0;
       const newZ = values[2] || 0;
 
-      // Only log if values changed significantly
-      const changed = Math.abs(newX - state.coordinates.x) > 10 ||
-                      Math.abs(newY - state.coordinates.y) > 10 ||
-                      Math.abs(newZ - state.coordinates.z) > 10;
+      // Detect if register 0 is a timer (increments by ~2 every 100ms)
+      const isTimer = newX > 1000 || (newX > 100 && Math.abs(newX - state.coordinates.x) < 50 && newX !== state.coordinates.x);
+      
+      if (!isTimer) {
+        // Only log if values changed significantly
+        const changed = Math.abs(newX - state.coordinates.x) > 10 ||
+                        Math.abs(newY - state.coordinates.y) > 10 ||
+                        Math.abs(newZ - state.coordinates.z) > 10;
 
-      state.coordinates.x = newX;
-      state.coordinates.y = newY;
-      state.coordinates.z = newZ;
+        state.coordinates.x = newX;
+        state.coordinates.y = newY;
+        state.coordinates.z = newZ;
 
-      if (changed) {
-        this.addLog(`Coordinates (0-2): X=${state.coordinates.x}, Y=${state.coordinates.y}, Z=${state.coordinates.z}`, 'info');
+        if (changed) {
+          this.addLog(`Coordinates (0-2): X=${state.coordinates.x}, Y=${state.coordinates.y}, Z=${state.coordinates.z}`, 'info');
+        }
       }
     }
 
@@ -392,7 +401,11 @@ export const robotService = {
       // Log if these look like coordinates (values between -10000 and 10000)
       if (Math.abs(altX) < 10000 && Math.abs(altY) < 10000 && Math.abs(altZ) < 10000) {
         if (altX !== 0 || altY !== 0 || altZ !== 0) {
-          this.addLog(`Alt Coordinates (3-5): X=${altX}, Y=${altY}, Z=${altZ}`, 'info');
+          // Only log once
+          if (!this._loggedAltCoords) {
+            this.addLog(`Alt Coordinates (3-5): X=${altX}, Y=${altY}, Z=${altZ}`, 'info');
+            this._loggedAltCoords = true;
+          }
         }
       }
     }
@@ -403,8 +416,11 @@ export const robotService = {
       // Check if values look like joint angles (typically -180 to 180, or scaled)
       const looksLikeJoints = joints.some(j => j > 0 && j < 36000);
       if (looksLikeJoints) {
-        state.joints = joints;
-        this.addLog(`Joints (6-11): ${joints.map(j => j.toFixed(1)).join(', ')}`, 'info');
+        // Only log if different from current
+        if (JSON.stringify(joints) !== JSON.stringify(state.joints)) {
+          state.joints = joints;
+          this.addLog(`Joints (6-11): ${joints.map(j => j.toFixed(1)).join(', ')}`, 'info');
+        }
       }
     }
 
@@ -416,10 +432,6 @@ export const robotService = {
         this.addLog(`Alt Joints (12-17): ${altJoints.map(j => j.toFixed(1)).join(', ')}`, 'info');
       }
     }
-
-    // Log all raw values for debugging (only first 20)
-    const debugStr = values.slice(0, 20).map((v, i) => `${i}:${v}`).join(', ');
-    console.log('[Modbus] Raw registers:', debugStr);
   },
 
   /**
