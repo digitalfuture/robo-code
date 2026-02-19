@@ -194,8 +194,7 @@ export const robotService = {
         }
 
         if (data.type === 'REGISTER_DATA') {
-          // Modbus TCP register data received
-          this.addLog(`Modbus registers: ${JSON.stringify(data.values)}`, 'info');
+          // Modbus TCP register data received - process silently
           this.handleModbusData(data.values);
         }
 
