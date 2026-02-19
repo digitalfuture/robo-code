@@ -332,17 +332,28 @@ export const robotService = {
     
     // Registers 0-2: X, Y, Z coordinates (example)
     if (values.length >= 3) {
-      state.coordinates.x = values[0] || 0;
-      state.coordinates.y = values[1] || 0;
-      state.coordinates.z = values[2] || 0;
+      const newX = values[0] || 0;
+      const newY = values[1] || 0;
+      const newZ = values[2] || 0;
+      
+      // Only log if values changed significantly
+      const changed = Math.abs(newX - state.coordinates.x) > 10 || 
+                      Math.abs(newY - state.coordinates.y) > 10 ||
+                      Math.abs(newZ - state.coordinates.z) > 10;
+      
+      state.coordinates.x = newX;
+      state.coordinates.y = newY;
+      state.coordinates.z = newZ;
+      
+      if (changed) {
+        this.addLog(`Coordinates: X=${state.coordinates.x}, Y=${state.coordinates.y}, Z=${state.coordinates.z}`, 'info');
+      }
     }
 
     // Registers 3-8: Joint angles J1-J6 (example)
     if (values.length >= 9) {
       state.joints = values.slice(3, 9);
     }
-
-    this.addLog(`Coordinates: X=${state.coordinates.x}, Y=${state.coordinates.y}, Z=${state.coordinates.z}`, 'info');
   },
 
   /**
