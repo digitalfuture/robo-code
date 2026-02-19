@@ -453,8 +453,18 @@ wss.on('connection', (ws, req) => {
             }
 
             if (message.type === 'READ_REGISTER' && PROTOCOL === 'MODBUS_TCP') {
+                if (!modbusClient) {
+                    console.error('[Proxy] Read failed: Modbus client not initialized');
+                    ws.send(JSON.stringify({
+                        type: 'ERROR',
+                        message: 'Modbus client not ready'
+                    }));
+                    return;
+                }
                 try {
+                    console.log(`[Proxy] Reading registers ${message.addr}-${message.addr + message.count - 1}`);
                     const response = await modbusClient.readHoldingRegisters(message.addr, message.count);
+                    console.log(`[Proxy] Read ${response.response.body.values.length} registers`);
                     ws.send(JSON.stringify({
                         type: 'REGISTER_DATA',
                         values: response.response.body.values
