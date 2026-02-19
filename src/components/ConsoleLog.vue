@@ -32,7 +32,8 @@ const togglePause = () => {
   }
 };
 
-watch(() => state.logs.length, scrollToBottom);
+// Disable auto-scroll completely
+// watch(() => state.logs.length, scrollToBottom);
 
 onMounted(() => {
   // Don't auto-scroll on mount
