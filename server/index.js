@@ -62,13 +62,24 @@ const connectRobot = () => {
     });
 
     robotSocket.on('data', (data) => {
+        // Check for heartbeat (single space 0x20 per manual Section 5.1)
+        // Robot sends heartbeat every 18 seconds when idle
+        if (data.length === 1 && data[0] === 0x20) {
+            console.log('[Proxy] ← Robot heartbeat (0x20)');
+            // Respond with heartbeat acknowledgment to keep connection alive
+            // This may be required before robot accepts commands
+            robotSocket.write(Buffer.from([0x20]));
+            console.log('[Proxy] → Heartbeat response sent');
+            return;
+        }
+        
         // Auto-detect encoding on first response
         // ER Series robots may use UTF-8, UTF-16LE, or GBK (Chinese)
         let chunk;
         if (robotEncoding === 'utf8') {
             // Try UTF-8 first
             chunk = data.toString('utf8');
-            
+
             // Check for garbage characters (replacement character or unusual patterns)
             if (/[\uFFFD]/.test(chunk) || chunk.includes('')) {
                 // UTF-8 failed, try UTF-16LE
