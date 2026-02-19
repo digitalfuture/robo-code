@@ -194,10 +194,13 @@ export const robotService = {
         }
 
         if (data.type === 'REGISTER_DATA') {
-          // Modbus TCP register data received - process silently
-          // Log only for manual read operations (first 20 values)
-          const preview = data.values.slice(0, 20).join(', ');
-          this.addLog(`Registers: [${preview}]`, 'info');
+          // Modbus TCP register data received
+          // Log only for manual read operations
+          if (this._logNextRegisterData) {
+            const preview = data.values.slice(0, 20).join(', ');
+            this.addLog(`Registers: [${preview}]`, 'info');
+            this._logNextRegisterData = false; // Reset flag
+          }
           this.handleModbusData(data.values);
         }
 
@@ -265,13 +268,16 @@ export const robotService = {
   },
 
   /**
-   * Read Modbus holding registers
+   * Read Modbus holding registers (manual operation with logging)
    */
   readModbusRegisters(address: number, count: number) {
     if (!ws || !state.isConnected) {
       this.addLog('Cannot read Modbus: No connection', 'error');
       return;
     }
+
+    // Set flag to log the response
+    this._logNextRegisterData = true;
 
     ws.send(JSON.stringify({
       type: 'READ_REGISTER',
@@ -281,6 +287,9 @@ export const robotService = {
 
     this.addLog(`Reading Modbus registers ${address}-${address + count - 1}`, 'cmd');
   },
+
+  // Flag to log next register data (for manual read operations)
+  _logNextRegisterData: false,
 
   /**
    * Write Modbus holding register
