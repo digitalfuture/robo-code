@@ -87,22 +87,8 @@ const getPropColor = (val: number) => {
       </div>
     </div>
 
-    <!-- Telemetry Footer -->
-    <div class="status-footer">
-       <div class="metric">
-         <span class="lbl">{{ t('status.temp') }}</span>
-         <span class="val ok">42°C</span>
-       </div>
-       <div class="metric">
-         <span class="lbl">{{ t('status.load') }}</span>
-         <span class="val">12%</span>
-       </div>
-       <div class="metric">
-         <span class="lbl">{{ t('status.time') }}</span>
-         <span class="val">04:20:11</span>
-       </div>
-       <div class="mode-badge">{{ t('status.auto') }}</div>
-    </div>
+    <!-- Mode Badge -->
+    <div class="mode-badge">{{ t('status.auto') }}</div>
   </div>
 </template>
 
@@ -245,38 +231,26 @@ const getPropColor = (val: number) => {
   height: 2px;
   background: rgba(255,255,255,0.1);
   margin-top: auto;
-  
+
   .fill {
     height: 100%;
     transition: width 0.1s linear, background-color 0.3s ease;
   }
 }
 
-.status-footer {
+.mode-badge {
+  background: var(--color-primary);
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
   margin-top: auto;
-  border-top: 1px solid var(--color-border);
-  padding-top: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  
-  .metric {
-    display: flex;
-    flex-direction: column;
-    font-size: 0.7rem;
-    
-    .lbl { color: var(--color-text-dim); margin-bottom: 2px; }
-    .val { font-family: var(--font-mono); }
-    .val.ok { color: var(--color-primary); }
-  }
-  
-  .mode-badge {
-    background: var(--color-primary);
-    color: #000;
-    font-size: 0.7rem;
-    font-weight: bold;
-    padding: 2px 8px;
-    border-radius: 10px;
-  }
 }
+
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
 </style>
