@@ -778,18 +778,6 @@ export const robotService = {
     return response;
   },
 
-  /**
-   * Set global speed (Section 3.11)
-   */
-  async setGlobalSpeed(speed: number) {
-    const command = CommandBuilder.setGoableSpeed(speed);
-    const response = await this.sendCommand(command);
-    if (response?.success) {
-      this.addLog(`Global speed: ${speed}%`, 'success');
-    }
-    return response;
-  },
-
   // ========== DEMO MODE ==========
 
   toggleDemoMode(enabled: boolean) {
