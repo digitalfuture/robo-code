@@ -27,8 +27,6 @@ const scrollToBottom = () => {
 
 const togglePause = () => {
   isPaused.value = !isPaused.value;
-  // Tell robotService to pause data processing
-  robotService.togglePause(isPaused.value);
   if (!isPaused.value) {
     scrollToBottom();
   }
@@ -37,7 +35,7 @@ const togglePause = () => {
 watch(() => state.logs.length, scrollToBottom);
 
 onMounted(() => {
-  scrollToBottom();
+  // Don't auto-scroll on mount
   if (state.logs.length === 0) {
     robotService.addLog(t('log.init'), 'success');
   }

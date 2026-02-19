@@ -361,8 +361,7 @@ export const robotService = {
    * Called automatically by polling - do NOT log here to avoid spam
    */
   handleModbusData(values: number[]) {
-    // Skip processing if paused
-    if (this._isPaused) return;
+    // Update state silently - no logging to avoid spam
     if (values.length >= 3) {
       const newX = values[0] || 0;
       const newY = values[1] || 0;
@@ -386,19 +385,11 @@ export const robotService = {
     // Update UI silently (Vue reactivity handles this)
   },
 
-  // Internal pause flag
-  _isPaused: false,
-
   /**
-   * Toggle pause for data processing
+   * Toggle pause for data processing (not used - pause is visual only)
    */
-  togglePause(paused: boolean) {
-    this._isPaused = paused;
-    if (paused) {
-      this.addLog('Data processing paused', 'warn');
-    } else {
-      this.addLog('Data processing resumed', 'success');
-    }
+  togglePause(_paused: boolean) {
+    // Placeholder - pause is handled by ConsoleLog component for scrolling only
   },
 
   /**
