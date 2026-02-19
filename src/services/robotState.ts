@@ -363,8 +363,6 @@ export const robotService = {
   handleModbusData(values: number[]) {
     // Skip processing if paused
     if (this._isPaused) return;
-    
-    // Update state silently - no logging to avoid spam
     if (values.length >= 3) {
       const newX = values[0] || 0;
       const newY = values[1] || 0;
@@ -389,7 +387,7 @@ export const robotService = {
   },
 
   // Internal pause flag
-  private _isPaused = false,
+  _isPaused: false,
 
   /**
    * Toggle pause for data processing
