@@ -157,13 +157,11 @@ export const robotService = {
         this.addLog('Starting automatic Modbus register scan...', 'info');
         this.addLog('Scanning registers 0-999 in batches of 100...', 'info');
         this.scanAllModbusRegisters();
+      } else {
+        // TCP String Protocol
+        this.addLog('Requesting robot status...', 'info');
+        this.getRunStatus();
       }
-        } else {
-          // TCP String Protocol
-          this.addLog('Requesting robot status...', 'info');
-          this.getRunStatus();
-        }
-      }, 2000);
     };
 
     ws.onmessage = (event) => {
