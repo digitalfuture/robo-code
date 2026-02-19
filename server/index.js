@@ -462,7 +462,7 @@ wss.on('connection', (ws, req) => {
                     return;
                 }
                 try {
-                    console.log(`[Proxy] Reading registers ${message.addr}-${message.addr + message.count - 1}`);
+                    console.log(`[Proxy] Reading Holding Registers ${message.addr}-${message.addr + message.count - 1}`);
                     const response = await modbusClient.readHoldingRegisters(message.addr, message.count);
                     console.log(`[Proxy] Read ${response.response.body.values.length} registers`);
                     ws.send(JSON.stringify({
@@ -475,6 +475,42 @@ wss.on('connection', (ws, req) => {
                         type: 'ERROR',
                         message: error.message
                     }));
+                }
+            }
+
+            if (message.type === 'READ_INPUT_REGISTER' && PROTOCOL === 'MODBUS_TCP') {
+                if (!modbusClient) {
+                    ws.send(JSON.stringify({ type: 'ERROR', message: 'Modbus client not ready' }));
+                    return;
+                }
+                try {
+                    console.log(`[Proxy] Reading Input Registers ${message.addr}-${message.addr + message.count - 1}`);
+                    const response = await modbusClient.readInputRegisters(message.addr, message.count);
+                    ws.send(JSON.stringify({
+                        type: 'INPUT_DATA',
+                        values: response.response.body.values
+                    }));
+                } catch (error) {
+                    console.error('[Proxy] Input Read failed:', error.message);
+                    ws.send(JSON.stringify({ type: 'ERROR', message: error.message }));
+                }
+            }
+
+            if (message.type === 'READ_COIL' && PROTOCOL === 'MODBUS_TCP') {
+                if (!modbusClient) {
+                    ws.send(JSON.stringify({ type: 'ERROR', message: 'Modbus client not ready' }));
+                    return;
+                }
+                try {
+                    console.log(`[Proxy] Reading Coils ${message.addr}-${message.addr + message.count - 1}`);
+                    const response = await modbusClient.readCoils(message.addr, message.count);
+                    ws.send(JSON.stringify({
+                        type: 'COIL_DATA',
+                        values: response.response.body.values
+                    }));
+                } catch (error) {
+                    console.error('[Proxy] Coil Read failed:', error.message);
+                    ws.send(JSON.stringify({ type: 'ERROR', message: error.message }));
                 }
             }
         } catch (e) {

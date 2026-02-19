@@ -411,51 +411,64 @@ export const robotService = {
       return;
     }
 
-    const batches = [
-      { addr: 0, count: 100 },
-      { addr: 100, count: 100 },
-      { addr: 200, count: 100 },
-      { addr: 300, count: 100 },
-      { addr: 400, count: 100 },
-      { addr: 500, count: 100 },
-      { addr: 600, count: 100 },
-      { addr: 700, count: 100 },
-      { addr: 800, count: 100 },
-      { addr: 900, count: 100 }
-    ];
+    this.addLog('=== STARTING FULL REGISTER SCAN ===', 'info');
+    this.addLog('Scanning Holding Registers (4xxxx): 0-999', 'info');
+    this.addLog('Scanning Input Registers (3xxxx): 0-999', 'info');
+    this.addLog('Scanning Coils (0xxxx): 0-999', 'info');
+    this.addLog('This will take ~30 seconds...', 'info');
 
+    // Scan Holding Registers first
+    this.scanRegisterRange('Holding', 0, 1000, () => {
+      // Then Input Registers
+      this.scanRegisterRange('Input', 0, 1000, () => {
+        // Then Coils
+        this.scanRegisterRange('Coils', 0, 1000, () => {
+          this.addLog('=== FULL SCAN COMPLETE ===', 'success');
+          this.addLog('Check logs for non-zero values', 'info');
+          this.addLog('Use "Export Logs" button to save to file', 'info');
+        });
+      });
+    });
+  },
+
+  /**
+   * Scan a range of Modbus registers
+   */
+  scanRegisterRange(type: 'Holding' | 'Input' | 'Coils', startAddr: number, endAddr: number, callback?: () => void) {
+    const batchSize = 100;
+    const batches = Math.ceil((endAddr - startAddr) / batchSize);
     let batchIndex = 0;
 
     const scanNextBatch = () => {
-      if (batchIndex >= batches.length) {
-        this.addLog('=== AUTOMATIC SCAN COMPLETE ===', 'success');
-        this.addLog('Check logs for non-zero register values', 'info');
-        this.addLog('Use "Export Logs" button to save to file', 'info');
+      if (batchIndex >= batches) {
+        if (callback) callback();
         return;
       }
 
-      const batch = batches[batchIndex];
-      this.addLog(`Scanning batch ${batchIndex + 1}/${batches.length}: registers ${batch.addr}-${batch.addr + batch.count - 1}`, 'info');
+      const addr = startAddr + (batchIndex * batchSize);
+      const count = Math.min(batchSize, endAddr - addr);
+
+      this.addLog(`Scanning ${type} ${addr}-${addr + count - 1} (${batchIndex + 1}/${batches})`, 'info');
 
       const handler = (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.type === 'REGISTER_DATA') {
+          if (data.type === 'REGISTER_DATA' || data.type === 'INPUT_DATA' || data.type === 'COIL_DATA') {
             // Log only non-zero values
             const nonZeroValues = data.values
-              .map((v: number, i: number) => ({ addr: batch.addr + i, value: v }))
+              .map((v: number, i: number) => ({ addr: addr + i, value: v }))
               .filter((item: { addr: number; value: number }) => item.value !== 0);
 
             if (nonZeroValues.length > 0) {
               const logStr = nonZeroValues
                 .map((item: { addr: number; value: number }) => `R${item.addr}=${item.value}`)
                 .join(', ');
-              this.addLog(`Non-zero: [${logStr}]`, 'info');
+              this.addLog(`${type} Non-zero: [${logStr}]`, 'info');
             }
 
             ws?.removeEventListener('message', handler);
             batchIndex++;
-            setTimeout(scanNextBatch, 500); // Delay between batches
+            setTimeout(scanNextBatch, 300);
           }
         } catch (e) {
           // Ignore parse errors
@@ -464,14 +477,17 @@ export const robotService = {
 
       ws?.addEventListener('message', handler);
 
+      // Send appropriate read command based on type
+      const readType = type === 'Holding' ? 'READ_REGISTER' : 
+                       type === 'Input' ? 'READ_INPUT_REGISTER' : 'READ_COIL';
+      
       ws?.send(JSON.stringify({
-        type: 'READ_REGISTER',
-        addr: batch.addr,
-        count: batch.count
+        type: readType,
+        addr: addr,
+        count: count
       }));
     };
 
-    // Start scanning
     scanNextBatch();
   },
 
