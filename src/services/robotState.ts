@@ -329,22 +329,22 @@ export const robotService = {
   handleModbusData(values: number[]) {
     // Try to extract coordinates and joints from registers
     // This is a placeholder - actual register mapping depends on robot configuration
-    
+
     // Registers 0-2: X, Y, Z coordinates (example)
     if (values.length >= 3) {
       const newX = values[0] || 0;
       const newY = values[1] || 0;
       const newZ = values[2] || 0;
-      
+
       // Only log if values changed significantly
-      const changed = Math.abs(newX - state.coordinates.x) > 10 || 
+      const changed = Math.abs(newX - state.coordinates.x) > 10 ||
                       Math.abs(newY - state.coordinates.y) > 10 ||
                       Math.abs(newZ - state.coordinates.z) > 10;
-      
+
       state.coordinates.x = newX;
       state.coordinates.y = newY;
       state.coordinates.z = newZ;
-      
+
       if (changed) {
         this.addLog(`Coordinates: X=${state.coordinates.x}, Y=${state.coordinates.y}, Z=${state.coordinates.z}`, 'info');
       }
@@ -354,6 +354,110 @@ export const robotService = {
     if (values.length >= 9) {
       state.joints = values.slice(3, 9);
     }
+  },
+
+  /**
+   * Scan Modbus registers to find changing values (for mapping discovery)
+   * Reads registers in batches and logs which ones change over time
+   */
+  scanModbusRegisters(startAddress: number, count: number, scanDuration: number = 10000) {
+    if (!ws || !state.isConnected) {
+      this.addLog('Cannot scan: No connection', 'error');
+      return;
+    }
+
+    this.addLog(`Starting register scan: ${startAddress}-${startAddress + count - 1}`, 'info');
+    this.addLog(`Scan duration: ${scanDuration}ms`, 'info');
+
+    const baselineValues = new Map<number, number>();
+    const changingRegisters = new Set<number>();
+    const scanStartTime = Date.now();
+
+    // First, get baseline readings
+    const getBaseline = async () => {
+      return new Promise<void>((resolve) => {
+        const handler = (event: MessageEvent) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'REGISTER_DATA') {
+              data.values.forEach((value: number, index: number) => {
+                baselineValues.set(startAddress + index, value);
+              });
+              ws?.removeEventListener('message', handler);
+              resolve();
+            }
+          } catch (e) {
+            // Ignore parse errors
+          }
+        };
+        ws?.addEventListener('message', handler);
+
+        ws?.send(JSON.stringify({
+          type: 'READ_REGISTER',
+          addr: startAddress,
+          count: count
+        }));
+
+        setTimeout(() => {
+          ws?.removeEventListener('message', handler);
+          resolve();
+        }, 2000);
+      });
+    };
+
+    // Then monitor for changes
+    const monitorChanges = () => {
+      const checkInterval = setInterval(() => {
+        if (Date.now() - scanStartTime > scanDuration) {
+          clearInterval(checkInterval);
+          this.addLog('=== SCAN COMPLETE ===', 'success');
+          if (changingRegisters.size > 0) {
+            this.addLog(`Changing registers found: ${Array.from(changingRegisters).join(', ')}`, 'success');
+            this.addLog(`These registers may contain dynamic data (coordinates, joints, status)`, 'info');
+          } else {
+            this.addLog('No changing registers detected', 'warn');
+          }
+          return;
+        }
+
+        // Read current values and compare
+        const handler = (event: MessageEvent) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'REGISTER_DATA') {
+              data.values.forEach((value: number, index: number) => {
+                const addr = startAddress + index;
+                const baseline = baselineValues.get(addr);
+                if (baseline !== undefined && value !== baseline) {
+                  changingRegisters.add(addr);
+                  this.addLog(`Register ${addr}: ${baseline} → ${value}`, 'info');
+                  baselineValues.set(addr, value); // Update baseline
+                }
+              });
+            }
+          } catch (e) {
+            // Ignore parse errors
+          }
+        };
+        ws?.addEventListener('message', handler);
+
+        ws?.send(JSON.stringify({
+          type: 'READ_REGISTER',
+          addr: startAddress,
+          count: count
+        }));
+
+        setTimeout(() => {
+          ws?.removeEventListener('message', handler);
+        }, 500);
+      }, 1000);
+    };
+
+    // Start the scan
+    getBaseline().then(() => {
+      this.addLog('Baseline acquired, monitoring for changes...', 'info');
+      monitorChanges();
+    });
   },
 
   /**

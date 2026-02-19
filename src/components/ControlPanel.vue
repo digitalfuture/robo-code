@@ -50,6 +50,10 @@ const handleAction = (action: string) => {
 const readModbusTest = () => {
     robotService.readModbusRegisters(modbusAddress.value, modbusCount.value);
 };
+
+const scanModbusRegisters = () => {
+    robotService.scanModbusRegisters(0, 50, 15000); // Scan 0-49 for 15 seconds
+};
 </script>
 
 <template>
@@ -140,9 +144,14 @@ const readModbusTest = () => {
       <button @click="readModbusTest" class="read-btn mono">
         Read Registers
       </button>
+      <button @click="scanModbusRegisters" class="scan-btn mono">
+        Scan for Changes
+      </button>
     </div>
     <div class="modbus-hint mono">
-      Try: 0-20 (base), 270-275 (joints), 1000-1005 (coords), 1300-1305 (joints)
+      <strong>Read Registers:</strong> Read specific address range<br/>
+      <strong>Scan for Changes:</strong> Monitor registers 0-49 for 15s to find dynamic data (coordinates, joints)<br/>
+      <strong>Try:</strong> 0-20 (base), 270-275 (joints), 1000-1005 (coords), 1300-1305 (joints), 40000-40050 (full map)
     </div>
   </div>
 </template>
@@ -393,6 +402,21 @@ const readModbusTest = () => {
 
       &:hover {
         background: var(--color-info-light);
+      }
+    }
+
+    .scan-btn {
+      padding: 0.5rem 1rem;
+      background: var(--color-success);
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-weight: bold;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--color-success-light);
       }
     }
   }
