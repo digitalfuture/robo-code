@@ -64,9 +64,8 @@ const initModbus = () => {
         startModbusPolling();
     });
 
-    robotSocket.on('data', (data) => {
-        console.log('[Proxy] ← Modbus raw:', data.toString('hex'));
-    });
+    // Don't log raw data - jsmodbus handles parsing internally
+    // robotSocket.on('data', ...) - removed to prevent infinite logging
 
     robotSocket.on('error', handleModbusError);
     robotSocket.on('close', handleModbusClose);
