@@ -27,6 +27,8 @@ const scrollToBottom = () => {
 
 const togglePause = () => {
   isPaused.value = !isPaused.value;
+  // Tell robotService to pause data processing
+  robotService.togglePause(isPaused.value);
   if (!isPaused.value) {
     scrollToBottom();
   }

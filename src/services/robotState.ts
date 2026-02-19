@@ -98,9 +98,6 @@ export const robotService = {
     this.addLog('Logs cleared', 'info');
   },
 
-  // Flag to prevent duplicate logging
-  private _loggedAltCoords = false,
-
   /**
    * Connect to robot via proxy server using TCP string protocol
    */
@@ -361,76 +358,48 @@ export const robotService = {
 
   /**
    * Handle Modbus register data
+   * Called automatically by polling - do NOT log here to avoid spam
    */
   handleModbusData(values: number[]) {
-    // Try to extract coordinates and joints from registers
-    // Testing multiple possible register mappings
+    // Skip processing if paused
+    if (this._isPaused) return;
     
-    // Mapping 1: Registers 0-2 = X, Y, Z (current default)
-    // Skip if register 0 looks like a timer (continuously incrementing)
+    // Update state silently - no logging to avoid spam
     if (values.length >= 3) {
       const newX = values[0] || 0;
       const newY = values[1] || 0;
       const newZ = values[2] || 0;
 
-      // Detect if register 0 is a timer (increments by ~2 every 100ms)
+      // Detect if register 0 is a timer (continuously incrementing)
       const isTimer = newX > 1000 || (newX > 100 && Math.abs(newX - state.coordinates.x) < 50 && newX !== state.coordinates.x);
       
       if (!isTimer) {
-        // Only log if values changed significantly
-        const changed = Math.abs(newX - state.coordinates.x) > 10 ||
-                        Math.abs(newY - state.coordinates.y) > 10 ||
-                        Math.abs(newZ - state.coordinates.z) > 10;
-
         state.coordinates.x = newX;
         state.coordinates.y = newY;
         state.coordinates.z = newZ;
-
-        if (changed) {
-          this.addLog(`Coordinates (0-2): X=${state.coordinates.x}, Y=${state.coordinates.y}, Z=${state.coordinates.z}`, 'info');
-        }
       }
     }
 
-    // Mapping 2: Try registers 3-5 = X, Y, Z (alternative)
-    if (values.length >= 6) {
-      const altX = values[3] || 0;
-      const altY = values[4] || 0;
-      const altZ = values[5] || 0;
-      
-      // Log if these look like coordinates (values between -10000 and 10000)
-      if (Math.abs(altX) < 10000 && Math.abs(altY) < 10000 && Math.abs(altZ) < 10000) {
-        if (altX !== 0 || altY !== 0 || altZ !== 0) {
-          // Only log once
-          if (!this._loggedAltCoords) {
-            this.addLog(`Alt Coordinates (3-5): X=${altX}, Y=${altY}, Z=${altZ}`, 'info');
-            this._loggedAltCoords = true;
-          }
-        }
-      }
+    // Update joints if available
+    if (values.length >= 9) {
+      state.joints = values.slice(3, 9);
     }
+    
+    // Update UI silently (Vue reactivity handles this)
+  },
 
-    // Mapping 3: Try registers 6-11 = J1-J6 (joints)
-    if (values.length >= 12) {
-      const joints = values.slice(6, 12);
-      // Check if values look like joint angles (typically -180 to 180, or scaled)
-      const looksLikeJoints = joints.some(j => j > 0 && j < 36000);
-      if (looksLikeJoints) {
-        // Only log if different from current
-        if (JSON.stringify(joints) !== JSON.stringify(state.joints)) {
-          state.joints = joints;
-          this.addLog(`Joints (6-11): ${joints.map(j => j.toFixed(1)).join(', ')}`, 'info');
-        }
-      }
-    }
+  // Internal pause flag
+  private _isPaused = false,
 
-    // Mapping 4: Try registers 12-17 = J1-J6 (alternative joint mapping)
-    if (values.length >= 18) {
-      const altJoints = values.slice(12, 18);
-      const looksLikeJoints = altJoints.some(j => j > 0 && j < 36000);
-      if (looksLikeJoints && JSON.stringify(altJoints) !== JSON.stringify(state.joints)) {
-        this.addLog(`Alt Joints (12-17): ${altJoints.map(j => j.toFixed(1)).join(', ')}`, 'info');
-      }
+  /**
+   * Toggle pause for data processing
+   */
+  togglePause(paused: boolean) {
+    this._isPaused = paused;
+    if (paused) {
+      this.addLog('Data processing paused', 'warn');
+    } else {
+      this.addLog('Data processing resumed', 'success');
     }
   },
 
