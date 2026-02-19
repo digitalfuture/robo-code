@@ -95,10 +95,12 @@ const connectRobot = () => {
                         chunk = iconv.decode(data, 'gbk');
                         robotEncoding = 'gbk';
                         console.log('[Proxy] ✓ Auto-detected encoding: GBK (Chinese)');
+                        console.log('[Proxy] GBK decoded:', chunk);
                     } catch (e) {
                         // Fallback to hex dump
                         robotEncoding = 'hex';
-                        console.log('[Proxy] Raw bytes:', data.toString('hex'));
+                        console.log('[Proxy] Raw bytes (hex):', data.toString('hex'));
+                        console.log('[Proxy] GBK decode error:', e.message);
                         chunk = '[Encoded data - see hex dump]';
                     }
                 }
