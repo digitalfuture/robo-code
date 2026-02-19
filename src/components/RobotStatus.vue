@@ -86,9 +86,6 @@ const getPropColor = (val: number) => {
         </div>
       </div>
     </div>
-
-    <!-- Mode Badge -->
-    <div class="mode-badge">{{ t('status.auto') }}</div>
   </div>
 </template>
 
@@ -237,20 +234,5 @@ const getPropColor = (val: number) => {
     transition: width 0.1s linear, background-color 0.3s ease;
   }
 }
-
-.mode-badge {
-  background: var(--color-primary);
-  color: #000;
-  font-size: 0.7rem;
-  font-weight: bold;
-  padding: 2px 8px;
-  border-radius: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-align: center;
-  margin-top: auto;
-}
-
-@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
 </style>
