@@ -383,11 +383,19 @@ export const robotService = {
     // Skip processing if paused
     if (this._isPaused) return;
     
-    // Detect if this is coordinates data (register 100+ contains values like 50000+)
-    const isCoordinates = values.length >= 9 && (values[0] > 1000 || values[2] > 1000 || values[4] > 1000);
+    // Coordinates have pattern: [val, 0, val, 0, val, 0, val, 0, val, 0]
+    // Every other register is 0 or small value
+    const isCoordinates = values.length >= 9 && 
+                          values[0] > 10000 &&  // X ~50000
+                          values[1] < 1000 &&   // reserved
+                          values[2] > 10000 &&  // Y ~17000
+                          values[3] > 10000;    // not zero (some values)
     
-    // Detect if this is joints data (register 200+ contains values in 1000-50000 range)
-    const isJoints = values.length >= 6 && values[0] > 100 && values[0] < 60000;
+    // Joints are 6 consecutive values in range 1000-60000
+    const isJoints = values.length >= 6 && 
+                     values[0] > 500 && values[0] < 60000 &&
+                     values[1] > 500 && values[1] < 60000 &&
+                     values[2] > 500 && values[2] < 60000;
     
     // Update coordinates from registers 100-108
     if (isCoordinates && values.length >= 9) {
@@ -419,8 +427,9 @@ export const robotService = {
       }
     }
 
-    // Update joints from registers 200-205
-    if (isJoints && values.length >= 6) {
+    // Update joints from registers 200-205 (6 consecutive values)
+    // Only if NOT coordinates data
+    if (isJoints && !isCoordinates && values.length >= 6) {
       const newJoints = values.slice(0, 6).map(v => v / 100);
       
       // Update if different
