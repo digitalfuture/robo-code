@@ -299,6 +299,31 @@ export const robotService = {
   },
 
   /**
+   * Jog robot via Modbus (placeholder - needs actual register addresses)
+   */
+  jogRobotModbus(axis: string, direction: number) {
+    // This is a placeholder - actual implementation depends on robot's Modbus register map
+    // Common pattern: write to jog command register
+    // axis: 'X', 'Y', 'Z', 'Rx', 'Ry', 'Rz' or 'J1'-'J6'
+    // direction: 1 for positive, -1 for negative
+    
+    // Example (addresses are placeholders):
+    const jogRegisters: Record<string, number> = {
+      'X': 100, 'Y': 101, 'Z': 102,
+      'Rx': 103, 'Ry': 104, 'Rz': 105,
+      'J1': 110, 'J2': 111, 'J3': 112,
+      'J4': 113, 'J5': 114, 'J6': 115
+    };
+    
+    const reg = jogRegisters[axis];
+    if (reg) {
+      const value = direction * 100; // Speed value
+      this.writeModbusRegister(reg, value);
+      this.addLog(`Jog ${axis}${direction > 0 ? '+' : '-'}`, 'cmd');
+    }
+  },
+
+  /**
    * Handle Modbus register data
    */
   handleModbusData(values: number[]) {

@@ -33,8 +33,14 @@ const setMode = (m: 'AUTO' | 'MANUAL') => {
   robotService.sendCommand('SET_MODE');
 };
 
-const handleJog = (_axis: string) => {
-    robotService.sendCommand('JOG');
+const handleJog = (axis: string) => {
+    if (state.connection.protocol === 'Modbus TCP') {
+        // For Modbus, we need to find the correct register addresses
+        // This is a placeholder - actual addresses depend on robot configuration
+        robotService.jogRobotModbus(axis, 1);
+    } else {
+        robotService.sendCommand('JOG');
+    }
 };
 
 const handleAction = (action: string) => {
