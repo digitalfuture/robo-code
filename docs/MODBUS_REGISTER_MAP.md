@@ -1,179 +1,193 @@
-# Estun Robot Modbus TCP Register Map
+# Estun ERC3-C1 Modbus TCP Register Map
 
-## Protocol: Modbus TCP
-- **Port:** 502
-- **Protocol Type:** Holding Registers (4xxxx series)
-- **Data Type:** 16-bit integers (UINT16)
-- **Buffer:** MBDataBuffer[0..1499] (3000 bytes total)
+## Discovered: 2026-02-19
 
----
+## Connection Settings
 
-## Register Overview
-
-### MBDataBuffer Mapping
-- **MBDataBuffer[0-49]** → Registers **40001-40050** (Transmit - Robot sends data)
-- **MBDataBuffer[50-1499]** → Registers **40051-40064+** (Receive - Robot receives commands)
+| Parameter | Value |
+|-----------|-------|
+| **IP Address** | 192.168.60.68 (default) |
+| **Modbus TCP Port** | **1502** (NOT 502!) |
+| **Protocol** | Modbus TCP Holding Registers |
+| **Data Format** | 16-bit unsigned integers (Big Endian) |
 
 ---
 
-## Transmit Registers (Robot Sends Data)
+## Register Map
 
-**Address Range:** 40001-40050 (MBDataBuffer[0-49])
+### Current Position (Cartesian Coordinates)
 
-*Note: Exact mapping for coordinates and joints needs verification from Estun or empirical testing*
+**Address: 100-108** (6 registers × 2 bytes = 12 bytes)
 
-| Register | MBDataBuffer | Definition | Description |
-|----------|--------------|------------|-------------|
-| 40001 | [0] | Reserved | - |
-| 40002 | [1] | Global Speed | Current speed value |
-| 40003-40050 | [2-49] | User Data | Available for custom data (coordinates, joints, status) |
+| Register | Value Example | Description | Scale |
+|----------|--------------|-------------|-------|
+| 100 | 50100 | X coordinate | ÷100 = 501.00 mm |
+| 101 | 0 | (reserved) | - |
+| 102 | 17332 | Y coordinate | ÷100 = 173.32 mm |
+| 103 | 0 | (reserved) | - |
+| 104 | 17679 | Z coordinate | ÷100 = 176.79 mm |
+| 105 | 0 | (reserved) | - |
+| 106 | 17723 | A angle (rotation around X) | ÷100 = 177.23° |
+| 107 | 0 | (reserved) | - |
+| 108 | 18083 | B angle (rotation around Y) | ÷100 = 180.83° |
+| 109 | 0 | (reserved) | - |
 
-**Expected Data (needs verification):**
-- **Coordinates (X, Y, Z, A, B, C):** Likely in range 40003-40020
-- **Joint Angles (J1-J6):** Likely in range 40009-40020
-- **Robot Status:** Likely in range 40003-40010
-
----
-
-## Receive Registers (Robot Receives Commands)
-
-### Command Flag Register (40051)
-**Address:** `40051` (Local: MBDataBuffer[50])  
-**Name:** Command Flag  
-**Value:** `0x11` (17) - Enable read/write for commands
+**Note:** C angle (rotation around Z) not yet found.
 
 ---
 
-### Robotic Operation Commands (40052)
-**Address:** `40052` (Local: MBDataBuffer[51])  
-**Name:** Robotic Operation Commands  
-**Type:** Bit-field command register  
-**Trigger:** Rising edge (commands execute on 0→1 transition)
+### Current Joint Angles
 
-| Bit | Hex Value | Command | Description |
-|-----|-----------|---------|-------------|
-| 2 | 0x04 | Start | Start robot program |
-| 3 | 0x08 | Stop | Stop robot program |
-| 4 | 0x10 | Reset | Reset robot errors |
-| 7 | 0x80 | Load Project | Load project file |
-| 8 | 0x100 | Logout | Logout current project file |
-| 9 | 0x200 | Set Global Speed | Set global speed value |
-| 10 | 0x400 | Reset State Machine | Reset command state machine |
+**Address: 200-205** (6 registers)
 
-**Important Notes:**
-- All commands are triggered on the **rising edge** (0 → 1 transition)
-- Set register 40051 to `0x11` before sending commands
-- Commands can be sent when the command status bit is `0x001`
-- When encountering a command response failure, reset using **bit 10** (0x400) before sending new command
+| Register | Value Example | Description | Scale |
+|----------|--------------|-------------|-------|
+| 200 | 2294 | J1 angle | ÷100 = 22.94° |
+| 201 | 17084 | J2 angle | ÷100 = 170.84° |
+| 202 | 24327 | J3 angle | ÷100 = 243.27° |
+| 203 | 48152 | J4 angle | ÷100 = 481.52° |
+| 204 | 25795 | J5 angle | ÷100 = 257.95° |
+| 205 | 47914 | J6 angle | ÷100 = 479.14° |
+
+**Note:** Values may need special decoding (some values > 360°).
 
 ---
 
-### Global Speed Value (40053)
-**Address:** `40053` (Local: MBDataBuffer[52])  
-**Name:** Global Speed Value  
-**Range:** 0-100 (percentage)
+### Static Parameters (Saved Position)
+
+**Address: 5-9** (5 registers)
+
+| Register | Value | Description |
+|----------|-------|-------------|
+| 5 | 17235 | Static parameter 1 |
+| 6 | 21057 | Static parameter 2 |
+| 7 | 13889 | Static parameter 3 |
+| 8 | 12336 | Static parameter 4 |
+| 9 | 83 | Static parameter 5 |
+
+**Address: 15-17** (3 registers)
+
+| Register | Value | Description |
+|----------|-------|-------------|
+| 15 | 12374 | Static parameter 6 |
+| 16 | 12334 | Static parameter 7 |
+| 17 | 12334 | Static parameter 8 |
 
 ---
 
-### Project Name (40054-40063)
-**Address:** `40054` - `40063` (Local: MBDataBuffer[53-62])  
-**Name:** Set Project Name  
-**Size:** 20 bytes (10 registers × 2 bytes each)
+### Additional Parameters
+
+**Address: 100-149** (50 registers)
+
+Contains various configuration and status values.
+
+| Register | Value Example | Description |
+|----------|--------------|-------------|
+| 100 | 50100 | X coordinate |
+| 102 | 17332 | Y coordinate |
+| 104 | 17679 | Z coordinate |
+| 106 | 17723 | A angle |
+| 108 | 18083 | B angle |
+| 110+ | Various | Other parameters |
 
 ---
 
-### Digital Inputs Status (40064)
-**Address:** `40064` (Local: MBDataBuffer[63])  
-**Name:** SimDI[1-16]  
-**Description:** Digital Input channels 1-16 status
+### Empty Ranges
+
+The following ranges returned all zeros (no data):
+
+- **Address 300-399**: All zeros
+- **Address 400-499**: All zeros
+- **Address 500-999**: Not fully tested
 
 ---
 
 ## Usage Examples
 
-### Start Robot Program
+### Read Current Position (X, Y, Z, A, B)
+
 ```
-1. Write 0x0011 to register 40051 (enable command mode)
-2. Write 0x0004 to register 40052 (bit 2 = Start)
-3. Robot executes program start on rising edge
+Read Holding Registers:
+- Address: 100
+- Count: 10
+
+Response: [50100, 0, 17332, 0, 17679, 0, 17723, 0, 18083, 0]
+
+Coordinates:
+- X = 50100 / 100 = 501.00 mm
+- Y = 17332 / 100 = 173.32 mm
+- Z = 17679 / 100 = 176.79 mm
+- A = 17723 / 100 = 177.23°
+- B = 18083 / 100 = 180.83°
 ```
 
-### Stop Robot Program
-```
-1. Write 0x0008 to register 40052 (bit 3 = Stop)
-2. Robot stops program execution
-```
+### Read Current Joint Angles (J1-J6)
 
-### Reset Robot Errors
 ```
-1. Write 0x0010 to register 40052 (bit 4 = Reset)
-2. Robot clears error state
-```
+Read Holding Registers:
+- Address: 200
+- Count: 6
 
-### Set Global Speed to 50%
-```
-1. Write 50 to register 40053
-2. Robot operates at 50% speed
-```
+Response: [2294, 17084, 24327, 48152, 25795, 47914]
 
-### Reset Command State Machine (on error)
-```
-1. Write 0x0400 to register 40052 (bit 10)
-2. State machine resets
-3. Ready for new commands
+Joint Angles:
+- J1 = 2294 / 100 = 22.94°
+- J2 = 17084 / 100 = 170.84°
+- J3 = 24327 / 100 = 243.27°
+- J4 = 48152 / 100 = 481.52°
+- J5 = 25795 / 100 = 257.95°
+- J6 = 47914 / 100 = 479.14°
 ```
 
 ---
 
-## Connection Parameters
+## Important Notes
 
-| Parameter | Value |
-|-----------|-------|
-| IP Address | Robot controller IP (e.g., 192.168.60.68) |
-| Port | 502 |
-| Protocol | Modbus TCP |
-| Register Type | Holding Registers (4xxxx) |
-| Data Format | 16-bit unsigned integer (Big Endian) |
+1. **Port 1502, NOT 502!** Standard Modbus port 502 returns limited data.
+
+2. **Scale factor:** Coordinates and angles use scale factor of 100.
+   - Raw value 50100 = 501.00 mm
+   - Raw value 17723 = 177.23°
+
+3. **Reserved registers:** Some registers between coordinates are reserved (read as 0).
+
+4. **Joint angles > 360°:** Some joint values exceed 360° - may need special decoding.
+
+5. **Write operations:** Writing to registers returns "Modbus Exception" - controller may be in read-only mode or requires special configuration.
 
 ---
 
-## Troubleshooting
+## Testing Status
 
-### Command Not Executing
-1. Check command status bit at 40051 - should be 0x001
-2. Ensure rising edge trigger (write 0 first, then write command)
-3. If command response failure, reset state machine using bit 10
+| Test | Status | Notes |
+|------|--------|-------|
+| Read registers 0-99 | ✅ Works | Static parameters found |
+| Read registers 100-149 | ✅ Works | **Coordinates found!** |
+| Read registers 200-249 | ✅ Works | **Joint angles found!** |
+| Read registers 300-399 | ✅ Works | All zeros |
+| Read registers 400-499 | ✅ Works | All zeros |
+| Write to registers | ❌ Exception | Modbus Exception error |
+| TCP String Protocol (port 5000) | ⚠️ Partial | Heartbeat works, commands don't |
 
-### Connection Lost
-1. Check network connectivity (ping robot IP)
-2. Verify Modbus TCP port 502 is accessible
-3. Check robot controller is in REMOTE mode
+---
 
-### Unknown Register Addresses
-The transmit register map (40001-40050) for coordinates and joints is not fully documented in public manuals. To find correct addresses:
-1. Contact Estun support for complete register map
-2. Use empirical testing - read registers while moving robot
-3. Check Estun Editor software for register configuration
+## Next Steps
+
+1. **Find C coordinate** (rotation around Z) - not yet located
+2. **Find robot status register** (running, stopped, error)
+3. **Find error code register**
+4. **Enable write operations** for robot control
+5. **Test dynamic updates** - verify values change when robot moves
 
 ---
 
 ## References
 
-- Estun Editor V2.2 Software Manual (Page 148, 182)
-- ECM04101-EN-04 ESTUN Robot ERC3-C1 Series Control Cabinet Operation Manual
-- ER Series Industrial Robot RCS2 V1.5.3 3D Vision Manual
-- ER Series Industrial Robot ModbusTCP Interface Debugging Manual
+- Estun ERC3-C1 Controller
+- Modbus TCP Protocol
+- Discovered via network scan on 2026-02-19
 
 ---
 
-## Notes
-
-**Document Status:** Partial - Receive registers documented, Transmit registers need verification
-
-**Last Updated:** 2026-02-19
-
-**TODO:**
-- [ ] Verify coordinate register addresses (X, Y, Z, A, B, C)
-- [ ] Verify joint angle register addresses (J1-J6)
-- [ ] Verify robot status register address
-- [ ] Test read/write operations with actual robot
+**Last Updated:** 2026-02-19  
+**Status:** Partial - Coordinates and Joints found, more registers to discover

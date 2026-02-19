@@ -57,8 +57,8 @@ const state = reactive<RobotState>({
   isConnected: false,
   connection: {
     address: import.meta.env.VITE_ROBOT_IP || '192.168.1.100',
-    port: Number(import.meta.env.VITE_ROBOT_PORT) || 502,
-    protocol: 'Modbus TCP'
+    port: Number(import.meta.env.VITE_ROBOT_PORT) || 1502,
+    protocol: 'Modbus TCP (Port 1502)'
   },
   mode: 'MANUAL',
   coordinates: { x: 0, y: 0, z: 0, a: 0, b: 0, c: 0 },
@@ -267,8 +267,9 @@ export const robotService = {
 
   /**
    * Read Modbus holding registers (manual operation with logging)
+   * Default: reads coordinates (100-109) and joints (200-205)
    */
-  readModbusRegisters(address: number, count: number) {
+  readModbusRegisters(address: number = 100, count: number = 20) {
     if (!ws || !state.isConnected) {
       this.addLog('Cannot read Modbus: No connection', 'error');
       return;
@@ -367,31 +368,55 @@ export const robotService = {
 
   /**
    * Handle Modbus register data
-   * Called automatically by polling - do NOT log here to avoid spam
+   * Called automatically by polling - updates state silently
+   * 
+   * Register Map (Port 1502):
+   * - Registers 100-108: Cartesian coordinates (X,Y,Z,A,B,C) - scale 100
+   * - Registers 200-205: Joint angles (J1-J6) - scale 100
    */
   handleModbusData(values: number[]) {
-    // Update state silently - no logging to avoid spam
-    if (values.length >= 3) {
-      const newX = values[0] || 0;
-      const newY = values[1] || 0;
-      const newZ = values[2] || 0;
-
-      // Detect if register 0 is a timer (continuously incrementing)
-      const isTimer = newX > 1000 || (newX > 100 && Math.abs(newX - state.coordinates.x) < 50 && newX !== state.coordinates.x);
+    // Skip processing if paused
+    if (this._isPaused) return;
+    
+    // Update coordinates from registers 100-108
+    // Raw values are scaled by 100 (e.g., 50100 = 501.00mm)
+    if (values.length >= 9) {
+      const rawX = values[0] || 0;
+      const rawY = values[2] || 0;
+      const rawZ = values[4] || 0;
+      const rawA = values[6] || 0;
+      const rawB = values[8] || 0;
       
-      if (!isTimer) {
+      // Apply scale factor (÷100)
+      const newX = rawX / 100;
+      const newY = rawY / 100;
+      const newZ = rawZ / 100;
+      const newA = rawA / 100;
+      const newB = rawB / 100;
+      
+      // Update state if values changed
+      const changed = Math.abs(newX - state.coordinates.x) > 0.1 ||
+                      Math.abs(newY - state.coordinates.y) > 0.1 ||
+                      Math.abs(newZ - state.coordinates.z) > 0.1;
+      
+      if (changed) {
         state.coordinates.x = newX;
         state.coordinates.y = newY;
         state.coordinates.z = newZ;
+        state.coordinates.a = newA;
+        state.coordinates.b = newB;
       }
     }
 
-    // Update joints if available
-    if (values.length >= 9) {
-      state.joints = values.slice(3, 9);
+    // Update joints from registers 200-205
+    if (values.length >= 6) {
+      const newJoints = values.slice(0, 6).map(v => v / 100);
+      
+      // Update if different
+      if (JSON.stringify(newJoints) !== JSON.stringify(state.joints)) {
+        state.joints = newJoints;
+      }
     }
-    
-    // Update UI silently (Vue reactivity handles this)
   },
 
   /**
@@ -402,8 +427,12 @@ export const robotService = {
   },
 
   /**
-   * Scan all Modbus registers automatically (0-999 in batches)
+   * Scan all Modbus registers automatically
    * Called automatically on connect for Modbus TCP
+   * 
+   * Now optimized for known register map:
+   * - Registers 100-109: Cartesian coordinates
+   * - Registers 200-205: Joint angles
    */
   scanAllModbusRegisters() {
     if (!ws || !state.isConnected) {
@@ -411,23 +440,17 @@ export const robotService = {
       return;
     }
 
-    this.addLog('=== STARTING FULL REGISTER SCAN ===', 'info');
-    this.addLog('Scanning Holding Registers (4xxxx): 0-999', 'info');
-    this.addLog('Scanning Input Registers (3xxxx): 0-999', 'info');
-    this.addLog('Scanning Coils (0xxxx): 0-999', 'info');
-    this.addLog('This will take ~30 seconds...', 'info');
+    this.addLog('=== STARTING MODBUS REGISTER SCAN ===', 'info');
+    this.addLog('Port 1502 - Known register map:', 'info');
+    this.addLog('  Registers 100-109: Cartesian (X,Y,Z,A,B,C)', 'info');
+    this.addLog('  Registers 200-205: Joint angles (J1-J6)', 'info');
+    this.addLog('Scanning full range 0-999 for additional data...', 'info');
 
-    // Scan Holding Registers first
+    // Scan full range 0-999
     this.scanRegisterRange('Holding', 0, 1000, () => {
-      // Then Input Registers
-      this.scanRegisterRange('Input', 0, 1000, () => {
-        // Then Coils
-        this.scanRegisterRange('Coils', 0, 1000, () => {
-          this.addLog('=== FULL SCAN COMPLETE ===', 'success');
-          this.addLog('Check logs for non-zero values', 'info');
-          this.addLog('Use "Export Logs" button to save to file', 'info');
-        });
-      });
+      this.addLog('=== FULL SCAN COMPLETE ===', 'success');
+      this.addLog('Check logs for non-zero values', 'info');
+      this.addLog('Use "Export Logs" button to save to file', 'info');
     });
   },
 
