@@ -8,12 +8,16 @@ const isSystemActive = computed(() => state.isConnected);
 const mode = ref<'AUTO' | 'MANUAL'>('MANUAL');
 const speed = ref(50); // %
 
+// Modbus test panel
+const modbusAddress = ref(0);
+const modbusCount = ref(20);
+
 const toggleSystem = () => {
     // If connected, disconnect. If not, we can't really "connect" without IP yet.
     if (state.isConnected) {
         robotService.disconnect();
     } else {
-        // For now, let's treat the big power button as the Demo Toggle for user convenience, 
+        // For now, let's treat the big power button as the Demo Toggle for user convenience,
         // OR add a specific Demo button. Let's add a debug Demo Toggle.
         // But user asked for "Real" look. So main button should try to connect real first.
         robotService.connect(); // Proxy will handle target IP
@@ -35,6 +39,10 @@ const handleJog = (_axis: string) => {
 
 const handleAction = (action: string) => {
     robotService.sendCommand(action);
+};
+
+const readModbusTest = () => {
+    robotService.readModbusRegisters(modbusAddress.value, modbusCount.value);
 };
 </script>
 
@@ -108,6 +116,27 @@ const handleAction = (action: string) => {
        <button class="estop-btn" @click="handleAction('ESTOP')">
          <span>{{ t('control.stop') }}</span>
        </button>
+    </div>
+  </div>
+
+  <!-- Modbus Test Panel -->
+  <div class="modbus-test-panel">
+    <div class="label-heading mono">Modbus TCP Test</div>
+    <div class="modbus-controls">
+      <div class="input-group">
+        <label>Address:</label>
+        <input type="number" v-model="modbusAddress" class="mono" />
+      </div>
+      <div class="input-group">
+        <label>Count:</label>
+        <input type="number" v-model="modbusCount" class="mono" min="1" max="50" />
+      </div>
+      <button @click="readModbusTest" class="read-btn mono">
+        Read Registers
+      </button>
+    </div>
+    <div class="modbus-hint mono">
+      Try: 0-20 (base), 270-275 (joints), 1000-1005 (coords), 1300-1305 (joints)
     </div>
   </div>
 </template>
@@ -299,14 +328,73 @@ const handleAction = (action: string) => {
   box-shadow: 0 5px 15px rgba(0,0,0,0.5);
   color: white;
   font-weight: bold;
-  font-family: var(--font-main);
-  letter-spacing: 1px;
-  transition: transform 0.1s;
-  
-  &:active {
-    transform: scale(0.95);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    border-color: #770000;
+  cursor: pointer;
+  &:hover { background: radial-gradient(circle at 30% 30%, #ff6666, #cc0000); }
+  &:active { transform: scale(0.95); }
+}
+
+/* Modbus Test Panel */
+.modbus-test-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+
+  .modbus-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      label {
+        font-size: 0.7rem;
+        color: var(--color-text-dim);
+        font-family: var(--font-mono);
+      }
+
+      input {
+        width: 80px;
+        padding: 0.5rem;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--color-border);
+        color: var(--color-text);
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        border-radius: 4px;
+
+        &:focus {
+          outline: none;
+          border-color: var(--color-info);
+        }
+      }
+    }
+
+    .read-btn {
+      padding: 0.5rem 1rem;
+      background: var(--color-info);
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-weight: bold;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--color-info-light);
+      }
+    }
+  }
+
+  .modbus-hint {
+    margin-top: 0.75rem;
+    font-size: 0.7rem;
+    color: var(--color-text-dim);
   }
 }
 

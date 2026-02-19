@@ -1,0 +1,3722 @@
+ 
+ 1  
+  
+ESTUN Robot ERC3 -C1 Series Control Cabinet  
+Operation Manual  
+
+ 
+ 2  
+ 
+ 
+ 
+ 
+ 
+ESTUN Robot ERC3 -C1 Series Control 
+Cabinet  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Operation Manual  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ E-A04 
+  
+
+ 
+ 3  
+Thank you for purchasing ESTUN robots.  
+Before using the robot, be sure to read the SAFETY PRECAUTION and understand the content. ESTUN is committed to prove the products. 
+All specifications and designs are subject to change without notice.  
+All statements, information, and advice provided in this manual have been carefull y processed, but no guarantee is given for their complete 
+accuracy. We shall not be held liable for any direct or indirect losses arising from the use of this manual.  
+Users are solely responsible for the application of any products and should exercise cau tion when using this manual and the associated 
+products.  
+The interpretation of all content in this manual belongs to ESTUN Robotics Engineering Co., Ltd.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+This manual may not be reproduced and copied in any way, in whole or in part, without a 
+license to any party.  
+ESTUN Robotics. All Rights Reserved Copyright.  
+ 
+Hotline: 400 -025-3336  
+ADD: NO.1888, Jiyin Avenue, Jiangning Development Zone, Nanjing  Post Code: 211102  
+TEL: 025 -85097068  
+WEB: www.estun.com  
+E-mail: robot@estun.com  
+
+ 
+ 4 Foreword  
+This manual explains the usage of the ERC3 -C1 control cabinet. The ERC3 -C1 is a compact control cabinet.  
+The compatible robot types for this control cabinet are as follows:  
+Cabinet Model  Compatible Models  
+ERC3 -C1-X1A4  ER3-400-SR 
+ER3-500-SR 
+ER6-500-SR 
+ER6-600-SR 
+ER6-700-SR 
+ER10 -500-SR 
+ER10 -600-SR 
+ER10 -600-SR/LI 
+ER10 -700-SR 
+ER10 -700-SR/LI  
+ER10 -800-SR 
+ERC3 -C1-X1B4  ER20 -800-SR 
+ER20 -800-SR 
+ER20 -1000 -SR 
+ER20 -1000 -SR 
+ER20 -800-SR/L I 
+ER20 -1000 -SR/L I 
+ER20 -800-SR/HI/LI  
+ER20 -1000 -SR/HI/LI  
+ER10B -900-MI/3  
+ER10 B-900-MI/4  
+ERC3 -C1-X1C4  ER50 -1200 -SR 
+ERC3 -C1-X1B6  ER8-720-MI 
+ER7-910-MI 
+ER10 -900-MI/HI  
+ER10B -900-MI/HI  
+ERC3 -C1-X1C 6 ER15 -1430 -MI 
+ER20-1200 -MI 
+ 
+
+ 
+ 5 Revision History  
+Revision  Date  Content  
+01 2023.07 Initial release.  
+02 2023.10  Updated technical specifications and spare parts list; added new model ER10B -900-MI/HI.  
+03 2024.04 Updated warning and caution labels; revised Safety IO interface definitions; added method 
+for installing expansion cards; added optional Ethernet port adapter expansion card; added 
+ABZ expansion card port specifications; updated spare parts list.  
+04 2024.07  Added new control cabinet model ERC3 -C1-X1C6; added new models ER15 -1430 -MI and 
+ER20 -1200 -MI; updated “ Figure 1 -3 Designation ”; opti mizes IO wiring diagrams . 
+
+ 
+6 
+ Safety Precautions  
+This Chapter describes the content to be observed for the safe use of the robot. Before using, be sure to read and 
+understand the content in this Chapter.  
+1. Before installation, operation, maintenance, and troubleshooting, it is essential to thoroughly read and f ully 
+understand this manual and other accompanying materials. Commence usage only after acquiring complete 
+knowledge of the equipment, safety information, and precautions.  
+2. The terms "Danger", "Caution", and "Warning" used in this manual supplement safety c onsiderations and do not 
+represent an exhaustive list of all safety requirements that must be followed.  
+3. We will not assume any legal liability for personal safety incidents or property losses resulting from improper 
+product operation.  
+4. Companies or individu als using ESTUN Robots should familiarize themselves with the standards and laws in their 
+respective regions or countries. Additionally, appropriate safety measures should be installed to protect personnel 
+using the robot.  
+Definition of users  
+The users of this manual are defined as follows.  
+1. Operators  
+⚫ To perform the power ON/OFF operation of the robot;  
+⚫ To start the robot program from the operation panel;  
+⚫ To restore system alarm status;  
+⚫ Must not work inside the safety fence.  
+2. Programmers   
+⚫ To operate the robot;  
+⚫ To teach the robot in a safe area ; 
+⚫ To perform the operations in a safe area;  
+⚫ The above -mentioned personnel must receive training on the robot.  
+3. Maintenance personnel  
+⚫ To oper ate the robot;  
+⚫ To teach the robot in a safe area;  
+⚫ To carry out the robot main tenance (repair, adjustment, replacement);  
+⚫ To perform the operations in a safe area;  
+⚫ The above -mentioned personnel must receive specialist training on the robot.  
+Safety Symbols  
+If the manual contains instructions marked as follows, users must read them carefully and follow strictly.  
+
+ 
+7 
+ Symbol  Definition  
+ ⚫ This symbol indicates a high potential for serious danger that could result in death or severe 
+injury if not avoided.  
+ ⚫ This symbol indicates a moderate or low potential for danger that could result in minor or 
+moderate injuries if not avoided.  
+ ⚫ This symbol indicates potential risks that, if disregarded, could lead to equipment damage, 
+data loss, decreased device performance, or unpredictable outcomes.  
+ ⚫ This symbol provides additional infor mation to the main text, emphasizing and 
+supplementing the content.  
+Safety Precautions  
+1. Precautions before use:  
+ ⚫ Upon receiving the product , please first check whether the equipment is in good 
+condition, and whether there is any deformation, moisture, or damage.  
+⚫ Please unpack the product according to the specifications. Do not shake or strike the 
+equipment violently.  
+⚫ Check that the equipment and accessories are intact and free from damage, aging, or 
+corrosion.  after unpacking.  
+⚫ Carefully check the quantity as per the product list and verify if the equipment 
+documentation and accessories match the list.  
+ ⚫ Do not install if any abnormal signs such as deformation, moisture, damage, or scratches 
+are found on the product or its acces sories before use!  
+⚫ Do not install if the received product does not match the model, quantity, or name listed 
+on the product list!  
+⚫ If any of these or other issues are found, do not attempt to install the product yourself ! 
+Please contact ESTUN staff promptly . 
+ 
+2. 搬运时注意事项：  
+
+
+ 
+8 
+  ⚫ Adhere strictly to the specified storage and transportation conditions, and ensure 
+compliance with required temperature and humidity levels.  
+⚫ Protect the product from rain, strong vibrations, direct sunlight, strong magnetic 
+fields, and strong electric fields during transportation and handling.  
+⚫ Package the product according to specifications before transportation to prevent 
+damage during transit.  
+⚫ Take moisture -proof measures during handling.  
+⚫ Do not transport the product mixed with harmful substances.  
+ ⚫ Use professional handling equipment for transportation.  
+⚫ Avoid vibrations, drops, or impacts to the control cabinet during handling.  
+⚫ When handling the product manually, ensure a firm grip to prevent dropping and 
+potential injuries.  
+⚫ Handle the product gently and be mindful of your surroundings to prevent falls or 
+injuries.  
+⚫ When using professional equipment for handling,  ensure no personnel are beneath the 
+equipment to avoid injury from falling objects.  
+⚫ Follow ESTUN's recomme nded methods for handling and installing the robot. 
+Incorrect methods may cause the robot to topple, and lead to accidents.  
+3. Installation precautions  
+ ⚫ Read the product instructions and safety precautions thoroughly before installation.  
+⚫ Unauthorized modifications to the product are strictly prohibited.  
+⚫ Do not use this control cabinet to power other equipment.  
+⚫ Avoid installing the product in areas with strong electric or magnetic field 
+interference.  
+⚫ Do not remove or loosen any components or bolts without authorization.  
+ ⚫ Installation personnel must be familiar with product installation requirements and related 
+documentation.  
+⚫ Unauthorized personnel are strictly prohibited from independently performing 
+installation, wiring, maint enance, or any other operations on the product.  
+⚫ Non-professionals are strictly prohibited from inspecting or replacing product components 
+independently.  
+⚫ Install shielding protection when using transformers or other devices that cause 
+strong electromagnetic  interference.  
+⚫ Do not install the product while the power is on, as this poses an electric shock hazard.  
+⚫ Ensure proper grounding of equipment at all times to avoid the risk of electric shock.  
+4. Precautions for operation ： 
+
+
+ 
+9 
+  ⚫ Before powering on, ensure the equipment is properly installed, and wiring is secure 
+and meets the motor startup conditions.  
+⚫ Verify that the power supply meets the equipment requirements before powering on.  
+⚫ Avoid leaning against the control cabinet or randomly pressing buttons when 
+powe ring on to prevent unexpected robot movements that could cause injury or 
+equipment damage.  
+⚫ Do not open the control cabinet door or protective cover after the equipment is powered 
+on to avoid the risk of electric shock.  
+⚫ After powering on, check all E-stop switches. If any are not functioning properly, 
+stop using the equipment immediately and contact E STUN support.  
+⚫ It is strictly prohibited to replace or dismantle any equipment components while the 
+power is on, as there is a risk of electric shock.  
+⚫ Avoid touching any equipment terminals while the power is on to prevent the risk of 
+electric shock.  
+⚫ Avoid touching any equipment terminals while the power is on to prevent electric 
+shock.  
+⚫ Do not touch the equipment Casing , fan, resistors, etc., while the equ ipment is running to 
+avoid the risk of burns.  
+⚫ Prevent foreign objects from entering the equipment during operation to avoid 
+damage.  
+⚫ Non-professionals are strictly prohibited from performing signal detection or other 
+professional operations on the equipment  during operation, posing risks of equipment 
+damage and personal injury.  
+⚫ After powering off the control cabinet, wait at least 10 seconds before restarting to 
+prevent controller failure.  
+5. Precautions for maintenance:  
+ ⚫ Be cautious of components that generate heat, such as motors and reducers. Do not 
+touch these parts without protection to avoid burns.  
+⚫ Do not disassemble components while they are in motion to avoid injury.  
+⚫ Use professional tools during maintenance. Do not use the control cabinet or rob ot as 
+a ladder to prevent falls.  
+⚫ Non-professionals are not allowed to repair the product.  
+⚫ Read the Safety Precautions and relevant manuals carefully before maintenance.  
+⚫ Disconnect the power supply before replacing or inspecting components. Do not 
+perform m aintenance with the power on.  
+ 
+  
+
+
+ 
+10 
+ 6. Other safety precautions:  
+Caution
+ ⚫ All operators, maintenance personnel, and users must receive professional training 
+and strictly follow product usage guidelines and safety precautions.  
+⚫ Appropriate safety gear, such as helmets, safety shoes, and suitable work clothing, 
+must be worn by all users and operators.  
+⚫ All operations should be conducted in the designated safe areas.  
+⚫ Even after the robot is powered off, external devices connected to  it may remain 
+active. Damaged power lines or power cables for these external devices can cause 
+injury.  
+⚫ A CO2 fire extinguisher should be available on site in case of a fire in the robot 
+system.  
+ 
+Warning and Caution Signs  
+Symbol  Description  
+ Electric shock  
+Attention should be paid to the danger of high voltage and electric shock at the place where 
+this sign is affixed.  
+ High temperature  
+Be cautious about a section where this label is affixed, as the section generates heat. If you 
+have to inevitably touch such a section when it is hot, use a protective provision such as 
+heat-resistant gloves.  
+ No stepping  
+Do not step on or climb the robot as it may adversely affect the equipment, and cause the 
+bodily injury to operators.  
+ Wounding by ro bot 
+There is a danger of wounding by robot when working within the motion range of robot.  
+ No disassembly  
+Users are prohibited from disassembling the part affixed with this sign. Disassembly shall 
+be carried out by professionals using professional tools.  
+
+
+ 
+11 
+ Symbol  Description  
+ Power Off Warning Label  
+This label indicates that the equipment must be powered down before opening the control 
+cabinet. Before restoring power, close the control cabinet and wait at least 15 minutes 
+before reopening it.  
+ Injury Prevention Warning Label  
+This label indicates that personal protective equipment (PPE) must be worn when opening 
+the control cabinet or its covers. Failure to follow these precautions may result in injury or 
+death. Refer to NFPA 70E for minimum PPE requirements.  
+Way to Stop Robots  
+The robot can be stopped in the following three ways:  
+Stopping 
+Method  Description  Procedure  
+Power -off 
+Stop The power -off stop disconnects the servo 
+power source, resulting in an 
+instantaneous robot stop. However, 
+abruptly cutting the servo power during 
+robot movement leads to uncontrolled 
+deceleration.  ⚫ Activate the alarm and disconnect the servo power, 
+causing an immediate stop in robot motion.  
+⚫ Pause the program execution.  
+Alarm 
+Stop The alarm stop is a method of robot 
+cessation where, upon system alarm 
+(excluding power -off alarms), the robot's 
+motion is decelerated and stopped using 
+control commands.  ⚫ The robot system issues an alarm due to overload, 
+failure, etc.  (excluding power -off alarms) ;  
+⚫ The servo system sends a "C entral Stop" command, 
+decelerating the robot's motion and pausing the 
+program execution ;  
+⚫ Disconnect the servo power.  
+Hold  This method maintains servo power, and 
+causes the robot to decelerate and stop.  ⚫ Cause the robot to decelerate  and stop, pausing 
+program execution.  
+ 
+
+
+ 
+12 
+ CONTENTS  
+Foreword  ................................ ................................ ................................ ................................ ................................ ..... 4 
+Revision History  ................................ ................................ ................................ ................................ .........................  5 
+Safety Precautions  ................................ ................................ ................................ ................................ ......................  6 
+Definition  of users  ................................ ................................ ................................ ................................ ..............  6 
+Safety Symbols  ................................ ................................ ................................ ................................ ...................  6 
+Safety Precautions ................................ ................................ ................................ ................................ ...............  7 
+Warning and Caution Signs ................................ ................................ ................................ ...............................  10 
+Way to Stop Robots  ................................ ................................ ................................ ................................ ..........  11 
+CONTENTS  ................................ ................................ ................................ ................................ .............................  12 
+Chapter 1  Product Information  ................................ ................................ ................................ ................................ . 15 
+1.1 Information on Nameplate  ................................ ................................ ................................ ..........................  15 
+1.2 Designation  ................................ ................................ ................................ ................................ .................  16 
+1.3 Product Dimensions  ................................ ................................ ................................ ................................ .... 16 
+1.4 Components  ................................ ................................ ................................ ................................ ................  17 
+1.5 Technical Parameters  ................................ ................................ ................................ ................................ .. 18 
+Chapter 2  Transportation & Installation  ................................ ................................ ................................ ...................  20 
+2.1 Handling Procedures  ................................ ................................ ................................ ................................ ... 20 
+2.1.1  Installation requirements  ................................ ................................ ................................ ..................  20 
+2.2 Installation Methods ................................ ................................ ................................ ................................ .... 21 
+2.2.1  Horizontal installation  ................................ ................................ ................................ ......................  21 
+2.2.2  Vertical installation  ................................ ................................ ................................ ..........................  22 
+2.2.3  Stacking installation  ................................ ................................ ................................ .........................  24 
+Chapter 3  Wiring  ................................ ................................ ................................ ................................ .......................  27 
+3.1 Wiring Precautions  ................................ ................................ ................................ ................................ ...... 27 
+3.1.1  Selection of circuit breaker/air switch  ................................ ................................ ..............................  28 
+3.1.2  Power Cable Selection  ................................ ................................ ................................ .....................  29 
+3.2 External Interface Description  ................................ ................................ ................................ ....................  29 
+3.3 Connection Diagram  ................................ ................................ ................................ ................................ ... 31 
+3.4 Powe r supply wiring  ................................ ................................ ................................ ................................ ... 31 
+3.5 LED Explanation  ................................ ................................ ................................ ................................ ........  32 
+3.6 Power Wiring  ................................ ................................ ................................ ................................ ..............  33 
+3.6.1  Power line interface explanation  ................................ ................................ ................................ ...... 33 
+3.6.2  Power line wiring  ................................ ................................ ................................ .............................  38 
+
+ 
+13 
+ 3.7 Encoder wiring  ................................ ................................ ................................ ................................ ............  38 
+3.7.1  Conn ection diagram  ................................ ................................ ................................ .........................  39 
+3.7.2  Encoder interface explanation  ................................ ................................ ................................ ..........  39 
+3.8 Teach pendant wiring  ................................ ................................ ................................ ................................ .. 40 
+3.8.1  Precautions for using teach pendant  ................................ ................................ ................................ . 40 
+3.8.2  Teach pendant interface description  ................................ ................................ ................................ . 41 
+3.8.3  Teach pendant specifications  ................................ ................................ ................................ ............  42 
+3.8.4  Appearance of teach pendant  ................................ ................................ ................................ ...........  42 
+3.9 IO Wiring  ................................ ................................ ................................ ................................ ....................  43 
+3.9.1  DI wiring  ................................ ................................ ................................ ................................ ..........  44 
+3.9.2  DO wiring  ................................ ................................ ................................ ................................ ........  48 
+3.10 Communication Connection  ................................ ................................ ................................ .....................  51 
+3.10.1  Communication signal description  ................................ ................................ ................................ . 51 
+3.10.2  Recommended communication cables  ................................ ................................ ...........................  51 
+3.10.3  USB interface  ................................ ................................ ................................ ................................ . 52 
+3.10.4  EtherCAT wiring  ................................ ................................ ................................ ............................  52 
+3.11 SAFETY IO  ................................ ................................ ................................ ................................ ..............  52 
+3.11.1  SAFETY Interface Description  ................................ ................................ ................................ ...... 54 
+3.11.2  Start confirmation wiring method  ................................ ................................ ................................ .. 55 
+3.11.3  External E -stop wiring method  ................................ ................................ ................................ ...... 56 
+3.11.4  Limit switch wiring method  ................................ ................................ ................................ ...........  57 
+3.11.5  Safety door wiring method  ................................ ................................ ................................ .............  57 
+3.11.6  Auto protection stop wiring method  ................................ ................................ ...............................  59 
+3.11.7  E-stop output wiring method  ................................ ................................ ................................ ..........  60 
+Chapter 4  (Optional) Expansion Cards  ................................ ................................ ................................ .....................  61 
+4.1 Expansion Slot Description  ................................ ................................ ................................ .........................  61 
+4.2 DI Expansion Card  ................................ ................................ ................................ ................................ ...... 64 
+4.2.1  Expansion card information  ................................ ................................ ................................ .............  64 
+4.2.2  Installation dimensions  ................................ ................................ ................................ ....................  65 
+4.2.3  Terminal definitions  ................................ ................................ ................................ .........................  65 
+4.2.4  Port specifications  ................................ ................................ ................................ ............................  66 
+4.2.5 External wiring diagram ................................ ................................ ................................ ...................  66 
+4.3 DO Expansion Card  ................................ ................................ ................................ ................................ .... 67 
+4.3.1  DO expansion card description  ................................ ................................ ................................ ........  67 
+4.3.2  DO expansion card information  ................................ ................................ ................................ ....... 67 
+
+ 
+14 
+ 4.3.3  Installation dimensions  ................................ ................................ ................................ ....................  68 
+4.3.4  Definition of NPN type digital output expansion card terminal ................................ .......................  68 
+4.3.5  Definitions of PNP type digital Output expansion card terminals  ................................ ...................  70 
+4.4 ABZ Expansion Card  ................................ ................................ ................................ ................................ .. 72 
+4.4.1  Expansion card information  ................................ ................................ ................................ .............  72 
+4.4.2  Installation dimensions  ................................ ................................ ................................ ....................  72 
+4.4.3  Terminal definitions  ................................ ................................ ................................ .........................  73 
+4.5 Ethernet port adapter Expansion Card  ................................ ................................ ................................ ........  74 
+4.5.1  Expansion card information  ................................ ................................ ................................ .............  74 
+4.5.2  Installation dimensions  ................................ ................................ ................................ ....................  74 
+4.5.3  Terminal definitions  ................................ ................................ ................................ .........................  75 
+4.5.4 Recommended communication cables  ................................ ................................ .............................  75 
+4.5.5  Wiring method  ................................ ................................ ................................ ................................ . 75 
+Chapter 5  Servo Parameter Settings  ................................ ................................ ................................ .........................  77 
+5.1 Check before Power -on ................................ ................................ ................................ ...............................  77 
+5.2 Pn Parameter Settings for Teach Pendant  ................................ ................................ ................................ ... 77 
+5.3 Introduction to Servo Parameters  ................................ ................................ ................................ ................  79 
+5.3.1  Instructions for use  ................................ ................................ ................................ ...........................  79 
+5.3.2  Detailed explanation of parameters  ................................ ................................ ................................ .. 79 
+Chapter 6  View Servo Alarms and Handling  ................................ ................................ ................................ ............  86 
+6.1 View Alarms Using Teach Pendant  ................................ ................................ ................................ .............  86 
+6.2 Log ................................ ................................ ................................ ................................ ..............................  87 
+6.3 Help ................................ ................................ ................................ ................................ .............................  87 
+6.4 Alarm List  ................................ ................................ ................................ ................................ ...................  89 
+Chapter 7  Maintenance  ................................ ................................ ................................ ................................ .............  96 
+7.1 Maintenance precautions  ................................ ................................ ................................ ............................  96 
+7.2 Daily inspection  ................................ ................................ ................................ ................................ ..........  96 
+7.3 Regular inspection  ................................ ................................ ................................ ................................ ...... 97 
+7.4 Program Backup and Loading ................................ ................................ ................................ .....................  98 
+7.4.1  Program backup  ................................ ................................ ................................ ...............................  98 
+7.4.2  Program loading  ................................ ................................ ................................ ...............................  98 
+7.5 List of spare parts  ................................ ................................ ................................ ................................ ........  99 
+ 
+
+ 
+15 Chapter 1  Product Information  
+1.1  Information on Nameplate  
+ ⚫ Upon receiving the product, carefully verify the information on the control cabinet's outer 
+packaging and the nameplate. Ensure that the "Control Cabinet Model" and "Product 
+S/N" on the packaging match those on the nameplate.  
+⚫ If there is any di screpancy, contact ESTUN support for verification.  
+  
+Figure 1 -1 Nameplate Information for Control Cabinet  
+ 
+ 
+Figure 1 -2 Information of Control Cabinet on Outer Packaging  
+Control cabinet model  
+Control cabinet weight  
+Input specifications   
+Frequency  
+Power  
+Product Order No.  
+Product S/N  
+Control cabinet model  
+ 
+ 
+Product S/N  
+
+ 
+16 1.2  Designation  
+ERC3 -      C1     -     X1           A4          A
+Identifier
+A
+BId entifierDrive 
+sp ecifications
+A4Low pow er 4-axis 
+version
+B4Medium power 4-
+axis versi on
+C4High pow er 4-axis 
+version
+A6Low pow er 6-axis 
+version
+B6Id entifier Comp act /Standard
+C1 Compact C 1
+ Id entifier CPU model
+X1 X86 bare  version
+NU No controller versi on
+TINo TRIO  controller 
+version
+A1Series Name Specification CPU Model Driver Specification Design Sequence
+ESTUN  Robot  Generation 
+3 Electric Cabinet
+ARM cont roller 
+version
+Medium power 6-
+axis versi on
+High  pow er 6-axis 
+versionC6 
+ 
+Figure 1 -3 Designation  
+1.3  Product Dimensions  
+This section provides the dimensions of a single unit placed horizontally.  
+The height of the unit without rubber feet is 89mm, and with rubber feet is 102mm, with the feet adding 13mm in 
+height.  
+ 
+Figure 1 -4 Product Dimensions  
+
+
+ 
+17 1.4  Components  
+ External interface  
+ 
+Figure 1 -5 External interface  
+ 
+S/N Interface name  
+1 Power line interface  
+2 Cooling air inlet  
+3 Mode selector switch  
+4 Teach pendant interface  
+5 LED   
+6 Expansion card slot (optional)  
+7 Power switch  
+8 Encoder interface  
+9 RJ45 interface  
+10 Standard IO interface  
+11 USB  interface  
+12 Safety IO interface  
+13 Power interface  
+  
+
+
+ 
+18 1.5  Technical Parameters  
+Table  1-1 Basic parameters list of control cabinet  
+Model  Dimensions(mm)  
+Self-weight 
+(kg) Rated 
+power
+（kVA） Reference 
+energy 
+consumption 
+(kW.h) Applicable model  
+(L*W*H)  
+ERC3 -C1-X1A4  440*330* 102 9.5 1 0.8 ER3-400-SR 
+ER3-500-SR 
+ER6-500-SR 
+ER6-600-SR 
+ER6-700-SR 
+ER10 -500-SR 
+ER10 -600-SR 
+ER10 -600-SR/LI 
+ER10 -700-SR 
+ER10 -700-SR/LI  
+ER10 -800-SR 
+ERC3 -C1-X1B4  440*330*102  9.5 1 0.8 ER20 -800-SR 
+ER20 -800-SR 
+ER20 -1000 -SR 
+ER20 -1000 -SR 
+ER20 -800-SR/LI  
+ER20 -1000 -SR/LI  
+ER20 -800-SR/HI/LI  
+ER20 -1000 -SR/HI/LI  
+ER10B -900-MI/3  
+ER10 B-900-MI/4  
+ERC3 -C1-X1C4  440*330*102  10 1.5 1.2 ER50 -1200 -SR 
+ERC3 -C1-X1B6  440*330*102  10 1.2 0.96 ER8-720-MI 
+ER7-910-MI 
+ER10 -900-MI/HI  
+0.47 ER10B -900-MI/HI  
+
+ 
+19 ERC3 -C1-X1C6 440*330*102  10 1.5 0.81 ER15 -1430 -MI 
+0.88 ER20 -1200 -MI 
+ [Note] The dimensions given in the table include the rubber foot height of 13mm.  
+Table 1 -2 Control Cabinet Technical Specifications  
+Item Spec.  
+Control cabinet installation environment  Ventilated, not airtight  
+Minimum installation range  520*410*182 (mm ，L*W*H )  
+Number of control axes  3~6 
+Mains power supply for electric cabinet  (way 
+of introduction)  Single -phase AC 220V~240V , 50/60Hz  
+Rated power  1.5kV A  
+Leak current  <30mA  
+Ethernet  3-channel  
+EtherCAT  1-channel  
+USB  1-channel  
+SAFETY  Provided with e -stop, safety door, and safety light curtain functionality  
+System IO  6 inputs, 7 outputs  
+General IO  14 inputs, 13 outputs  
+Communication interface with peripherals  Standard：EtherCAT ，Modbus TCP ，TCP/IP ;  
+[Note]: Other communication protocols are optional, please consult our sales 
+department.  
+Noise level  <60dB  
+Ambient working temperature  0℃~45℃  
+Storage environment  Temperature : -20℃～60℃  
+Humidity: ≤95% RH (no condensation, no freezing)  
+Insulation resistance  100M Ω and above  
+Vibration strength  10Hz ≤ f ≤ 57Hz, amplitude 0.15mm  
+Shock resistance  Max 15g, duration 11ms  
+Altitude  Below 1,000m  
+EMC  test standards  IEC 61000 -6-2:2019  
+IEC 61000 -6-4:2019  
+IP grade  IP20  
+ 
+
+ 
+20 Chapter 2  Transportation & Installation  
+2.1  Handling Procedures  
+ You can manually handle the control cabinet. Ensure to wear safety shoes and gloves before 
+handling.  
+Be aware of your surroundings to avoid any unsafe conditions and prevent falls or injuries.  
+ 
+Figure 2 -1 Handling Diagram  
+2.2  Installation requi rements  
+Environmental requirements : 
+ The operating environment temperature should be between 0°C and 45°C. During transportation 
+and maintenance, the temperature range should be -20°C to 60°C.  
+ The relative humidity should not exceed 95%RH, and there should be no condensation.  
+ The installation site should have minimal dust, powder, oil fumes, and water.  
+ Flammable substances, corrosive liquids, and gases are not allowed in the operating area.  
+ The control cabinet should be installed in a low vibration or  low impact energy environment 
+(vibration below 0.5G).  
+ There should be no nearby electrical interference sources (e.g. gas shielded welding TIG 
+equipment).  
+ There should be no potential hazards of collision with moving equipment (e.g. forklifts).  
+ There shou ld be no ion or non -ion interference.  
+Instructions for Users ： 
+ Please refer to the Instructions for Users and standardize your work.  
+Requirements for installation space:  
+ The installation space is shown in the figure below. Reserve the space for heat dissipa tion. 
+
+
+ 
+21  
+Figure 2 -2 Installation Space Requirements  
+2.3  Installation Methods  
+The control cabinet supports three installation methods: horizontal, vertical, and stacking up to three units.  
+The required tools for each method are listed below:  
+Installation 
+Method  Tools Required  Description  
+Horizontal  Phillips screwdriver and rubber foot  1. Rubber feet are included and pre -installed (4 
+feet per unit)  
+2. Flat brackets for securing multiple units or for 
+vertical installation (default option)  
+3. L-shaped brackets for securing the unit to the 
+floor (default option)  
+[Note] Screws fo r mounting bracket (L -type or flat 
+bracket) are M4 -6 Vertical  Phillips screwdriver, mounting brackets, and 
+necessary screws  
+Stacking (up to 3 
+units)  Phillips screwdriver, mounting brackets (flat 
+and L -shaped) and necessary screws  
+ 
+2.3.1  Horizontal installation  
+For standard installation scenarios, ensure the surface is flat and not deformed.  
+ 
+ Installing steps:  
+Step 1 Check if the rubber feet at the bottom of the control cabinet are securely installed. In case of loosening or not 
+installed, tighten the rubber feet using a Phillips screwdriver (rubber feet are pre -installed at the factory).  
+Step 2 Place the control cabinet on the installation surface as shown below to compl ete the horizontal installation.  
+Air Intlet  
+Horizontal mounting surface  
+Air Outlet  
+
+ 
+22  
+Figure 2 -3 Single Unit Horizontal Installation Diagram  
+Step 3  (Optional) In severe environments (e.g. prone to vibration), use the included L -shaped brackets and screws 
+to secure the cabinet. Install the brackets on both sides of the cabinet and fix them with screws to the 
+mounting surface.  
+ 
+ 
+2.3.2  Vertical installation  
+For vertical installation scenarios, ensure the surface is flat and not deformed.  
+ 
+ Installing steps  
+Step 1 Use a screwdriver to remove the screws from the four rubber feet and store the feet and screws properly.  
+Horizontal mounting surface  
+Tighten and secure it with the screws between th e 
+bracket and the floor with a screwdriver  
+Tighten and secure it with the screws between the 
+bracket and the machine with a screwdriver  
+Horizontal mounting surface  Bracke t Bracket  Bracke t 
+Horizontal mounting surface  Horizontal mounting surface  
+
+ 
+23  
+Step 2 Install the flat brackets on the side without the nameplate, as shown below.  
+ 
+Step 3 Rotate the cabinet toward the side with the installed brackets and place it steadily on a flat surface.  
+ 
+Step 4 Secure the brackets to the mounting surface using screws as shown in figure below, to complete the vertical 
+installation.  
+Remove all rubber feet with a 
+screwdriver  
+Rotate the cabinet toward the side with the installed brackets and place it 
+steadily on the mounting surface  
+Install the flat brackets on the side 
+without the nameplate  Rotate and place smoothly on the 
+mounting surface  
+
+ 
+24  
+Figure 2 -4 V ertical Installation Diagram  
+ 
+ Installation Dimensions  
+           
+Figure 2 -5 V ertical Installation Dimensions  
+ 
+2.3.3  Stacking installation  
+For stacking multiple units, ensure the surface is flat and not deformed. Stacking allows for efficient use of 
+space. It supports up to three control cabinets.  
+ 
+Bracket  Bracket  
+Horizontal mounting surface  
+Horizontal mounting surface  
+
+
+ 
+25  Installing Steps 
+Take stacking of 2 machines as an example, and the installing steps are detailed below : 
+Step 1 Use a screwdriver to remove the screws from the four rubber feet of the first unit and store the feet and   
+screws properly.  
+Step 2 Place the first unit neatly on top of the second unit. Use the included flat  brackets and screws to secure the 
+units on both sides, and then fasten with a screwdriver.  
+Step 3 Use L -shaped brackets to secure the units to the floor, and tighten them with a screwdriver.  
+Step 4 This completes the stacking of two units, as shown below.  
+ 
+ 
+Figure 2 -6 Two Units Stacking Diagram  
+ Installation dimensions  
+ For multiple vertical installations, fix all control cabinets together into a single unit by 
+following the vertical installing steps.  
+Machine 1  1. Place Machine 1 and Machine 2 neatly on 
+top of each other  
+Flat brackets  
+Secure Machine 1 and Machine 2 using 
+flat brackets, with two brackets on each 
+side (total of four brackets).  2. Fix the Machine 1 and Machine 2 
+with a flat bracket and tighten the 
+screws with a screwdriver.  
+3. Use the L -shaped bracket to fix the 
+Machine 2 and the floor (fix the 
+machine side first, then the floor side), 
+and tighten the screws with a 
+screwdriver.  Four screws required per plane  
+L-shaped brackets  
+Two L -shaped brackets are required per 
+side, totaling four brackets.  Machine 2  
+
+ 
+26  
+Figure 2 -7 Stacking Installation Dimensions  
+
+
+ 
+27 Chapter 3  Wiring  
+3.1  Wiring Precautions  
+Installation, wiring, maintenance, and inspection of the product should only be carried out by personnel 
+who have received training in electrical equipment, possess sufficient electrical knowledge, and are familiar with 
+electrical safety protocols.  
+ ⚫ Perform the wiring or inspection only by professional technicians.  
+⚫ Perform the wiring according to the rated capacity provided in the Manual.  
+⚫ Make sure that all circuit connections are securely fixed.  
+⚫ Do not touch the circuit boards directly with your hands.  
+⚫ Integrated circuit boards may experience malfunctions due to el ectrostatic discharge.  
+⚫ The robot's electric cabinet should not be opened or accessed by users.  
+⚫ If the customer's power supply is unstable, it is recommended for the customer to purchase 
+additional equipment such as an UPS and connect it to the robot. This will protect the 
+controller and ensure stable operation, avoiding the loss of system files.  
+⚫ After connecting the robot control cabinet to external devices, arrange the cables 
+(including but not limited to IO cables, network cables) properly to avoid trippi ng hazards 
+or equipment damage.  
+ ⚫ The system must be electrically grounded to avoid fire, electric shock and bodily injury.  
+⚫ Turn off the main power switch prior to wiring and inspection to avoid electric shock and 
+bodily injury.  
+⚫ Be sure to turn off the main power supply for at least 5 minutes prior wiring and inspection. 
+There may be residual high -voltage inside the control cabinet even if power off. 
+Therefore, never touch the power terminals.  
+⚫ The main power supply cannot be powered on when the cabin et door is not closed, this is 
+because the safety interlock so mounted would prevent the main power supply from 
+powering on.  
+⚫ The electric control cabinet is in E -stop mode when wiring, and any matters incurred shall 
+be under the responsibility of users. Operation inspection shall be performed once the 
+wiring is done.  
+⚫ Avoid frequently turning the main power on and off for the electric cabinet, and ensure 
+that the time interval between each power cycle is at least 1 minute.  
+⚫ The robo t's electric cabinet is a dedicated control device designed with power capacity 
+considerations for only a minimal amount of external I/O requirements. Therefore, it is not 
+allowed for users to connect external power sources, including but not limited to 
+additional axes, and definitely not to connect power strips. Doing so may result in fault 
+alarms or even cause a fire in the electric cabinet.  
+Before connecting the power line of the robot control cabinet to the grid terminal , it is recommended to 
+connect it to a circuit breaker or disconnector first to prevent short circuits from affecting other equipment.  The 
+power supply wiring diagram for the  robot control cabinet is shown below:  
+
+
+ 
+28 
+SPD
+浪涌保护器 （用户自配 ）漏电 /空开断路器单相电源
+AC200V～240V 
+Figure 3 -1 Single Control Cabinet Power Wiring Diagram  
+SPD浪涌保护器 （用户自配 ）漏电 /空开断路器单相电源
+AC200V～240V
+ 
+Figure 3 -2 Two Control Cabinets Connected in Parallel to One Circuit Breaker  
+3.1.1  Selection of circuit breaker/air switch  
+The robot's motion trajectory involves a repetitive acceleration -deceleration process. As a result, the control 
+cabinet experiences repetitive instances of high transient current in its input. This imposes specific requirements 
+on the rated current and type of  upstream circuit breakers or disconnectors. Additionally, being a 
+frequency -controlled industrial device, the design and operational principles of the robot control cabinet 
+inherently lead to a certain level of leakage current.  
+1. Selection of circuit bre aker/air switch with leakage protector  
+a) It is recommended to configure each robot control cabinet with a separate 10A, D -type circuit 
+breaker or air switch. The leakage protector should have a sensitivity current of ≥30mA and be 
+of type B residual current d evice (RCD).  
+b) If two robot control cabinets share one circuit breaker or air switch, use a 20A, D -type circuit 
+breaker or air switch with a leakage protector of ≥30mA sensitivity current. No other electrical 
+equipment should be connected under this leakage protector to prevent additional leakage 
+currents that could cause a total leakage current above 30mA and result in a trip.  
+c) If connecting multiple devices under one circuit breaker or air switch with a leakage protector, the 
+current value and leakag e current protection value of the air switch or circuit breaker should be 
+multiplied based on the configuration value of a single unit.  
+2. Selection of circuit breaker/air switch without leakage protector  Single -phase power supply 
+AC200V~240V  
+Leakage/air switch circuit breaker  
+Surge protector (user -supplied)  
+Single -phase power supply 
+AC200V~240V  
+Leakage/air switch circuit breaker  
+Surge protector (user -supplied)  
+
+ 
+29 a) It is recommended to configure each robot control c abinet with a separate 10A, D -type air 
+switch or circuit breaker.  
+b) If two robot control cabinets share one air switch or circuit breaker, use a 20A, D -type air 
+switch or circuit breaker.  
+c) When connecting multiple devices under one circuit breaker or air switch, multiply the current value 
+of the circuit breaker or air switch based on the configuration value of a single unit.  
+3.1.2  Power Cable Selection  
+ESTUN control cabinets are not equipped with input power cables. Users need to provide their wiring or 
+purchase  from ESTUN. When choosing cables, comply with the relevant safety standards. The recommended 
+cable specifications are as follows.  
+Model  Wire Gauge  
+AWG  Cross -sectional Area  (mm² )  
+ERC3 -C1-X1A4  
+13 2.5 ERC3 -C1-X1B4  
+ERC3 -C1-X1C4  
+ERC3 -C1-X1B6  
+ERC3 -C1-X1C6  
+3.2  External Interface Description  
+1 2 5 4 3 7 6 7
+8 9 14 13 15 16 101112
+ 
+Figure 3 -3 External Interfaces  
+ 
+S/N Name  Description  
+1 Power line interface  Motor power cable interface for each axis of the robot. One interface corresponds to 
+2 axes (3 interfaces for 6 axes; 2 interfaces for 4 axes).  
+2 Air cooling inlet  The air cooling inlet of control cabinet, can be fitted with filter cotton (optional)  
+3 Mode selector switch  The key switch for robot control mode: Left rotatio n for Auto mode, right rotation 
+for Manual mode  
+4 Teach pendant interface  Cable interface for the robot's teach pendant.  
+5 LED  System status indication (refer to LED instructions).  
+
+ 
+30 S/N Name  Description  
+6 Expansion card slots 1, 
+2, 3 Expansion card interfaces  
+Users can select and install different types of expansion cards according to their 
+needs. The types of expansion cards include:  
+ 16-channel digital input expansion card  
+ 16-channel NPN type digital output expansion card  
+ 16-channel PNP type digital output expansion car d 
+ ABZ expansion card  
+ Ethernet port conversion expansion card  
+For specific configurations of expansion cards and installation methods, refer to 
+"4.1 Instructions for Expansion Card Slots ". 
+7 Power switch  Power switch for the robot control cabinet, used to turn the power ON/OFF.  
+8 Encoder interface  Motor encoder cable interface for each axis of the robot, used to collect robot 
+position signals. Connects to the robot body using dedicated cables.  
+9 Ethernet1  interface  Connects to Ethernet slaves, acting a s a virtual teach pendant interface  
+10 EtherCAT  interface  Connects to EtherCAT slaves, used for connecting external servo axes or other IO 
+modules  
+11 Ethernet2  interface  Connects to Ethernet slaves  
+12 Ethernet3  interface  Connects to Ethernet slaves, used for connecting to the VNC interface  
+13 USB  interface  Used for controller data transmission or connecting peripherals  
+14 Standard IO interface  Standard user DI/DO provided by the control cabinet, used for signal connection 
+between external de vices and the control cabinet  
+System IO consists of 6 DI and 7 DO, while user IO consists of 14 DI and 13 DO.  
+15 Safety IO interface  Used for connecting external safety signals such as E -stop and safety door signals  
+16 Power interface  Single -phase AC 220V power input from the external power grid  
+
+ 
+31 3.3  Connection Diagram  
+ 
+Figure 3 -4 Connection Diagram  
+3.4  Power supply wiring  
+ 
+Figure 3 -5 Power Supply Wiring Diagram  
+The control cabinet uses single -phase AC 220V power. Follow the diagram below for power line preparation 
+and correct wiring.  
+Diagram  Pin Color  Description  
+ L Brown  
+Single -phase power wiring  
+N Blue  
+PE Blue -green  Safe ground wiring  
+ Wiring steps:  
+Check the markings and precautions on the control cabinet power input terminal and wiring terminal before wiring. 
+Strictly adhere to relevant operating standards.  
+ 
+Step 1 Take out the input terminals from the accessory kit.  
+4-axis or 6 -axis robots  Power wiring  
+Encoder wire  Handheld teach pendant  Expansion card  
+power cable  
+Virtual teach pendant  Servo drive  
+Servo motor  Reserved  
+Expansion of external servo axes 
+or other I/O modules  Controller debugging 
+interface  Controller data transfer or connection 
+of peripherals, e.g. USB stick, mouse, 
+keyboard, etc.  
+
+ 
+32  
+Step 2 Insert the three wires of the power line into the input terminal according to the terminal markings (from left 
+to right: L/PE/N), and tighten securely.  
+ 
+Step 3 After completing the power line connection, insert the input terminals into the power input terminal on the 
+control cabinet.  
+DANGER！
+ When wiring the power supply, strictly follow the L/PE/N sequence to avoid misconnection, which 
+could lead to short circuits and electric shock hazards.  
+ 
+3.5  LED Expl anation  
+ 
+Figure 3 -6 LED Illustration  
+There are four LEDs on the control cabinet representing different operational states, with the following 
+explanations:  
+LED Name  Status  Explanation  
+Power (POW)   
+OFF: Control cabinet is not powered or malfunctioning.  
+ 
+Flash: Control cabinet is powered.  
+ 
+ON: Main power is connected for the control cabinet.  
+System Enable (S -ON)  
+OFF: System is not enabled.  
+ 
+ON: System is enabled or in running state.  
+Program Run (RUN)   
+OFF: No program is running.  
+ 
+ON: Program is running.  
+Alarm (ALM)   
+OFF: No alarm is triggered by the system.  
+ 
+ON: Alarm has been triggered by the system.  
+ 
+POW Power Indicator  
+SON System Enable 
+Indicator  
+RUN Program Run 
+Indicator  
+ALM Alarm Indicator  
+
+ 
+33 3.6  Power Wiring  
+ 
+Figure 3 -7 Power Wiring Interface Diagram  
+3.6.1  Power line interface explanation  
+The encoder and power cables connecting the mechanical body and the controller have connection 
+markings. Please connect the cables according to the markings of Axis1&6, Axis2&5, Axis3&4 (or Axis1&3, 
+Axis2&4), and do not connect them incorrectly, as this may cause damage, which may prevent the robot system 
+from working properly, and may also cause serious safety problems.  
+ ERC3 -C1-X1A4/B4 Small/Medium Power 4-Axis Power Interface  
+ 
+Figure 3 -8 ERC3 -C1-X1A4/B4  power interface  
+ 
+Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ A1 U1 
+Axis -J1 motor 
+power line  A3 U3 
+Axis -J3 motor 
+power line  A2 V1 A5 V3 
+A4 W1 A6 W3 
+A7 / Not defined  A8 / Not defined  
+A9 PE Protective ground 
+wire A10 LT+ Body LED  
+A11 BK_+1  Axis -J1 Brake 
+wire positive 
+terminal  A12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+A13 BK_+3  Axis -J3 Brake 
+wire positive 
+terminal  A14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+
+
+ 
+34 Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ B1 U2 
+Axis -J2 motor 
+power line  B3 U4 
+Axis -J4 motor 
+power line  B2 V2 B5 V4 
+B4 W2 B6 W4 
+B7 / Not defined  B8 / Not defined  
+B9 PE Protective ground 
+wire B10 LT+ Body LED  
+B11 BK_+2  Axis -J2 Brake 
+wire positive 
+terminal  B12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+B13 BK_+4  Axis -J4 Brake 
+wire positive 
+terminal  B14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+ ERC3 -C1-X1C4 High -Power 4 -Axis Power Interface  
+ 
+Figure 3 -9 ERC3 -C1-X1C4 power interface  
+ 
+Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ A1 U1 
+Axis -J1 motor 
+power line  A3 Not defined  
+/ A2 V1 A5 Not defined  
+A4 W1 A6 Not defined  
+A7 / Not defined  A8 / Not defined  
+A9 PE Protective 
+ground wire  A10 LT+ Body LED  
+A11 BK_+1  Axis -J1 Brake 
+wire positive 
+terminal   A12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+A13 Not defined  / A14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+
+
+ 
+35 Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ 
+ B1 U2 
+Axis -J2 motor 
+power line  B3 Not defined  
+/ B2 V2 B5 Not defined  
+B4 W2 B6 Not defined  
+B7 / Not defined  B8 / Not defined  
+B9 PE Protective 
+ground wire  B10 LT+ Body LED  
+B11 BK_+2  Axis -J2 Brake 
+wire positive 
+terminal   B12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+B13 Not defined  / B14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ C1 U3 
+Axis -J3 motor 
+power line  C3 U4 
+Axis -J4 motor 
+power line  C2 V3 C5 V4 
+C4 W3 C6 W4 
+C7 / Not defined  C8 / Not defined  
+C9 PE Protective 
+ground wire  C10 LT+ Body LED  
+C11 BK_+3  Axis -J3 Brake 
+wire C12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+C13 BK_+4  Axis -J4 brake 
+wire C14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+ ERC3 -C1-X1B6 Medium Power 6 -Axis Power Interface  
+ 
+Figure 3 -10 ERC3 -C1-X1B6  power interface  
+ 
+
+
+ 
+36 Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ A1 U1 
+Axis -J1 motor 
+power line  A3 U6 
+Axis -J6 motor 
+power line  A2 V1 A5 V6 
+A4 W1 A6 W6 
+A7 / Not defined  A8 / Not defined  
+A9 PE Protective 
+ground wire  A10 LT+ Body LED  
+A11 BK_+1  Axis -J1 Brake 
+wire positive 
+terminal  A12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+A13 BK_+6  Axis -J6 brake 
+wire positive 
+terminal  A14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ B1 U2 
+Axis -J2 motor 
+power line  B3 U5 
+Axis -J5 motor 
+power line  B2 V2 B5 V5 
+B4 W2 B6 W5 
+B7 / Not defined  B8 / Not defined  
+B9 PE Protective 
+ground wire  B10 LT+ Body LED  
+B11 BK_+2  Axis -J2 brake 
+wire positive 
+terminal  B12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+B13 BK_+5  Axis -J5 brake 
+wire positive 
+terminal  B14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ C1 U3 
+Axis -J3 motor 
+power line  C3 U4 
+Axis -J4 motor 
+power line  C2 V3 C5 V4 
+C4 W3 C6 W4 
+C7 / Not defined  C8 / Not defined  
+C9 PE Protective 
+ground wire  C10 LT+ Body LED  
+C11 BK_+3  Axis -J3 brake 
+wire positive 
+terminal  C12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+C13 BK_+4  Axis -J4 brake 
+wire positive 
+terminal  C14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+
+
+ 
+37  
+ 
+ERC3 -C1-X1C6 High -Power 6-Axis Power Interface  
+ 
+Figure 3 -11 ERC3 -C1-X1B6  power interface  
+ 
+Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ A1 U1 
+Axis -J1 motor 
+power line  A3 U6 
+Axis -J6 motor 
+power line  A2 V1 A5 V6 
+A4 W1 A6 W6 
+A7 / Not defined  A8 / Not defined  
+A9 PE Protective 
+ground wire  A10 LT+ Body LED  
+A11 BK_+1  Axis -J1 Brake 
+wire positive 
+terminal  A12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+A13 BK_+6  Axis -J6 brake 
+wire positive 
+terminal  A14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ B1 U2 
+Axis -J2 motor 
+power line  B3 U5 
+Axis -J5 motor 
+power line  B2 V2 B5 V5 
+B4 W2 B6 W5 
+B7 / Not defined  B8 / Not defined  
+B9 PE Protective 
+ground wire  B10 LT+ Body LED  
+B11 BK_+2  Axis -J2 brake 
+wire positive 
+terminal  B12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+B13 BK_+5  Axis -J5 brake 
+wire positive 
+terminal  B14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+
+
+ 
+38 Interface Illustration  Pin Definition  Description  Pin Definition  Description  
+ C1 U3 
+Axis -J3 motor 
+power line  C3 U4 
+Axis -J4 motor 
+power line  C2 V3 C5 V4 
+C4 W3 C6 W4 
+C7 / Not defined  C8 / Not defined  
+C9 PE Protective 
+ground wire  C10 LT+ Body LED  
+C11 BK_+3  Axis -J3 brake 
+wire positive 
+terminal  C12 24V_BK  24V brake 
+power supply 
+positive 
+terminal  
+C13 BK_+4  Axis -J4 brake 
+wire positive 
+terminal  C14 GND_BK  Brake power 
+supply/ brake 
+wire negative 
+terminal  
+ 
+ 
+3.6.2  Power line wiring  
+ 
+Figure 3 -12 Small/Medium Power 4 -Axis Robot Power Wiring (ERC3 -C1-X1C4, ERC3 -C1-X1B4)  
+ 
+ 
+Figure 3 -13 6-Axis/High -Power 4 -Axis Robot Power Wiring (ERC3 -C1-X1C4, ERC3 -C1-X1B6 , ERC3 -C1-X1C6 ) 
+3.7  Encoder wiring  
+ 
+
+
+ 
+39 
+ 
+Figure 3 -14 Encoder Interface  
+ 
+3.7.1  Connection diagram  
+ 
+Figure 3 -15 Encoder Wiring Diagram  
+3.7.2  Encoder interface explanation  
+ 
+Figure 3 -16 Encoder Interface Explanation  
+ 
+Pin Definition  Description  Pin Definition  Description  
+1 S1＋ 
+J1-axis motor encoder 
+wiring  19 S4＋ 
+J4-axis motor encoder 
+wiring  2 S1﹣ 20 S4﹣ 
+3 VCC_ENC_J1  21 VCC_ENC_J4  
+4 GND_ENC_J1  22 GND_ENC_J4  
+5 CLK1+  23 CLK4+  
+6 CLK1 - 24 CLK4 - 
+7 S6＋ 
+J6-axis motor encoder 
+wiring  25 S5＋ 
+J5-axis motor encoder 
+wiring  8 S6﹣ 26 S5﹣ 
+9 VCC_ENC_J6  27 VCC_ENC_J5  
+10 GND_ENC_J6  28 GND_ENC_J5  
+
+
+ 
+40 Pin Definition  Description  Pin Definition  Description  
+11 CLK6+  29 CLK5+  
+12 CLK6 - 30 CLK5 - 
+13 S3＋ 
+J3-axis motor encoder 
+wiring  31 S2＋ 
+J2-axis motor encoder 
+wiring  14 S3﹣ 32 S2﹣ 
+15 VCC_ENC_J3  33 VCC_ENC_J2  
+16 GND_ENC_J3  34 GND_ENC_J2  
+17 CLK3+  35 CLK2+  
+18 CLK3 - 36 CLK2 - 
+37-42 NC / / / / 
+3.8  Teach pendant wiring  
+ 
+Figure 3 -17 Teach Pendant Wiring Diagram  
+3.8.1  Precautions for using teach pendant  
+1. Handle with care and avoid dropping, throwing, or striking the teach pendant, as this may cause damage or 
+malfunction. When not in use, hang it on the dedicated holder to prevent accidental dropping ;  
+2. Do not use sharp objects such as screws, knives, or pen tips to operate the touch screen. This may damage the 
+touch screen. Use your fingers or a stylus pen to operate the touch screen ;  
+3. When no USB devices are connected, make sure to cover the USB po rts with protective caps to avoid exposing 
+them to dust, which could cause interruptions or failures ;  
+4. When using USB plugs, do not apply excessive force. Normal use is sufficient ;  
+5. If the USB is not recognized, unplug the USB drive, power off, and then plug it back in after powering on ;  
+6. When using the E -stop button or key, do not apply excessive force. Normal use is sufficient ;  
+7. The power -on time is 40 S for the system to start up properly. Do not power off prematurely to avoid file loss ; 
+8. Connect or disconnect the teach pendant when the control cabinet is powered off. It is prohibited to connect or 
+disconnect the teach pendant while the control cabinet is powered on, as this may result in damage to the controller 
+or the teach pendant.  
+9. When storing cables, do not place them under heavy machinery to avoid crushing, cutting, or pulling them apart ;  
+10. Follow our defined wiring guidelines to avoid connection errors and potential issues ;  
+11. The teach pendant is not explosion -proof. Do not use it in explosive environments or work units ;  
+12. Keep the teach pendant away from water, oil, and similar environments ;  
+
+
+ 
+41 13. The ERC3 -C1 control cabinet is only compatible with the T76 model of teach pendant and cannot be paired with 
+the T72 model.  
+14. To release the E -stop, lift the E -stop button upward or rotate the button to release it. Avoid excessive rotation or 
+pausing during rotation, as this may cause abnormal dual -channel detection of the sys tem, and trigger alarm codes 
+A112/A113. In the event of abnormal alarms A112/A113 during non -routine operations, manually clear the alarm for 
+normal operation.  
+15. To correctly use the teach pendant push button, support the bottom of the teach pendant with  the palm of the left 
+hand and simultaneously press the middle position of the teach pendant with two fingers of the left hand. For ease of 
+operation, the push button is designed as a rectangle. Using only one finger to apply force at the upper or lower en d 
+of the rectangle may result in failure to close one set of contacts, triggering alarm codes A11A/A11B. In the event of 
+alarms A11A/A11B during non -routine operations, manually clear the alarm for normal operation.  
+16. When switching between Manual and Au to modes using the mode switch on the control cabinet, do not pause in 
+the middle position during the switch. The middle position of the mode switch is the critical point for mechanical 
+contact closure. Pausing at this position may cause alarm codes A116/A 117. In the event of abnormal alarms 
+A116/A117 during non -routine operations, manually clear the alarm for normal operation.  
+17. If frequent switching between manual and automatic modes is required during testing, wait for 5 seconds after 
+switching from ma nual to automatic mode for the system self -check to complete before switching back to manual 
+mode. Rapid and frequent switching between manual and automatic modes may cause alarm code A1F due to 
+incomplete self -checks. This is a normal phenomenon, and powe r cycling will resolve the issue.  
+18. In manual mode, if frequent pressing of the teach pendant button is required, wait for 5 seconds after pressing the 
+button before releasing it, to allow time for the system self -check to complete. Rapid and frequent sw itching between 
+Manual and Auto modes may cause alarm code A1F due to incomplete self -checks. This is a normal phenomenon, 
+and power cycling will resolve the issue  
+3.8.2  Teach pendant interface description  
+ 
+Figure 3 -18 Teach Pendant Interface Description  
+Table 3 -1 Teach Pendant Pin Descriptions  
+Pin Definition  Description  Pin Definition  Description  
+1 TP_24V  Teach pendant 24V power 
+supply pin  10 TP_SEL1  / 
+2 TP_0V  Teach pendant 0V pin  11 TP_SEL2  / 
+3 TP_ES1+  E-stop 1+ 12 TP_EN2+  Teach pendant enable  2+ 
+4 TP_ES1 - E-stop 1- 13 TP_TX+  Teach pendant EtherNet transfer data+  
+5 TP_ES2+  E-stop 2+ 14 TP_TX - Teach pendant EtherNet transfer data - 
+6 TP_ES2 - E-stop 2- 15 TP_RX+  Teach pendant EtherNet transfer data+  
+
+
+ 
+42 Pin Definition  Description  Pin Definition  Description  
+7 TP_EN1+  Teach pendant enable 1+  16 TP_RX - Teach pendant EtherNet transfer data - 
+8 TP_EN1 - Teach pendant enable 1 - 17 TP_EN2 - Teach pendant enable  2- 
+9 24V-IO 24V power supply pin  / / / 
+ 
+3.8.3  Teach pendant specifications  
+ 
+Name  Details  
+Processor  A40I Quad -core 1.2GHz, DDRIII 512M  
+Memory/storage  EMMC  8G 
+LCD screen  TFT 7 Inch 800*480  
+Touch screen  4-wire resistive screen  
+Operating system  Linux  
+External USB  2.0*1  
+LED  LEDs: 3 
+Communication  Ethernet (100M)  
+Accessories  E-stop; Key switch (two gears); Enable switch (three positions)  
+Display color quality  16-bit color  
+Power consumption  24V 1A 
+Adapter power model  DC24V  1A or higher  
+Casing material/color  ABS/PC ; BLACK/GRAY  
+Operating environment  Operating temperature: -10° C～50° C  
+Storage temperature  -20° C ~60° C  
+3.8.4  Appearance of teach pendant  
+ 
+ 
+Figure 3 -19 Exterior of Teach Pendant  
+
+
+ 
+43 Table 3 -2 Exterior of Teach Pendant  
+S/N Description  
+1 Display  
+2 E-stop Button  
+3 Mode Selector Switch  
+4a, 4b, 4c  Global Function Button  
+5 Status LED  
+6 Enable Switch  
+7 Suspension Handle  
+8 Cable Access Area  
+9 USB Slot  
+10 Stylus Pen  
+3.9  IO Wiring  
+This section provides an overview of the DI/DO interfaces of the standard control cabinet, which includes 
+20 DIs and 20 DOs by default. The system occupies 6 DIs (X0 ~X5) and 7 DOs (Y0 ~Y6), while the user can 
+define the usage of the remaining 14 DIs (X6 ~X19) and 13 DOs (Y7 ~Y19).  
+If there are insufficient inputs and outputs, the IO can be expanded using an expansion card, as described in 
+the (Optional) Expansion Cards section.  
+ 
+Figure 3 -20 Standard IO Connector  
+Standard IO connector  
+
+ 
+44 3.9.1  DI wiring  
+ 
+Figure 3 -21 DI Interface  
+ DI Port Specifications  
+Item Spec.  
+Number of input channels  20 channel s (standard)  
+System occupied inputs: 6 channels, X0~X 5 
+User -defined inputs: 14 channels, X6~X19  
+Input connection method  Crimp type terminal  
+Input voltage range  19.2～28.8VDC  
+Input current (24VDC)  Approximately 4.85mA  
+Max. input voltag e 30VDC  
+ON voltage  18~30VDC  
+OFF voltage  0~5VDC  
+Max. input signal frequency  1kHZ  
+Input impedance  ＞4.7K  
+Isolation method  Opto -coupler isolation  
+DI type NPN/PNP  
+ DI Interface Definitions  
+Pin  Definition  Teach Pendant Label  Description  Remarks  
+X0 Special pin : Pause  Teach Pendant DI3  DI_remoteStop  Pause robot program in 
+remote mode with 
+System occupied input: X0~X5  User -defined inputs: X6~X19  
+Row X: Input DI interface  
+
+ 
+45 Pin  Definition  Teach Pendant Label  Description  Remarks  
+high-level trigger  
+X1 Special pin:  Alarm reset  Teach Pendant DI7  DI_remoteResetErr  Reset robot alarm on 
+rising edge in remote 
+mode  
+X2 Special pin:  Run Teach Pendant DI6  DI_remoteStart  Run robot program on 
+rising edge in remote 
+mode  
+X3 Special pin:  Spare  / / Reserved , not available 
+to users.  
+X4 Special pin:  Reload the 
+self-starting program  Teach Pendant DI9  DI_remoteLoadProg  Reload auto -start 
+program in remote mode  
+X5 Special pin: Exit Teach Pendant DI10  DI_exitCycle  Exit current program in 
+remote mode, jump to 
+specified line in main 
+program  
+X6 General input 6  Teach Pendant DI11  / / 
+X7 General input 7  Teach Pendant DI12  / / 
+X8 General input 8  Teach Pendant DI13  / / 
+X9 General input 9  Teach Pendant DI14  / / 
+X10 General input 10  Teach Pendant DI15  / / 
+X11 General input 11  Teach Pendant DI16  / / 
+X12 General input 12  Teach Pendant DI17  / / 
+X13 General input 13  Teach Pendant DI18  / / 
+X14 General input 14  Teach Pendant DI19  / / 
+X15 General input 15  Teach Pendant DI20  / / 
+X16 General input 16  Teach Pendant DI21  / / 
+X17 General input 17  Teach Pendant DI22  / / 
+X18 General input 18  Teach Pendant DI23  / / 
+X19 General input 19  Teach Pendant DI24  / / 
+S0 X0-X19 common  / /  
+ 0V_E , 0V for external 
+input power  / / / 
+ 0V, 0V for external input 
+power  / /  
+PE Grouding point, for  
+shielded cable grounding  / / / 
+Note: DI1-DI10 on the os cillator ports are occupied by the system, and ports with dedicated pins noted in the table 
+above are not available to the user.  
+ DI Signal Wiring  
+Input DI signals can be connected using both common anode and common cathode methods, divided into signal 
+pins X6-X19 and common terminal pin S0. The wiring method for extending DI output signals is the same as above.  
+
+
+ 
+46  Wiring Diagram  
+ When the upper device is open collector output:  
+(1) Common cathode method ( upper device with NPN type output)  
+4.7KS0
+Xx(24V)
+(0V)
+(0V_E)Upper device 
+NPNCorrect connection of 
+internal 24VExample of incorrect connection of internal 24V
+4.7KS0
+Connection 
+to internal 
+0V
+Upper device 
+NPN4.7KS0Upper device 
+NPN
+Incorrect PNP type 
+connection
+(DIx)(24V)
+Xx(DIx)
+(0V)
+(0V_E)(24V)
+Xx(DIx)
+(0V)
+(0V_E)
+ 
+Figure 3 -22 Using the internal 24V power supply (NPN type output for the upper device)  
+4.7KS0外部 +24V
+外部 0V4.7KS0
+External 0VUse of a single 
+power supply
+Use of a single 
+power supply
+External +24VCorrect connection of external 24V 
+(recommended for use)
+Example of incorrect connection of external 24V
+Upper device 
+NPN4.7KS0External +24V
+External 0VUpper device 
+NPN
+Incorrect PNP type 
+connection
+(24V)
+(24V)
+(24V)
+Xx(DIx)
+Xx(DIx)
+ Xx(DIx)
+(0V)
+ (0V)
+ (0V)
+(0V_E)
+ (0V_E)
+ (0V_E)Upper device 
+NPN
+ 
+Figure 3 -23 Using the external 24V power supply (NPN type output for the upper device)  
+（2）Common anode method (PNP type output)  
+4.7KS0Upper device 
+PNP
+4.7KS0
+Upper device 
+PNP4.7KS0Upper device 
+PNP
+Connection 
+to internal 
+0V
+Incorrect NPN type 
+connection
+Correct connection of 
+internal 24VExample of incorrect 
+connection of internal 24V
+(24V) (24V) (24V)
+Xx(DIx) Xx(DIx) Xx(DIx)
+(0V) (0V) (0V)
+(0V_E) (0V_E) (0V_E)
+ 
+Figure 3 -24 Using the internal 24V power supply (PNP type output for the upper device)  
+4.7KS0External +24V
+External 0VCorrect connection of external 24V 
+(recommended for use)
+4.7KS0External +24V
+External 0VUpper device 
+PNP
+Upper device 
+PNP
+Incorrect NPN type 
+connection
+4.7KS0External +24V
+External 0VUpper device 
+PNPUse of a single 
+power supply
+Use of a single 
+power supply
+(24V) (24V) (24V)
+Xx(DIx) Xx(DIx) Xx(DIx)
+(0V) (0V) (0V)
+(0V_E) (0V_E) (0V_E)
+ 
+
+ 
+47 Figure 3 -25 Using the external 24V power supply (PNP type output for the upper device)  
+ When the upper device is of relay output  
+4.7KS0
+Upper device 
+relayCorrect connection of 
+internal 24V
+4.7KS0
+Connection to 
+internal 0V
+Example of incorrect 
+connection of internal 24V
+Upper device 
+relay(24V) (24V)
+Xx(DIx) Xx(DIx)
+(0V) (0V)
+(0V_E) (0V_E)
+ 
+Figure 3 -26 Using the internal 24V power supply ( Upper device using relay output ) 
+ 
+Incorrect connection of 
+external 24V
+4.7KS0External +24V
+External 0V4.7KS0External +24V
+External 0VUse of a single 
+power supply
+Use of a single 
+power supply
+Correct connection of external 24V 
+(recommended for use)
+Upper device 
+relayUpper device 
+relay(24V) (24V)
+Xx(DIx) Xx(DIx)
+(0V) (0V)
+(0V_E) (0V_E)
+ 
+Figure 3 -27 Using the External 24V  Power Supply ( upper device using relay output ) 
+
+ 
+48 3.9.2  DO wiring  
+ 
+Figure 3 -28 DO interface  
+ DO Port Definitions  
+Item Specifications  
+Number of output channels  20 channels (standard)  
+System occupied inputs: 7 channels, Y0~Y6  
+User -defined inputs: 13 channels, Y7~Y19  
+Output connection method  Crimp type terminal  
+Output voltage range  19.2~28.8VDC  
+DO type NPN  
+Max. drive current (24VDC)  300mA  
+Leakage current  Less than 200uA  
+Max. output signal frequency  1kHZ  
+Isolation method  Opto -coupler isolation  
+ DO Port Definitions  
+Pin  Definition  Teach Pendant Label  Description  Remarks  
+Y0 Special pin: System alarm  Teach Pendant DO2  DO_sysError  Output signal for 
+system alarm  
+System occupied inputs: Y0~Y6  User -defined inputs: Y7~Y19  
+Row Y: Output DO interface  
+
+ 
+49 Pin  Definition  Teach Pendant Label  Description  Remarks  
+Y1 Special pin: Enable  Teach Pendant DO4  DO_robotMot  Output signal when 
+enabling is 
+completed  
+Y2 Special pin: Program run  Teach Pendant DO1  DO_progRun  Output signal for 
+program running  
+Y3 Special pin: Safety door  / / / 
+Y4 Special pin: External E -stop / / / 
+Y5 Special pin: Teach pendant 
+E-stop / / / 
+Y6 Special pin: Controller spare  / / / 
+Y7 General output 7  Teach Pendant DO9  / / 
+Y8 General output 8  Teach Pendant DO10  / / 
+Y9 General output 9  Teach Pendant DO11  / / 
+Y10 General output 1 0 Teach Pendant DO12  / / 
+Y11 General output 1 1 Teach Pendant DO13  / / 
+Y12 General output 12  Teach Pendant DO14  / / 
+Y13 General output 13  Teach Pendant DO15  / / 
+Y14 General output 14  Teach Pendant DO16  / / 
+Y15 General output 15  Teach Pendant DO17  / / 
+Y16 General output 16  Teach Pendant DO18  / / 
+Y17 General output 17  Teach Pendant DO19  / / 
+Y18 General output 18  Teach Pendant DO20  / / 
+Y19 General output 19  Teach Pendant DO21  / / 
+NC / / / / 
+ 24V_E, +24 V (± 20%)  from 
+outside cabinet to DO inside 
+cabinet  / 
+N/A / 
+ 24V, +24V (± 5%)  for 
+external input power , 
+maximum allowable current 
+0.75A  / 
+/ / 
+PE Grouding  point, for shielded 
+cable grounding  / N/A / 
+Note: D O1-DO10 on the oscillator ports are occupied by the system, and ports with dedicated pins noted in the table 
+above are not available to the user.  
+ DO Signal Wiring  
+The following diagrams illustrate wiring for loads using opto -couplers/relays. The wiring for extending DO 
+output signals is the same.  
+
+
+ 
+50  
+ When the load is a  relay  
+Correct connection of 
+internal 24VExample of incorrect 
+connection of internal 24V
+24V_E not connected
+24V not 
+connected
+(24V_E)
+(24V)
+(24V_E)
+(24V)
+(24V_E)
+(24V)
+Yx (DOx) Yx (DOx) Yx (DOx)(24V_E)
+(24V)
+Yx (DOx)Relay loadRelay load Relay load
+Relay load
+(0V_E)
+(0V)
+(0V_E)
+(0V)
+(0V_E)
+(0V)
+(0V_E)
+(0V)
+Example of incorrect 
+connection of external 24VCorrect connection of external 24V 
+(recommended for use)
+External +24V
+External 0V
+External +24V
+External 0VNo external power 
+supply is allowed to be 
+connected to the 
+internal
+(24V_E)
+(24V)
+(24V_E)
+(24V)
+Yx (DOx) Yx (DOx)External +24V
+External 0V(24V_E)
+(24V)
+Yx (DOx)
+Incorrect use of PNP connection when 
+the standard DO of the cabinet is 
+NPN.
+Relay loadRelay load
+Relay load
+(0V_E)
+(0V)
+(0V_E)
+(0V)
+(0V_E)
+(0V)
+ 
+Figure 3 -29 External/Internal 24V Power Supply when Load is a Relay  
+ 
+ When the load is an opto -coupler  
+External +24V
+External 0VCorrect connection of external 24V 
+(recommended for use)
+(24V_E)
+(24V)
+Yx (DOx)External +24V
+External 0V(24V_E)
+(24V)
+Yx (DOx)Example of incorrect 
+connection of external 24V
+Incorrect use of PNP connection when 
+the standard DO of the cabinet is 
+NPN.
+ Opto -coupler 
+load
+Opto -coupler 
+load
+(0V_E)
+(0V)
+(0V_E)
+(0V)
+ 
+Figure 3 -30 Using an External 24V Power Supply when the Load is an Opto -coupler  
+  
+Correct connection of  
+internal 24V  Correct connection of  
+external 24V  
+(Load ) (Load ) External+24V  
+
+ 
+51 3.10  Communication Connection  
+ 
+Figure 3 -31 Communication Interface  
+3.10.1  Communication signal description  
+ EtherNet1 is used to connect to the virtual teach pendant;  
+ EtherNet2 is a reserved communication interface;  
+ EtherNet3 is used for controller debugging.  
+ EtherCat is used to connect external servo axes or other I/O modules.  
+The definitions for EtherCAT and EtherNet interfaces are as follows:  
+S/N Definition  Description  
+1 TX+  Data transmit + 
+2 TX- Data transmit - 
+3 RX+  Data receive + 
+4 / / 
+5 / / 
+6 RX- Data receive - 
+7 / / 
+8 / / 
+Casing  PE Shield  
+ 
+3.10.2  Recommended communication cables  
+Please use shielded/double -shielded twisted -pair CAT5e SF/UTP cables for communication. It is recommended to 
+use connectors with metal shielding to prevent signal interference.  
+
+
+ 
+52  
+3.10.3  USB interface  
+The USB interface on the controller is used for data transfer or connecting peripherals such as USB drives, mice, 
+keyboards, etc.  
+ 
+Figure 3 -32 Interface Diagram  
+3.10.4  EtherCAT  wiring  
+The control cabinet can act as the master station for EtherCAT communication to connect EtherCAT 
+communication devices such as Trio modules, ED3S servo drives (as extension axes).  
+ 
+Figure 3 -33 EtherCAT  connection  
+3.11  SAFETY  IO 
+The ERC3 -C1 control cabinet comes standard with a variety of safety stop methods. The SAFETY IO 
+interfaces are illustrated in the following diagram.  
+By default, shorting jumpers are inserted into the SAFETY IO, rendering the corresponding functions 
+inactive. To use th ese functions, the respective shorting jumpers must be removed, and connections must be 
+estaed following the appropriate wiring methods.  
+It is strongly advised not to remove the shorting jumpers if these functions are not in use, as doing so may 
+trigger th e corresponding functionalities, leading to operational halts or alarms.  
+It is recommended to 
+use connectors with 
+metal shielding  Incorrect use of PNP 
+connection when the 
+standard DO of the 
+cabinet is NPN. use 
+shielded/double -shielde
+d twisted -pair cables 
+(CAT5e SF/UTP)  
+Add extension axes according to 
+the actual use  
+
+ 
+53  
+SAFETY IO Plug Terminal, Shorting Jumper  Insertion Status  
+ 
+Figure 3 -34 SAFETY IO Shorting Jumper Insertion Diagram  
+The input and output signals related to safety stop and their functions are described below:  
+Function Name  Definitio
+n Channels  Activation Mode  Function Description  
+Start 
+Confirmation  CSB  2 Auto  In Auto mode, after pressing the start confirmation 
+button, the control cabinet can complete power -on. 
+External E -stop EX_ES  2 Auto & Manual  Class 0 stop. When the E -stop state is effective, the 
+control cabinet and robot will immediately cut off 
+the main power for shutdown.  
+Limit Switch  LS 2 Auto & Manual  Same function as External E -stop, Class 0 stop. 
+When the E -stop state is effective, the control 
+cabinet and robot will immediately cut off the main 
+power for shutdown.  
+General Stop  GS 2 Auto & Manual  Class 1 stop. After the general stop state is effective, 
+the control cabinet and robot will slow down first, 
+then cut off the main power of the control cabinet, 
+and can accept signals such as safety doors.  
+Auto Protection 
+Stop AS 2 Auto  Class 1 stop. Only effective in Auto mode. After the 
+auto protection stop state is effective, the control 
+cabinet and robot will slow down first, then cut off 
+the main power of the control cabinet, and can 
+accept signals such as safety doors.  
+E-stop Output  ES_OUT  2 Auto & Manual  When the external E -stop, control cabinet E -stop, 
+teach pendant E-stop, or limit switch is effective, the 
+E-stop output changes from closed to open.  
+ 
+
+
+ 
+54 3.11.1  SAFETY Interface Description  
+ 
+Figure 3 -35 SAFETY IO Interface  
+ 
+Pin Definition  Explanation  Pin Definition  Explanation  
+A0 CSB1+  Channel 1 start confirmation 
+signal +  B0 CSB1 - Channel 1 start confirmation 
+signal - 
+A1 24V-SAFETY  24V power supply  B1 GND -SAFETY  Power ground  
+A2 CSB2+  Channel 2  start confirmation 
+signal + B2 CSB2 - Channel 2 start confirmation 
+signal - 
+A3 AS1+  Channel 1 auto protection 
+stop + B3 AS1- Channel 1 auto protection 
+stop - 
+A4 24V-SAFETY  24V power supply  B4 GND -SAFETY  Power ground  
+A5 AS2+  Channel 2 auto protection 
+stop + B5 AS2- Channel 2 auto protection 
+stop - 
+A6 GS1+  Channel 1 Normal Stop +  B6 GS1- Channel 1 Normal Stop - 
+A7 24V-SAFETY  24V power supply  B7 GND -SAFETY  Power ground  
+A8 GS2+  Channel 2 Normal Stop +  B8 GS2- Channel 2 Normal Stop - 
+A9 LS1+  Channel 1 limit switch + B9 LS2+  Channel 2 limit switch + 
+A10 LS1- Channel 1 limit switch - B10 LS2- Channel 2 limit switch - 
+A11 EX_ES1+  Channel 1 external E -stop + B11 EX_ES2+  Channel 2 external E -stop + 
+A12 EX_ES1 - Channel 1 external E -stop - B12 EX_ES2 - Channel 2 external E -stop - 
+A13 ES1_OUT+  Channel 1 E-stop output + 
+(max. output capability: 
+100mA)  B13 ES2_OUT+  Channel 2 E -stop output + 
+(max. output capability: 
+100mA)  
+A14 ES1_OUT - Channel 1 E -stop output - 
+(max. output capability: 
+100mA)  B14 ES2_OUT - Channel 2 E -stop output - 
+(max. output capability: 
+100mA)  
+[Note] 24V -SAFETY provides a 24V power supply with a maximum output current of 80mA. It is 
+prohibited to be used for external load drive!  
+
+
+ 
+55 3.11.2  Start confirmation wiring method  
+When using the start confirmation function, connect the CSB - and CSB+ to a self -resetting NO switch 
+externally. The main power of the control cabinet will only be turned on after pressing the start confirmation 
+button. Its wiring method is as follows:  
+B0
+B2A0
+A2External safety door 
+switch External 24V
+0VSafety IO terminalElectrical cabinet
+Self-reset button
+ 
+Figure 3 -36 Start Confirmation Wiring Diagram (External 24V power supply)  
+A0
+A2External safety door 
+switchSafety IO terminalElectrical cabinet
+A1External 24V -SAFETY
+B0
+B2
+B1
+Internal GND -SAFETYSelf-reset button
+ 
+Figure 3 -37 Start Confirmation Wiring Diagram (Internal 24V power supply)  
+ 
+Caution
+ Ensure that the dual -channel wiring is normal when using this function.  
+ 
+When the start confirmation function is not used, short -circuit using a jumper, with the specific wiring 
+method as follows:  
+
+ 
+56 
+Safety IO terminal
+A0
+A1
+A2
+B0
+B1
+B2 
+Figure 3 -38 Wiring Method for Not Using Start Confirmation  
+3.11.3  External E -stop wiring method  
+Caution
+  Emergency stops are designated for handling urgent situations and should only be used to 
+halt a robot in emergencies during its normal operation.  
+ Engaging the emergency stop button when not necessary may cause the  robot to deviate 
+from its normal operational trajectory. Additionally, the impact from an emergency stop can 
+reduce the lifespan of the robot's reducer and increase wear on the motor brake pads. It is 
+strictly prohibited to use the E -stop button for regul ar halting or power disconnection in 
+non-emergency situations.  
+ 
+ 
+Figure 3 -39 Using External E -stop 
+ 
+Caution
+ Ensure that the dual-channel wiring is normal when using this function.  
+ 
+When the external E -stop function is not used, short -circuit using a jumper, with the specific wiring method 
+as follows:  
+Safety IO terminal  
+External  
+E-stop 
+E-stop 1+ 
+E-stop 1- 
+E-stop 2+ 
+E-stop 2- 
+ 
+
+ 
+57 
+Safety IO terminal
+A11
+A12
+B11
+B12 
+Figure 3 -40 Not Using External E -stop Connection  
+3.11.4  Limit switch wiring method  
+ 
+Figure 3 -41 Using External Limit Switch  
+ 
+Caution
+ Ensure that the dual -channel wiring is normal when using this function.  
+When not using the limit switch function, short -circuit using a jumper, with the specific wiring method as 
+follows:  
+ 
+Figure 3 -42 Not Using External Limit Switch Connection  
+3.11.5  Safety door wiring method  
+Safety doors and safety light curtains can be used to control protective barriers and doors during robot 
+operation.  
+Safety IO terminal  
+Limit switch  
+Limit  1+ 
+Limit  1- 
+Limit  2+ 
+Limit  2- 
+Control cabinet terminal  
+
+ 
+58 
+B6
+B8A6
+A8External safety door 
+switch External 24V
+0VSafety IO terminalElectrical cabinet 
+Figure 3 -43 External Safety Door Connection (using external 24V power supply connection)  
+A6
+A8External safety door 
+switchSafety IO terminalElectrical cabinet
+A7Internal 24V -SAFETY
+B6
+B8
+B7
+Internal GND -SAFETY
+ 
+Figure 3 -44 External Safety Door Connection (using internal 24V power supply connection)  
+ 
+Caution
+ Ensure that the dual -channel wiring is normal whe n using this function.  
+Safety IO terminal
+A6
+A7
+A8
+B6
+B7
+B8
+ 
+Figure 3 -45 Not Using External Safety Door Connection  
+
+ 
+59  
+3.11.6  Auto protection stop wiring method  
+The wiring method for safety doors and safety light curtains in Auto mode is shown in the following 
+figures:  
+B3
+B5A3
+A5External safety door 
+switch External 24V
+0VSafety IO terminalElectrical cabinet
+Self-reset button
+ 
+Figure 3 -46 Auto Protection Stop Connection  (Using external 24V power supply)  
+ 
+A3
+A5External safety door 
+switchSafety IO terminalElectrical cabinet
+A4Internal 24V -SAFETY
+B3
+B5
+B4
+Internal GND -
+SAFETYSelf-reset button
+ 
+Figure 3 -47 Auto Protection Stop Connection (Using internal 24V power supply)  
+
+ 
+60 
+Caution Ensure that the dual -channel wiring is normal when using this function.  
+Safety IO terminal
+A3
+A4
+A5
+B3
+B4
+B5
+ 
+Figure 3 -48 Not Using Autom Protection Stop Connection  
+3.11.7  E-stop output wiring method  
+(1) Wiring method with relay as the load 
+External +24V
+External 0V
+    A13 (ES1_OUT+ )
+ 
+    A14 (ES1_OUT -)
+ 
+v
+    B13 (ES2_OUT+ )
+ 
+    B14 (ES2_OUT -)
+ Relay loadElectrical 
+cabinet
+ 
+Figure 3 -49 E-stop Output Wiring (Relay as load)  
+(2) Wiring method with client DI module as the load  
+    
+External 0V
+    A13 (ES1_OUT+ )
+ 
+    A14 (ES1_OUT -)
+ 
+    B13 (ES2_OUT+ )
+ 
+    B14 (ES2_OUT -)
+ v24VExternal +24V
+DI1 Client DI 
+module
+DI2Electrical 
+cabinet
+0V  
+Figure 3 -50 E-stop Output Wiring (DI module as load)  
+
+ 
+61 Chapter 4  (Optional) Expansion Cards  
+4.1  Expansion Slot Description  
+Expansion cards are optional accessories developed for customer applications. The ERC3 -C1 control 
+cabinet can accommodate up to three expansion cards.  
+The types of expansion slots can be freely combined. Available expansio n cards include:  
+ 16-channel digital input expansion card (up to 3 DI expansion boards can be installed, 
+providing a maximum of 48 DI channels);  
+ 16-channel NPN type digital output expansion card (up to 3 DO expansion boards can be 
+installed, providing a maximum of 48 DOs);  
+ 16-channel PNP type digital output expansion card (up to 3 DO expansion boards can be 
+installed, providing a maximum of 48 DOs);  
+ ABZ expansion card (up to 1 ABZ expansion card can be installed);  
+ Ethernet port adapter  expansi on card (up to 1 Ethernet port adapter  expansion card can be 
+installed, only in the top slot CN3).  
+Caution
+  The ERC3 -C1 control cabinet can accommodate  up to three expansion cards;  
+ The total number of expandable input and output channel s is 48;  
+ DI/DO expansion cards require an external power supply;  
+ No underlying configuration is required for the installation of expansion cards. If you have any 
+questions, please contact ESTUN technical support to avoid damage due to incompatibility or 
+improper operation.  
+ 
+Figure 4 -1 Expansion Slots  
+ 
+Expansion Card Name  Model  Function  
+16-channel digital input 
+expansion card  ERC3 -DI-CB-A-V100B1  For user input signal expansion  
+16-channel NPN type digital 
+output expansion card  ERC3 -DONPN -CB-A-V100B1  For user NPN type output signal 
+expansion  
+16-channel PNP type digital 
+output expansion card  ERC3 -DOPNP -CB-A-V100B1  For user PNP type output signal 
+expansion  
+ABZ expansion card  ERC3 -ABZ -CB-A-V100B1  For user encoder signal expansion  
+
+
+ 
+62 Ethernet port adapter  expansion 
+card ERC3 -C1-ECZJ -V100B 0 For user ECAT signal adapter  
+4.2  Installing  Steps  
+Step 1 Use a screwdriver to remove the two captive screws at the back of the control cabinet's top cover.  
+Step 2 Push the control cabinet cover backward horizontally with both hands.  
+ 
+Step 3 Open the control cabinet cover as shown in the figure below.  
+ 
+Step 4 Unscrew the expansion card front panel screws with a screwdriver.  
+ 
+Step 5 Loosen the screws in the red circle a bit to better fi t the expansion card.  
+Baffle  
+
+ 
+63 
+ 
+Step 6 Insert the expansion card into the corresponding slot in the control cabinet , see “4.1 Expansion Slot 
+Description ” for correspondence . 
+  
+Step 7 Secure the expansion card with screws.  
+ 
+Step 8 Tighten the previously loosended screws . 
+ 
+Step 9 Close the control cabinet cover and push it forward horizontally with both hands.  
+
+
+ 
+64  
+Step 10 Tighten the two screws at the back of the control cabinet's top cover with a screwdriver.  
+Step 11 Install the plug.  
+ 
+ 
+4.3  DI Expansion Card  
+4.3.1  Expansion card information  
+Expansion Card Name  Model  Function  
+16-channel digital input expansion card  ERC3 -DI-CB-A-V100B1  For user input signal expansion  
+
+
+ 
+65 4.3.2  Installation dimensions  
+ 
+Figure 4 -2 DI Expansion Card Installation Dimensions  
+4.3.3  Terminal definitions  
+ 
+Figure 4 -3 DI Expansion Card Terminals  
+ 
+Pin Definition  Description  Pin Definition  Description  
+0 DI0 Expansion input 0 11 DI1 Expansion input 1 
+1 DI2 Expansion input 2 12 DI3 Expansion input 3 
+2 DI4 Expansion input 4 13 DI5 Expansion input 5 
+3 DI6 Expansion input 6 14 DI7 Expansion input 7 
+4 COM1  Common terminal for  DI0-DI7 15 NC / 
+5 DI8 Expansion input 8 16 DI9 Expansion input 9 
+6 DI10  Expansion input 10 17 DI11  Expansion input 11 
+7 DI12  Expansion input 12 18 DI13  Expansion input 13 
+8 DI14  Expansion input 14 19 DI15  Expansion input 15 
+
+
+ 
+66 Pin Definition  Description  Pin Definition  Description  
+9 COM2  Common terminal for DI8-DI15   20 / Not defined  
+10 PE Grounding point for shielding 
+cable grounding  21 PE Grounding point for 
+shielding cable 
+grounding  
+4.3.4  Port specifications  
+Item Specification  
+Number of input channels  16 
+Input connection method  Crimp type terminal  
+Input voltage range  19.2~28.8V DC  
+Input type  Digital, selectable NPN or PNP type inputs via common terminal  
+Max. input voltage  30V DC  
+Input current (typical 24V)  Approximately 4.85mA  
+ON voltage (V)  18~30V DC  
+OFF voltage (V)  0~5V DC  
+Input impedance  Greater than 4.7K  
+Isolation method  Opto -coupler isolation  
+ 
+4.3.5  External wiring diagram  
+The DI signal input can use common anode and common cathode wiring methods, divided into signal pins 
+DI0-DI7 with the corresponding common terminal COM1, and signal pins DI8 -DI15 with the corresponding 
+common terminal COM2.  
+ When the upper device has open -collector output  
+(1) Common cathode wiring method (NPN output for upper device)  
+4.7KExternal +24V
+External 0V4.7K
+COM1/COM2Use of an external 
+power supplyInternal +24VCorrect connection of external 24V 
+(recommended for use)Example of incorrect 
+connection of external 24V
+Upper device 
+NPN4.7K
+COM1/COM2External +24V
+External 0VUpper device 
+NPN
+Incorrect PNP type 
+connectionDIxDIx DIx COM1/COM2
+External 0VUpper device 
+NPN
+ 
+
+ 
+67 Figure 4 -4 Using the External 24V Power Supply (NPN type output for the upper device)  
+(2) Common anode wiring method  (PNP output for upper device)  
+4.7K
+COM1/COM2External +24V
+External 0VCorrect connection of external 24V 
+(recommended for use)
+4.7K
+COM1/COM2External +24V
+External 0VUpper device 
+PNP
+Upper device 
+PNP
+Incorrect NPN type 
+connection4.7KExternal +24V
+External 0VUpper device 
+PNPUse of an external 
+power supply
+DIx DIx DIx
+COM1/COM2
+ 
+Figure 4 -5 Using the External 24V Power Supply ( PNP output for the upper device)  
+(3) When the upper device has relay output  
+Incorrect connection of 
+external 24V
+4.7KCOM1/COM2External +24V
+External 0V4.7KCOM1/COM2Internal +24V
+External 0VCorrect connection of external 24V 
+(recommended for use)
+Upper device 
+relayUpper device 
+relayDIx DIxUse of an external 
+power supply
+ 
+Figure 4 -6 Using the External 24V Power Supply ( upper device using relay output ) 
+ 
+Caution
+ When using the expansion card, an external DC_24V power supply is required.  
+4.4  DO Expansion Card  
+4.4.1  DO expansion card description  
+The DO expansion card is divided into a 16 -channel NPN type digital output expansion card and a 
+16-channel PNP type digital output expansion card. Users can select according to their needs.  
+4.4.2  DO expansion card information  
+Expansion Card Name  Model  Function  
+16-channel NPN type digital 
+output expansion card  ERC3 -DONPN -CB-A-V100B1  For user NPN type output signal 
+expansion  
+16-channel PNP type digital 
+output expansion card  ERC3 -DOPNP -CB-A-V100B1  For user PNP type output signal 
+expansion  
+
+ 
+68 4.4.3  Installation dimensions  
+ 
+Figure 4 -7 DO Expansion Card Installation Dimensions  
+4.4.4  Definition of NPN type digital output expansion card terminal  
+ 
+Figure 4 -8 DO Expansion Card Terminals  
+ 
+Pin Definition  Description  Pin Definition  Description  
+0 DO0  Expansion output 0 11 DO8  Expansion output 8 
+1 DO1  Expansion output 1 12 DO9  Expansion output 9 
+2 DO2  Expansion output 2 13 D010  Expansion output 10 
+3 DO3  Expansion output 3 14 D011  Expansion output 11 
+4 DO4  Expansion output 4 15 DO12  Expansion output 12 
+5 DO5  Expansion output 5 16 DO13  Expansion output 13 
+6 DO6  Expansion output 6 17 DO14  Expansion output 14 
+7 DO7  Expansion output 7 18 DO15  Expansion output 15 
+
+
+ 
+69 Pin Definition  Description  Pin Definition  Description  
+8 24V_E  External power input  19 0V_E  External ground  
+9 NC / 20 NC / 
+10 PE Grounding point for 
+shielding cable grounding  21 FG Grounding point for 
+shielding cable grounding  
+ Port Specifications  
+Item Specification  
+Number of output channels  16 
+Output connection method  Crimp type terminal  
+Output type  Digital, NPN type output  
+Input voltage range  19.2~28.8V DC  
+Max. drive current per channel (typical 24V DC)  300mA  
+Isolation method  Opto -coupler isolation  
+ NPN Type DO External Wiring Diagram  
+The following diagram illustrates external wiring for loads such as opto -couplers or relays.  
+Correct connection of 
+external 24V 
+External +24V
+External 0VRL(Load )
+24V_E
+DOx
+0V_E
+ 
+ When the load is a relay  
+External 0V
+24V_E
+DOx
+0V_E(24V)
+Prohibit access to internal 
+24V on standard IO ports
+Relay load
+External 0V
+External 0V
+24V_E
+DOx
+0V_ERelay loadExternal +24V
+Incorrect use of PNP connection when 
+the standard DO of the cabinet is 
+NPN.
+Correct connection of external 24V 
+(recommended for use)
+External +24V
+External 0V
+24V_E
+DOx
+0V_EExample of incorrect connection 
+of external 24V
+Relay load
+ 
+Figure 4 -9 External 24V Power Supply for Relay Load  
+ When the load is an opto -coupler  
+
+ 
+70 
+External +24V
+External 0VCorrect connection of external 24V 
+(recommended for use)
+24V_E
+DOxExternal +24V
+External 0V24V_E
+DOxIncorrect use of PNP connection when 
+the standard DO of the cabinet is 
+NPN.
+ Opto -coupler 
+load
+Opto -coupler 
+load
+0V_E 0V_E
+External 0V
+24V_E
+DOx
+0V_E(24V)
+Example of incorrect connection 
+of external 24V
+Prohibit access to internal 
+24V on standard IO ports
+Opto -coupler 
+load 
+Figure 4 -10 Using External 24V Power Supply for Opto -coupler Load  
+ 
+Caution
+ When using the expansion card, an external DC 24V power supply is required.  
+4.4.5  Definitions of PNP type digital Output expansion card terminals  
+ 
+Figure 4 -11 PNP DO Expansion Card Terminals  
+ 
+Pin Definition  Description  Pin Definition  Description  
+0 DO0  Expansion output 0 11 DO8  Expansion output 8 
+1 DO1  Expansion output 1 12 DO9  Expansion output 9 
+2 DO2  Expansion output 2 13 D010  Expansion output 10 
+3 DO3  Expansion output 3 14 D011  Expansion output 11 
+4 DO4  Expansion output 4 15 DO12  Expansion output 12 
+5 DO5  Expansion output 5 16 DO13  Expansion output 13 
+6 DO6  Expansion output 6 17 DO14  Expansion output 14 
+7 DO7  Expansion output 7 18 DO15  Expansion output 15 
+8 24V_E  External power input  19 0V_E  External ground  
+9 NC / 20 NC / 
+10 Grounding point 
+for shielding 
+cable grounding  21 FG Grounding point 
+for shielding 
+cable grounding  Grounding point for 
+shielding cable 
+grounding  
+
+
+ 
+71  Port Specifications  
+Item Specification  
+Number of output channels  16 
+Output connection method  Crimp type terminal  
+Output type  Digital, PNP type output  
+Input voltage range  19.2~28.8V DC  
+Max. drive current per channel (typical 24V DC)  250mA  
+Isolation method  Opto -coupler isolation  
+ DO External Wiring Diagram (PNP Type)  
+The following diagram illustrates external wiring for loads such as opto -couplers or relays.  
+Correct connection of 
+external 24V
+External +24V
+External 0V
+24V_E
+DOx
+0V_EUpper device 
+PNP
+RL(Load )
+External 0V
+ 
+ When the load is a relay  
+Example of incorrect 
+connection of external 24V
+Correct connection of 
+external 24V
+External +24V
+24V_E
+DOx
+0V_EUpper device 
+PNP
+24V_E
+DOx
+0V_EUpper device 
+PNP(24V)
+Prohibit access to 
+internal 24V on 
+standard IO ports
+External +24V
+24V_E
+DOx
+0V_EUpper device 
+PNP
+Incorrect use of NPN 
+connection when the standard 
+DO of the cabinet is PNP.
+Relay load
+External 0VRelay load
+External 0VRelay load
+External 0V
+ 
+Figure 4 -12 External 24V Power Supply for Relay Load  
+ When the load is an opto -coupler  
+
+ 
+72 
+Example of incorrect 
+connection of external 24V
+Correct connection of 
+external 24V
+External +24V
+24V_E
+DOx
+0V_EUpper device 
+PNPExternal +24V
+24V_E
+DOx
+0V_EUpper device 
+PNP
+Incorrect use of PNP connection 
+when the standard DO of the 
+cabinet is NPN.
+Opto -coupler 
+load
+External 0V
+24V_E
+DOx
+0V_EUpper device 
+PNP
+Opto -coupler 
+load
+External 0V(24V)
+Prohibit access to 
+internal 24V on 
+standard IO ports
+Opto -coupler 
+load
+External 0V 
+Figure 4 -13 Using External 24V Power Supply for Opto -coupler Load  
+ 
+Caution
+ When using the expansion card, an external DC 24V power supply is required.  
+4.5  ABZ Expansion Card  
+The interface of ABZ expansion card is for high -speed pulse input signals, allowing users to connect an 
+external incremental encoder. The control cabinet can detect its feedback signals and convert them into data 
+information for corresponding software appl ications.  
+The ABZ encoder expansion card (a maximum of 1 ABZ expansion card) can be installed. If you need to 
+use the expansion card function, please contact our technical personnel first.  
+4.5.1  Expansion card information  
+Expansion Card Name  Model  Function  
+ABZ expansion card  ERC3 -ABZ -CB-A-V100B1  For user encoder signal expansion  
+4.5.2  Installation dimensions  
+ 
+ 
+
+
+ 
+73 Figure 4 -14 ABZ Encoder Installation Dimensions  
+4.5.3  Terminal definitions  
+ 
+ 
+Figure 4 -15 ABZ Encoder Terminals  
+ 
+ 
+Pin Definition  Description  Pin Definition  Description  
+1 Z+ Encoder Z-phase pulse differential 
+positive  2 B+ Encoder B -phase pulse 
+differential positive  
+3 A+ Encoder A -phase pulse differential 
+positive  4 NC Not connected  
+5 0V Encoder power signal ground  6 Z- Encoder Z-phase pulse 
+differential positive  
+7 B- Encoder B -phase pulse differential 
+positive  8 A- Encoder A -phase pulse 
+differential positive  
+9 5V 5V power supply  / / / 
+Note
+ Users may make a matching DB9 male cable according to the ESTUN encoder interface 
+definition. If there are any issues, please contact our technical personnel.  
+ Port Specifications  
+Item Specification  
+Input channels  2 
+Input connection method  Differential input, 4x counting mode  
+Supply voltage range  5.1~5.2V  
+Max. input signal frequency  200KHz  
+Input impedance  >20R  
+Input signal  A/B/Z three -phase input  
+
+
+ 
+74 Isolation method  Non-isolated  
+4.5.4  Wiring  Method  
+The wiring of the ABZ expansion card is shown in the following figure.  
+Incremental encoder 
+(differential output )
+5V9ABZ expansion card
+A+
+A-
+B+
+B-
+Z+
+Z-3
+8
+2
+7
+1
+6Incremental encoder 
+(differential output )
+24V9ABZ expansion card
+A+
+A-
+B+
+B-
+Z+
+Z-3
+8
+2
+7
+1
+6Example of wrong 
+connectionProhibition of 24V 
+connection
+GND
+GNDShielded ground5
+GND
+GNDShielded ground5(confirm connection as 
+required )
+ 
+Figure4 -16 ABZexpansion card connection diagram  
+ 
+4.6  Ethernet port adapter  Expansion Card  
+The Ethernet port adapter  expansion card (a maximum of 1 Ethernet port adapter  expansion card can be connected) 
+can be selected according to the user's needs.  
+4.6.1  Expansion card information  
+Expansion Card Name  Model  Function  
+Ethernet port adapter expansion card  ERC3 -C1-ECZJ -V100B0  For user ECAT signal conversion  
+4.6.2  Installation dimensions  
+ 
+ 
+
+
+ 
+75 Figure 4 -17 Ethernet Adapter Card Installation Dimensions  
+4.6.3  Terminal definitions  
+The ECAT1 interface definition is as follows:  
+S/N Definition  Description  
+1 TX+  Data transmit + 
+2 TX- Data transmit - 
+3 RX+  Data receive + 
+4 / / 
+5 / / 
+6 RX- Data receive - 
+7 / / 
+8 / / 
+Casing  PE Shielding  
+4.6.4  Recommended communication cables  
+Please use a Cat 5e shielded/dual -shielded twisted -pair cable (CAT5e SF/UTP). It is recommended to use 
+connectors with metal shielding layers to prevent signal interference.  
+ 
+4.6.5  Netword Port Adapter Expan sion Card Network Cable Connection  
+After installing the expansion card according t o “4.2 Installing Steps ”, users need to connect two network 
+cables to the controller side of the network port, the network cable connection is shown in the following figure . 
+ 
+Figure 4 -18 Network adapter card cable connection  
+It is recommended to use 
+connectors with metal 
+shielding  
+Incorrect use of PNP 
+connection when the 
+standard DO of the cabinet 
+is NPN. use shielded/  
+double -shielded twisted -pair 
+cables (CA T5e SF/UTP)  
+Customized network cable 1  
+Customized 
+network cable 2 
+
+ 
+76 4.6.6  Wiring method  
+The wiring method for the Ethernet port adapter expansion card is shown in the following diagram.  
+PN gateway PLCComputerPN IN EC OUTNetwork cable
+Network cable Network cable
+Reserved interface
+ 
+Figure 4 -19 Ethernet Port Adapter Expansion Card Connection Diagram  
+Note: See supporting documen tation for controller software configuration “ Configuration Manual for Communication 
+Gateway EC2PN -GW-A of ER Series Industrial Robots RCS2 ” 
+Caution
+ For using ESTUN's PN gateway, please contact ESTUN.  
+
+ 
+77 Chapter 5  Servo Parameter Settings  
+5.1  Check before Power -on 
+Before powering up the control cabinet, please check and confirm the following items and make 
+necessary adjustments.  
+S/N Content  
+1 Check the internal and external appearance of the control cabinet.  
+2 Check if the fixing screws are securely connected.  
+3 Confirm the status of connectors and the installation positions of various units in the control cabinet.  
+4 Connect cables between the control cabinet and the robot.  
+5 Power off the circuit breaker, then connect the input power cable.  
+6 Confirm the input power voltage.  
+7 Press the E -stop button on the oper ation panel, then turn on the power.  
+8 Confirm the interface signals between the control cabinet and the robot.  
+9 Confirm and set various parameters.  
+10 Touch the E -stop button on the operation panel.  
+11 Confirm the movement of each axis in manual mode.  
+12 Confirm the operation of each interface signal.  
+13 Confirm the operation of control interface signals for peripherals.  
+5.2  Pn Parameter Settings for Teach Pendant  
+Modify the drive unit parameters by following these step below.  
+Step 1 Turn on the main power. After switching on the power, the control cabinet will perform an initialization 
+diagnosis. The screen of the teach pendant will display the initialization scre en. 
+Step 2 After initialization is complete, check the system's operating status using the status indicators on the teach 
+pendant. The Run LED should be constantly ON, and the Err LED should be OFF, indicating normal 
+operation.  
+Step 3 When the teach pendan t displays the Home screen, select "General Settings > Servo Management".  
+ 
+
+ 
+78  
+Step 4 Select the "Set Pn Parameters" tab. When the Teach Pendant displays the "Set Pn Parameters" screen, 
+choose the drive axis you want to modify (e.g., Axis 1), then click the "Set" button.  
+ 
+Step 5 Set the desired parameters in the parameter dialog box that appears.  
+Note
+ Please note that only a subset of Pn parameters can be set using the teach pendant. To set additional 
+parameters, please use the operation panel. The robot must be in a stopped state before setting Pn 
+parameters.  
+
+
+ 
+79 5.3  Introduction to Servo Parameters  
+5.3.1  Instructions for use  
+S/N Name Scope UnitFactory 
+valueWhen to take 
+effect
+Basic function settings 0 0000～1111 － 0000 Restart
+Pn000Pn000.0：Servo ON
+0
+1External S -ON is valid.
+External S -ON is not valid. Motor excitation signal automatically 
+turned on after /S -RDY output.
+Pn000.1：Reserved
+Pn000.2：Reserved
+Pn000.3：ReservedWhen indicating a parameter change, the effective time of the change is as follows:
+"Restart": The change takes effect only after the power is restored.
+"Immediately": The change takes effect immediately after the parameter settings are confirmed.
+Detailed explanation 
+of parameters
+Parameter No.
+ 
+5.3.2  Detailed explanation of parameters  
+S/N Name  Scope  Unit Factory value  When to 
+take effect  
+Pn000  Basic function settings 
+0 0000～0111  － 0110  Restart  
+Pn000.0 : Servo ON  
+0 External S -ON is valid.  
+1 External S -ON is not valid. Motor excitation signal automatically 
+turned on after /S -RDY output.  
+Pn000.1 : Prohibit forward rotation input  
+0 External P -OT is valid. When a travel limit occurs, the system stops 
+according to the method set in Pn003.1.  
+1 External P -OT is not valid.  
+Pn000.2 : Prohibit reverse rotation input  
+0 External N -OT is valid. When a travel limit occurs, the system stops 
+according to the method set in Pn003.1.  
+1 External N -OT is not valid.  
+
+ 
+80 Pn000.3 : Reserved  
+ 
+Pn001  Basic function settings  
+1 0000-1111  － 0000  Restart  
+Pn001.0 : CCW, CW selection  
+0 CCW , counterclockwise rotation for positive direction.  
+1 CW, clockwise rotation for positive direction.  
+Pn001.1 : Reserved  
+Pn001.2 : Reserved  
+Pn000.3 : Reserved  
+ 
+Pn002  Application function 
+settings 2 0000～1111  － 0000  Restart  
+Pn002.0 : Actual position calculation selection after homing  
+0 The multi -turn encoder is not involved in calculation.  
+1 Use the absolute encoder as an incremental encoder.  
+Pn002.1 : Reserved  
+Pn002.2 : Absolute encoder selection  
+0 Use the absolute encoder as an absolute encoder  
+1 Use the absolute encoder as an incremental encoder  
+Pn002.3 : Reserved  
+ 
+Pn00 3 Application function 
+settings 3 0x0000～0x1132  － 0x0000  Restart  
+Pn003.0 : Motor stop method when GR1 alarm occurs, STO active, SOFF  
+0 DB brake stop, and remain free state after stopping.  
+1 DB brake stop, and remain DB state after stopping.  
+2 Free stop, and remain free state after stopping.  
+Pn003.1 : Stop method when overtravel occurs  
+0 DB brake stop, and remain free state after stopping.  
+1 Free stop, and remain free state after stopping.  
+2 Reverse connection brake stop, at zero clamp after stopping.  
+3 Reverse connection brake stop, and remain free state after 
+stopping.  
+Pn003.2: Forced stop method selection  
+0 Selected by Pn parameter  
+1 Selected by bus  
+Pn003.3 : Reserved  
+ 
+
+ 
+81 Pn004  Application function 
+settings  4 0x0000 ~0xFF25  － 0x0000  Restart  
+Pn004.0 : Stop method when GR2 alarm occurs  
+0 DB brake stop, and remain free state after stopping.  
+1 DB brake stop, and remain DB state after stopping.  
+2 Free stop, and remain free state after stopping.  
+3 Reverse connection brake stop, and remain DB state after stopping.  
+4 Reverse connection brake stop, and remain free state after stopping.  
+5 Treat as a warning, motor operates normally.  
+Pn004.1 : Ek zero clearing method in non -bus mode  
+0 Clear when SOFF, clear when STO, and not clear when OT.  
+1 Only the CLEAR signal is cleared.  
+2 Clear when SOFF, STO, or OT (except zero clamp).  
+Pn004.2 : Reserved  
+Pn004.3 : Reserved  
+ 
+Pn005  Application function 
+settings  5 0x00D0～0x33D3  － － Restart  
+Pn005.0 : Internal torque feedforward method  
+0 General internal torque feedforward.  
+1 Reserved  
+2 High -speed internal torque feedforward.  
+3 Reserved  
+Pn005.1 : Control method in non -bus mode  
+D Speed control  
+Pn005.2  : Torque feedforward method  
+0 Internal torque feedforward, set by Pn005.0.  
+1 Reserved  
+2 Controller -set torque feedforward, effective in bus control mode, 
+set via object 0x60B2.  
+3 Reserved  
+Pn005.3 : Speed feedforward method  
+0 Internal speed feedforward  
+1 Reserved  
+2 Controller -set speed feedforward. Effective in bus control mode, 
+set via object 0x60B1.  
+3 Reserved  
+ 
+Pn007  Application function 
+settings  7 0x0000～0x112F  － 250 Restart  
+
+ 
+82 Pn007.0 : Reserved  
+Pn007.1 : Main power supply method  
+0 Single -phase AC  
+1 Three -phase AC  
+2 DC 
+Pn007.2 : Undervoltage torque Limitation Enable  
+0 Invalid undervoltage torque limitation  
+1 Undervoltage torque limitation enabled  
+Pn007.3 : AC power supply frequency  
+0 50Hz  
+1 60Hz  
+ 
+Pn008  Startup panel display 
+selection  0～9999  － 9999  Restart  
+This value sets the Un number displayed on the panel at startup. If the value is not in the Un list, the "status 
+screen" is displayed. If set to 0, the Un000 content is displayed at startup.  
+Pn012  Discharge time  0～100 － 50 Immediately  
+The longer the set time, the stronger the discharge capacity.  
+Pn102  Speed loop gain  0～1000  rad/s  500 Immediately  
+This value determines the magnitude of the speed loop gain.  
+Pn103  Speed loop integral time  0～5000  0.1ms  125 Immediately  
+Decreasing this value will shorten the positioning time and improve the speed response.  
+Pn104  Position loop gain  0～1000  1s 40 Immediately  
+This value determines the amount of gain in the position loop.  
+Increasing this value increases the servo rigidity of the position control, but too large a value may cause 
+oscillations.  
+Pn105  Torque command filter 
+time constants  10～2500  0.01ms  50 Immediately  
+Setting the torque command filter can eliminate or reduce mechanical vibration, but may introduce 
+mechanical vibration if not set properly.  
+Pn106  Percentage of load 
+inertia  0～9999  % 0 Immediately  
+Ratio of load inertia to motor rotor inertia.  
+Set value = (Load inertia/Motor rotor inertia) x 100  
+Pn112  Internal speed 
+feedforward percentage  0～100 % 0 Immediately  
+This value sets the speed feedforward percentage. The higher the value, the faster the position response and 
+
+ 
+83 the smaller the position deviation.  
+Setting the value too high can cause overshoot and oscillation.  
+Effective when Pn005.3 = 0.  
+Pn113  Internal speed 
+feedforward filter time 
+constant  0～640 0.1ms  0 Immediately  
+This value smooths the mechanical impact caused by speed feedforward.  
+Setting it too large may cause excessive delay in speed feedforward and induce oscillation.  
+Pn114  Internal torque 
+feedforward percentage  0~100  % 0 Immediately  
+This value sets the torque feedforward percentage to accelerate speed response.  
+Used in manual tuning mode, set the load inertia percentage correctly.  
+Effective when Pn005.2 = 0.  
+Pn115  Internal torque 
+feedforward filter time 
+constant  0~640  0.1ms  0 Immediately  
+This value smooths the mechanical impact caused by torque feedforward.  
+Pn130  Coulomb Friction Load  0~3000  0.1Tn  0 Immediately  
+This value compensates for Coulomb friction load or fixed load.  
+Pn131  Coulomb friction 
+compensation speed 
+hysteresis  0~100  rpm 0 Immediately  
+The threshold for starting Coulomb friction compensation.  
+Pn132  Viscous friction 
+coefficient  0~1000  0.1%Tn/1000rpm  0 Immediately  
+The viscous friction coefficient  
+Pn135  Speed feedback 
+low-pass filter  0~3000  0.01ms  4 Immediately  
+Time constant of the speed feedback filter. Effective when Pn162 = 0.  
+Pn305  JOG speed  0~6000  rpm 500 Immediately  
+The magnitude of the speed command when the JOG is running and the direction is determined by the keys.  
+Pn306  Soft start acceleration 
+time 0~10000  ms 0 Immediately  
+Time required to accelerate to 1000rpm under ramp speed command.  
+Pn307  Soft start deceleration 
+time 0~10000  ms 0 Immediately  
+Time required to decelerate to 1000rpm under ramp speed command.  
+Pn323  Overspeed alarm 
+detection threshold  0~8000  ms 8000  Immediately  
+
+ 
+84 Triggers overspeed alarm A.03 when motor speed exceeds this set value.  
+Pn401  Forward internal torque 
+limit  0~400  % 350 Immediately  
+Forward internal torque limit  
+Pn402  Reverse internal torque 
+limit  0~400  % 350 Immediately  
+Reverse internal torque limit  
+Pn408  Speed limit during 
+torque control  0~6000  rpm 1500  Immediately  
+Speed limit during torque control  
+Pn504  Deviation counter 
+overflow alarm 
+threshold  1~ 83886080  pulse 41943040  Immediately  
+Triggers an alarm when the deviation counter value exceeds this threshold.  
+Pn505  Servo On waiting time  -2000~2000  ms -50 Immediately  
+This parameter is only effective when the port output parameter is configured to have /BK output.  
+This parameter controls the timing of the holding brake (to prevent gravitational slip or sustained 
+external force acting on the motor).  
+1. When this parameter is positive, upon receiving the servo ON input, the /BK signal is output first, 
+then aft er a delay set by this parameter, the motor excitation signal is given;  
+2. When this parameter is negative, upon receiving the servo ON input, the motor excitation signal is 
+given immediately, then after a delay set by this parameter, the /BK signal is out put. 
+Pn506  Basic waiting process  0~500  10ms  50 Immediately  
+This parameter is only effective when the port output parameter is configured to have /BK output.  
+This parameter controls the timing of the holding brake (to prevent gravitational slip or sustained 
+external force acting on the motor).  
+The standard setting is to output /BK (brake action) simultaneously with servo OFF.  
+Depending on the mechanical structure and characteristics of the brake, the machine may move 
+slightly under the influence of gravity. At this time, using the user parameter to delay the servo OFF action 
+can eliminate the movement. Using this parameter to delay the servo OFF action can eliminate this 
+movement. This parameter is only effective when the motor is stopped or at low s peed.  
+Pn507  Brake waiting speed  10~100  rpm 100 Immediately  
+This parameter is only effective when the port output is configured to include /BK output.  
+This parameter controls the timing of the holding brake (to prevent gravitational slip or sustained 
+external forces on the motor).  
+When the motor speed drops below the value set by this parameter after servo OFF, the /BK signal is 
+output.  
+Pn508  Brake waiting time  0~100  10ms  10 Immediately  
+This parameter is only effective when the port output is configured to include /BK output.  
+This parameter controls the timing of the holding brake (to prevent gravitational slip or sustained 
+external forces on the motor).  
+The /BK signal is output after the delay exceeds the value set by this parameter following servo OFF.  
+The /BK signal is output if either the brake waiting speed or brake waiting time condition is fulfilled.  
+
+ 
+85  
+ Pn535  Bleeder resistor 
+resistance value  20~300  Ω － Immediately  
+Bleeder resistor resistance value  
+Pn536  Bleeder resistor power  10~37500  W 60 Immediately  
+Bleeder resistor power  
+Pn537  Bleeder resistor heat 
+transfer coefficient  20~100  － － Immediately  
+Bleeder resistor heat transfer coefficient  
+
+ 
+86 Chapter 6  View Servo Alarms and Handling  
+6.1  View Alarms Using Teach Pendant  
+When a robot encounters an alarm during its operation, it immediately halts its motion. The teach pendant 
+will display an alarm icon, to allow users to access the "Log Management" interface to view detailed information 
+about the alarm.  
+Step 1 Click on the "Log Management" or  button on the Home page or screen to enter the "Log  
+Management" page. Then, click on the "Alarm" button below to view the "Current Alarms" information.  
+ 
+Step 2 Click on the "Content" of the current alarm to view its "Detailed Inform ation", including phenomenon, cause 
+analysis, and solutions.  
+ 
+Step 3 If the current alarm has been confirmed as resolved, click the "Clear Current Alarm" button below to clear the 
+current alarm.  
+Step 4 Click on the "Historical Alarms" above to access the "Historical Alarms" tab. Then, click the "Get Historical 
+Alarms" button to obtain historical alarm information.  
+
+
+ 
+87  
+6.2  Log 
+Step 1 Click on the "Log" button in the "System Log" interface to switch to the logging interface.  
+Step 2 Users can view the co ntents of the log on the controller or demonstrator side as appropriate.  
+ 
+6.3  Help  
+On the Log management screen, you can check whether there are any alarm details on the Help screen.  
+Step 1 On the "Log management" screen, click the "Help" button at the bottom to switch to the "Help" tab.  
+
+
+ 
+88  
+Step 2 Click "Search box", enter "Alarm number" or "Keyword" and click "Confirm". "Press the "Search" button to 
+find out the detailed information of the alarm.  
+ 
+  
+
+
+ 
+89 6.4  Alarm List  
+No. Name  Cause of fault  Solution  
+A.01  Storage parameter 
+check exception  Storage parameter check exception  Try performing a factory reset; if the 
+alarm persists, return to the factory.  
+A.03  Overspeed  The motor speed calculated in the program 
+exceeds 1,000 rpm or exceeds the speed 
+specified in Pn323  1. Check the setting value of Pn323  
+2. Check the motor power line connection  
+3. Return to the factory  
+A.04  Motor overload  The motor experiences an overload and 
+triggers an alarm  Select a larger power servo drive and 
+motor, or reduce the cycle speed  
+A.05  Position deviation 
+counter overflow  The value of the deviation counter Ek exceeds 
+the limit  Try reducing the pulse input frequency or 
+increasing the position loop gain  
+A.06  Position deviation pulse 
+exceeds parameter 
+Pn504 value  The deviation counter Ek value exceeds 
+Pn504 * electronic gear && Pn521.1 = 1 
+enabling alarm  1. Try reducing the pulse input frequency 
+or increasing the position loop gain  
+2. Increase the Pn504 setting  
+A.07  Inappropriate 
+configuration of 
+electronic gear ratio and 
+desired pulse frequency  Use of different processing schemes based on 
+different encoder bit numbers:  
+ (1) Encoder bits < 20, electronic gear ratio 
+(A/B) range: [0.001, 4000]  
+ (2) Encoder bits = 21, electronic gear ratio 
+(A/B) range: [0.001, 8000]  
+ (3) Encoder bits = 22, electronic gear ratio 
+(A/B) range: [0.001, 16000]  
+ (4) Encoder bits = 23, electronic gear ratio 
+(A/B) range: [0.001, 32000]  
+ (5) Encoder bits = 24, electronic gear ratio 
+(A/B) range: [0.001, 64000]  
+If beyond these ranges, an alarm will occur  Adjust electronic gear settings  
+A.08  Issue with current 
+detection channel 1  There’s issue for current detection channel 1  Return to the factory  
+A.09  Issue with current 
+detection channel 2  There’s issue for current detection channel 2  Return to the factory  
+A.11  Module internal 
+junction temperature 
+too high  High ambient temperature, improper 
+installation orientation of the servo drive, or 
+inadequate spacing with other servo drives 
+causing excessive internal junction module 
+temperature   Improve the cooling conditions of the 
+servo drive, reduce ambient temperature, 
+and install according to the servo drive's 
+installation standards  
+A.12  Module overcurrent or 
+discharge circ uit 
+overcurrent  IPM module or discharge circuit current 
+exceeds the maximum allowed value  Return to the factory  
+A.13  Overvoltage  Bus voltage exceeds the maximum threshold  1. Check if the bleeder resistor  wiring is 
+abnormal  
+2. Try modifying the motor's operating 
+trajectory or reducing the cycle speed  
+A.14  Undervoltage  Bus voltage is below the minimum threshold  Check the main power supply system; if 
+normal, return to the factory  
+A.15  Bleeder resistor  
+damaged  Bleeder resistor  is not connected.  Check if the bleeder resistor  is not 
+connected or the wire is burnt  
+A.16  Abnormal discharge  Abnormal discharge  Try modifying the motor's operating 
+trajectory or reducing the cycle speed  
+A.18  IGBT module 
+overheating   IPM or IGBT detects a temperature exceeding 
+105℃  Try optimizing the drive's cooling 
+environment  
+A.1A  Charging resistor 
+overload  Charging resistor overload  Avoid frequent the mains power -up and 
+power -off within a short period.  
+A.1B  DB brake circuit 
+damaged  DB brake c ircuit damaged  Return to the factory  
+
+ 
+90 No. Name  Cause of fault  Solution  
+A.1C  Fan failure alarm  Fan failure alarm, fan failure time exceeds 30 
+seconds  Return to the factory  
+A.1D  NTC disconnected   Temperature sensor disconnected  Return to the factory  
+A.1E  Mains charging circuit 
+fault Charging resistor is faulty  Return to the factory  
+A.1F  Ground short circuit 
+fault  Ground short circuit fault in the motor power 
+line, causing excessive current or voltage 
+pump -up Check the motor power line  
+A.23  Discharge brake circuit 
+overcurrent  Hardware detects excessive discharge current 
+in the discharge circuit  1. Correctly connect the bleeder resistor  
+2. Replace the bleeder resistor  
+3. Return to the factory  
+A.24  Main circuit power 
+supply wiring error  Main circuit power supply wiring error  Check whether the main circuit power 
+supply method (DC power supply, AC 
+power supply) is consistent with the 
+parameter setting  
+A.2A  Brake feedback 
+abnormality  Brake feedback abnormality  Return to the factory  
+A.35  Control board 
+temperature sensor 
+disconnected  － － 
+A.42  Mismatch between 
+motor power and drive 
+power  Motor power does not match the drive power  Use a motor that matches the drive 
+power; for example, a 400W drive can 
+only match a 400W motor  
+A.43  Encoder type error  Encoder type read from the encoder is 
+inconsistent with the type stored in the 
+encoder EEPROM  Return to the factory  
+A.45  Multi -turn information 
+error Multi -turn information error, possibly caused 
+by encoder contamination or strong 
+electromagnetic interfer ence Check if the encoder battery is normal, try 
+using Fn011 to clear the error, then restart 
+the drive  
+A.46  Multi -turn overflow  Multi -turn overflow  Use Fn011 to clear the error, then restart 
+the drive  
+A.47  Battery voltage too low
+  Encoder battery voltag e too low  Replace the battery, use Fn011 to clear 
+the error, then restart the drive  
+A.48  Battery undervoltage  Encoder battery undervoltage  Replace the battery, use Fn011 to clear 
+the error, then restart the drive  
+A.49  Detection of abnormal 
+multi -turn or single -turn 
+information  Abnormal multi -turn or single -turn position 
+information as fed back from encoder  Return to the factory  
+A.4A  Encoder temperature 
+too high  Encoder temperature is too high  Reduce motor load, optimize heat 
+dissipation env ironment, use Fn011 to 
+clear the error, then restart the drive  
+A.50  Encoder disconnected  Encoder disconnected  Check if the encoder cable is reliably 
+connected; keep the encoder cable away 
+from strong radiation sources  
+A.51  Overspeed detected by 
+absolute encoder  Encoder detects motor overspeed  Reduce motor speed command, use 
+Fn011 to clear the error, then restart the 
+drive 
+A.52  Encoder internal error  Encoder internal error  Clearable through Fn011; try to power up 
+again  
+A.53 Encoder single -turn 
+information error  Encoder internal error  Clearable through Fn011; try to power up 
+again  
+A.54  Checksum or stop bit 
+error in encoder control 
+field  Checksum or stop bit error in encoder control 
+field Clearable through Fn011; try to power up 
+again  
+A.58  Empty or incorrect 
+information for encoder 
+phase in Zone 1  Encoder phase information in Zone 1 is empty 
+or incorrect  Try replacing the motor  
+
+ 
+91 No. Name  Cause of fault  Solution  
+A.59  Empty or incorrect 
+information for encoder 
+motor body in Zone 2  Information for encoder  motor body in Zone 2 
+is empty or incorrect, or motor parameter 
+version is incorrect   Try replacing the motor  
+A.65  Position overflow alarm  Position difference given by IP or CSP is too 
+large Check if the controller's trajectory 
+planning is correct  
+A.70  DC synchronization 
+error EtherCAT master's set period does not meet 
+requirements or SYNC0 is not synchronized 
+with the drive   Check if the master's DC setting 
+parameters are correct  
+A.71  SM Event 
+synchronization error 
+(event arrived too early)  SM Event synchronization error (event arrived 
+too early)  Check master settings  
+A.72  SM Event 
+synchronization error 
+(event arrived too late)  SM Event synchronization error (event arrived 
+too late)   Check master settings  
+A.74  Error setting period in 
+Position Cubic 
+interpolation algorithm  An algorithm period error is detected when 
+using the Cubic interpolation algorithm, which 
+is equal to the DC synchronization period  Check that the DC cycle setting value is 
+correct and is not set to 0  
+A.75  Synchronization period 
+setting error  DC sync period or 60C2 object setting is not 
+an integer multiple of 125us or is less than 
+125us  Check the setting of DC synchronization 
+period, and the setting of 0x60C2  
+A.76  Acceleration object set 
+to 0 in PP/PV mode  Acceleration object is set to 0 in PP/PV mode  Modify the value of 
+/0x6083/0x6084/0x6085 to a non -zero 
+value  
+A.77  EtherCAT 
+communication 
+interrupted  Slave is in OP mode, and the interval for 
+receiving process data is greater than the 
+watchdog setting time  Restart the controller or check the 
+network cable's ON/OFF connection  
+A.81  Motor UVW wiring 
+error Motor UVW wiring error  Check if UVW wiring is loose, missing 
+phase or wrong phase sequence  
+A.82  Motor type mismatch  Motor type mismatch  Try replacing the motor  
+A.83  Abnormal motor 
+operation  Motor wiring abnormality or motor reverse 
+trailing for power generation  1. Check if motor power line wiring phase 
+sequence is correct;  
+2. Determine if the motor is generating 
+reverse drag;  
+3. Based on actual conditions, set 
+Pn521.2=1 to mask this alarm.  
+A.94  Excessive mixing 
+deviation of the second 
+encoder  Excessive mixing deviation of the second 
+encoder  1. Check that the parameters of Pn210, 
+Pn212, Pn213 and Pn214 are set 
+correctly;  
+2. Check whether t he second encoder 
+wiring is normal;  
+3. Check whether the mechanical 
+connection structure is loose, slippery or 
+has a large gap;  
+A.D1  Undervoltage warning  Undervoltage warning  1. Check whether the mains input voltage 
+is normal;  
+2. check whether the drive power line 
+wiring is correct;  
+A.101  Storage check exception  Storage check exception  If alarm persists, then return to the factory  
+A.103  MC1 feedback 
+exception  Control input and output of MC1 are 
+inconsistent  Return to the factory  
+A.104  MC2 feedback 
+exception  MC2 control input and output are not 
+consistent  Return to the factory  
+A.105  5V_STO undervoltage  5V_STO undervoltage  Return to the factory  
+A.106  5V_STO overvoltage  5V_STO overvoltage  Return to the factory  
+A.107  Ambient temperature 
+over-temperature  Ambient temperature inside the control 
+cabinet exceeds the limit value  1. Shut down and cool it down;  
+2. Return to the factory  
+
+ 
+92 No. Name  Cause of fault  Solution  
+A.110  External E -stop 
+abnormality  Channel 2 limit switch is disconnected or 
+E-stop button is pressed; channel 1 status is 
+abnormal, and system alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.111  External E -stop 
+abnormality  Channel 1 limit switch is disconnected or 
+E-stop button is pressed; Channel 2 status is 
+abnormal, and system alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.112  Teach pendant E -stop 
+abnormality  Channel 2 teach pendant E -stop s ignal is 
+valid; Channel 1 teach pendant E -stop is 
+invalid, and system alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.113  Teach pendant E -stop 
+abnormality  Channel 1 teach pendant E -stop signal is 
+valid; Channel 2 teach pendant emergency 
+stop is invalid, and system alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.114  Manual mode 
+abnormality  Channel 2 is in manual mode; Channel 1 
+status is abnormal, and system alarm is  
+triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.115  Manual mode 
+abnormality  Channel 1 is in manual mode; Channel 2 
+status is abnormal, and system alarm is 
+triggered  1. Check cable and terminal connections;  
+2. Return to the f actory  
+A.116  Auto mode exception  Channel 2 is in auto mode; Channel 1 status is 
+abnormal, and system alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.117  Auto mode exception  Channel 1 is in auto mode; Channel 2 status is 
+abnormal, and system alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.118  Startup confirmation 
+error Channel 2 start confirmation short -circuited; 
+Channel 1 status is abnormal, and system 
+alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.119  Startup confirmation 
+error Channel 1 start confirmation short -circuited; 
+Channel 2 status is abnormal, and system 
+alarm is triggered  1. Check cable and terminal connections;  
+2. Return  to the factory  
+A.11A  Teach pendant enable 
+error Channel 2 teach pendant enable status is valid; 
+Channel 1 status is abnormal, and system 
+alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.11B  Teach pendant enable 
+error Channel 1 teach pendant enable status is valid, 
+Channel 2 status is abnormal, and system 
+alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.11C  AS signal exception  Channel 2 AS2 safety door is closed; Chann el 
+1 AS1 safety door is disconnected, and system 
+alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.11D  AS signal exception  Channel 1 AS2 safety door is closed; Channel 
+2 AS2 safety door is disconnected, and system 
+alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.11E  GS signal exception  Channel 2 GS2 safety door is closed; Channel 
+1 GS1 safety door is disconnected, and system 
+alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.11F  GS signal exception  Channel 1 GS2 safety door is closed; Channel 
+2 GS2 safety door is disconnected, and system 
+alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.121  Abnormal  signal 
+insertion of the teach 
+pendant  Teach pendant aviation plug is not reliably 
+plugged in, Channel 1 status is abnormal, and 
+system alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.122  Abnormal insertion 
+signal of  teach pendant  Teach pendant aviation plug is not reliably 
+plugged in, Channel 2 status is abnormal, and 
+system alarm is triggered  1. Check cable and terminal connections;  
+2. Return to the factory  
+A.130  E-stop 1 fault of the 
+teach pendant hardware  Hardware failure of the E -stop circuitry of 
+channel 1.  Return to the factory  
+A.131  E-stop 2 fault of the 
+teach pendant hardware  Hardware failure of the E -stop circuitry of 
+Channel 2  Return to the factory  
+
+ 
+93 No. Name  Cause of fault  Solution  
+A.132  Class 0 signal 1 fault  Hardware failure of Channel 1's Class 0 
+E-stop circuitry  Return to the factory  
+A.133  Class 0 signal 2 fault  Hardware failure of Channel 2's Class 0 
+E-stop circuitry  Return to the factory  
+A.134  Enable 1 failure of 
+teach pendant hardware  Hardware fault in Channel 1's teach pendant 
+enable circuitry  Return to the factory  
+A.135  Enable 2 failure of 
+teach pendant hardware  Hardware fault in Channel 2's teach pendant 
+enable circuitry  Return to the factory  
+A.136  Auto mode protection 
+stop 1 fault  Hardware fault in  auto mode protection stop 
+circuitry of Channel 1  Return to the factory  
+A.137  Auto mode protection 
+stop 2 fault  Hardware fault in auto mode protection stop 
+circuitry of Channel 2  Return to the factory  
+A.138  Normal mode 
+protection stop 1 fault  Hardware fault in general mode protection 
+stop circuitry of Channel 1  Return to the factory  
+A.139  Normal mode 
+protection stop 2 fault  Hardware fault in general mode protection 
+stop circuitry of Channel 2  Return to the factory  
+A.13A  Class 1 signal 1 fault  Class 1 E -stop circuitry hardware fault on 
+Channel 1  Return to the factory  
+A.13B  Class 1 signal 2 fault  Class 1 E -stop circuitry hardware fault on 
+Channel 2  Return to the factory  
+A.140  Input channel 1 fault  Input hardware circuitry fault on Channel 1  Return to the factory  
+A.141  Input channel 2 fault  Input hardware circuitry fault on Channel 2  Return to the factory  
+A.142  Forming module 1 fault  Hardware circuitry fault in the forming 
+module of Channel 1  Return to the factory  
+A.143  Forming module 2 fault  Hardware circuitry fault in the forming 
+module of Channel 2  Return to the factory  
+A.144  PNP1 fault  PNP hardware circuitry fault on Channel 1  Return to the factory  
+A.145  PNP2 fault  PNP hardware circuitry fault on Channel 2  Return to  the factory  
+A.146  Logic or gate 1 fault  Logic or gate related hardware circuitry fault 
+on Channel 1  Return to the factory  
+A.147  Logic or gate 2 fault  Logic or gate related hardware circuitry fault 
+on Channel 2  Return to the factory  
+A.148  Buffer module A1 fault  Buffer module A hardware circuitry fault on 
+Channel 1  Return to the factory  
+A.149  Buffer module A2 fault  Buffer module A hardware circuitry fault on 
+Channel 2  Return to the factory  
+A.14A  Buffer module B1 fault  Buffer module B hardware circuitry fault on 
+Channel 1  Return to the factory  
+A.14B  Buffer module B2 fault  Buffer module B hardware circuitry fault on 
+Channel 2  Return to the factory  
+A.150  Diagnostic task not 
+completed within 20ms  Diagnostic task not completed within 20ms  1. Power off and restart;  
+2. Return to the factory  
+A.151  STO state machine 
+jump error  State machine jump error when exception 
+goes to state 0  1. Power off and restart;  
+2. Return to the factory  
+A.152  STO state machine 
+jump error  State machine jump error when exception 
+goes to state 1  1. Power off and restart;  
+2. Return to the factory  
+A.153  STO state machine 
+jump error  State machine jump error when exception 
+goes to state 2  1. Power off and restart;  
+2. Return to the factory  
+A.154  STO state machine 
+jump error  State machine jump error when exception 
+goes to state 3  1. Power off and restart;  
+2. Return to the factory  
+A.155  STO state machine 
+jump error  State machine jump error when exception 
+goes to state 4  1. Power off and restart;  
+2. Return to the factory  
+A.156  STO state machine 
+jump error  State machine jump error when exception 
+goes to state 5  1. Power off and restart;  
+2. Return to the factory  
+A.157  STO state machine 
+jump error  State machine jump error when exception 
+goes to state 6  1. Power off and restart;  
+2. Return to the factory  
+
+ 
+94 No. Name  Cause of fault  Solution  
+A.158  STO state machine 
+jump error  State machine jump error when exception 
+goes to state 7  1. Power off and restart;  
+2. Return to the factory  
+A.159  STO state machine 
+jump error  State machine jump error when exception 
+goes to state 8  1. Power off and restart;  
+2. Return to the factory  
+A.15A  STO state machine 
+jump error  State machine jump error when exception 
+goes to state 9  1. Power off and restart;  
+2. Return to the factory  
+A.160  Class 0 E -stop time for 
+Chann el 1 is too fast  E-stop time less than the limit for Class 0 in 
+Channel 1  1. Clear the alarm and execute the Class 0 
+stop again;  
+2. Return to the factory if it is repeatedly 
+occurring.  
+A.161  Class 0 E -stop time for 
+Channel 2 is too fast  E-stop time less than the limit for Class 0 in 
+Channel 2  1. Clear the alarm and execute the Class 0 
+stop again;  
+2. Return to the factory if it is repeatedly 
+occurring.  
+A.162  Class 0 E -stop time for 
+Channel 1 is too slow  E-stop time greater than the limit for Class 0 
+in Channel 1  1. Clear the alarm and execute the Class 0 
+stop again;  
+2. Return to the factory if it is repeatedly 
+occurring.  
+A.163  Class 0 E -stop time for 
+Channel 2 is too slow  E-stop time greater than the limit for Class 0 
+in Channel 2  1. Clear the alarm and execute the Class 0 
+stop again;  
+2. Return to the factory if it is repeatedly 
+occurring.  
+A.164  Class 1 E -stop time for 
+Channel 1 is too fast  E-stop time less than the limit for Class 1 in 
+Channel 1  1. Clear the alarm and execute the Class 1 
+stop again;  
+2. Return to the factory if it is repeatedly 
+occurring.  
+A.165  Class 1 E -stop time for 
+Channel 2 is too fast  E-stop time less than the limit for Class 1 in 
+Channel 2  1. Clear the alarm and execute the Class 1 
+stop again;  
+2. Return to the factory if it is repeatedly 
+occurring.  
+A.166  Class 1 E -stop time for 
+Channel 1 is too slow  E-stop time greater than the limit for Class 1 
+in Channel 1  1. Clear the alarm and execute the Class 1 
+stop again;  
+2. Return to the factory if it is repeatedly 
+occu rring.  
+A.167  Class 1 E -stop time for 
+Channel 2 is too slow  E-stop time greater than the limit for Class 1 
+in Channel 2  1. Clear the alarm and execute the Class 1 
+stop again;  
+2. Return to the factory if it is repeatedly 
+occurring.  
+A.170  DC synchronization 
+error The cycle set by the EtherCAT master does 
+not meet the requirements or SYNC0 is not 
+synchronized with the drive.  Check if the master DC setting 
+parameters are correct  
+A.175  Synchronization cycle 
+setting error  DC sync period or 60C2 o bject setting is not 
+an integer multiple of 125us or is less than 
+125us  Check the setting of DC syn period, check 
+the setting of 0x60C2  
+A.177  EtherCAT 
+communication 
+interrupted  Slave in OP mode receives process data at 
+intervals greater than the watchdog setting 
+time Restart the controller or check the 
+network cable connection  
+A.180  Card slot 1 fault  Reserved  Reserved  
+A.181  Card slot 2 fault  Reserved  Reserved  
+A.182  Card slot 3 fault  Reserved  Reserved  
+A.183  Card slot 1 expansion 
+card error  Reserved  Reserved  
+A.184  Card slot 2 expansion 
+card abnormality  Reserved  Reserved  
+A.185  Card slot 3 expansion 
+card abnormality  Reserved  Reserved  
+
+ 
+95 No. Name  Cause of fault  Solution  
+A.186  Abnormal number of 
+encoder expansion card  The number of encoder expansion cards is 
+more than 2  1. Check the number of expansion cards;  
+2. Return to the factory 。 
+A.187  Encoder 1 disconnected  Encoder 1 disconnected  1. Check the encoder 1 cable and 
+terminal;  
+2. Return to the factory 。 
+A.188  Encoder 2 disconnected  Encoder 2 disconnected  1. Check the encoder 1 cable and 
+terminal; 2. Return to the factory 。 
+A.189  Encoder 1 phase 
+abnormality  Reserved  Reserved  
+A.18A  Encoder 2 phase 
+abnormality  Reserved  Reserved  
+ 
+
+ 
+96 Chapter 7  Maintenance  
+7.1  Maintenance precautions  
+Before performing maintenance, please carefully read the following content and ensure a thorough understanding 
+of the methods for safe maintenance.  
+  Maintenance of the robot system must be carried out by personnel who have received safety 
+training. Trained personnel refer to individuals who have undergone safety training in 
+accordance with the laws and regulations of their respective countries, specifically designed 
+to provide knowledge on industrial robots, their operation, teaching, inspection, and related 
+regulations.  
+ Do not disassemble parts t hat are not described in this manual or perform maintenance using 
+methods different from those specified. This could result in the robot system malfunctioning 
+or serious safety issues.  
+ Do not enter the robot's workspace while it is powered on.  
+ Always verif y the robot's movement from outside the safety barrier after replacing 
+components.  
+ Before formal operation, confirm the correct operation status of the emergency stop switch 
+and safety door switch.  
+  Except for maintenance operations, do not open the control cabinet cover to avoid electrical 
+hazards.  
+ Always replace components after turning off the power to the control cabinet and associated 
+devices.  
+ Do not disconnect motor connectors while the power is on.  
+ Perform maintenance, inspections, and other ta sks in teams of two, with one person 
+maintaining a posture to immediately press the emergency stop button and the other person 
+remaining vigilant to complete the task quickly and ensure a clear path for retreat.  
+  Do not disassemble parts that are not covered in this manual.  
+ Maintenance personnel must keep the robot key secure, and unauthorized personnel should 
+not modify programs or parameters.  
+7.2  Daily inspection  
+To ensure the normal functioning of the product and protect it from damage, it is necessary to perform regular 
+maintenance and inspections.  
+If the equipment is located in the following environments, reduce the inspection interval:   
+ Temperature, humidity, dust, and vibration in the environment  
+ High -temperature environment  
+ Frequent start -stop situations  
+ Environments with AC power and load fluctuations  
+ Environments with significant vibration or impact  
+ Environments with corrosive substances, such as acids or alkalis  
+
+
+ 
+97 To ensure the proper functioning of the product and prevent damage, daily co nfirmation should be made for the 
+following items:  
+Item  Content  Solution  
+Installation 
+environment  Check the control cabinet and 
+surrounding cables for 
+abnormalities  Verify if the installation brackets are vibrating.  
+Check for loose or corroded connections at cable terminals.  
+Input 
+voltage  Input power voltage  Confirm if the input voltage is within the allowable range.  
+    Check for any significant load starting in the vicinity.  
+Terminals  Control cabinet terminals  Ensure that the bolts on both sides of the input, output, and other 
+terminals are tightened.  
+7.3  Regular inspection  
+Regular inspections should be conducted on areas that are difficult to inspect during operation. It is essential to 
+maintain the control cabinet in a clean state and ef fectively remove accumulated dust from the product surface to 
+prevent dust, especially metal dust, from entering the internal components. 。 
+(●：Replace    ：Check ) 
+Inspection Frequency  Maintenance  
+Inspection 
+Parts  Content  Inspection/Handling 
+Method  Weekly  3 months  1 year  4 years  5 
+years  8 years  
+      Electric cabinet 
+body Splash, dust and other 
+impurities adhered  Confirmation by visual 
+inspection, cleaning  
+      Rear body of 
+control cabinet  Splash, dust and other 
+impurities adhered , and other 
+debris should be closely 
+inspected, with particular 
+emphasis on checking 
+whether the transformer 
+terminals are covered in dust, 
+to prevent short circuits  Confirmation by vi sual 
+inspection, cleaning  
+      Warning label 
+on electrical 
+cabinet  Peeling, defacement  Confirmation by visual 
+inspection, cleaning. 
+Replace the sticker when 
+there are obvious stains or 
+the surface begins to peel  
+      Fan Normal  operation 
+confirmation  Confirmation by visual 
+inspection, cleaning  
+      Filter sponge  Dirt and blockage  Confirmation by visual 
+inspection, cleaning and 
+replacement  
+      Teach pendant 
+console, 
+electric cabinet 
+operation 
+panel, other 
+operating 
+switches  Confirm the function of 
+indicator light, operation 
+switch, button switch, etc.  Confirmation by visual 
+inspection  
+      Teach pendant Check the E -stop button and Please make sure that all 
+
+ 
+98  Use a soft cloth to remove dust when cleaning. Do not use equipment such as air blowers to blow 
+away dust. Wind pressure can cause dust to enter the fan and the blade to rotate at a speed 
+exceeding the specified speed, which may cause fan failure or affect its life. Use a vacuum cleaner 
+only on the blade part, do not vacuum on the rotating part and the main body. This may cause the 
+fan to fail or affect its life.  
+7.4  Program Backup and Loading  
+7.4.1  Program backup  
+Step 1 Insert the USB flash drive into the USB port of the teach pendant.  
+Step 2 Click  to enter the project management interface.  
+Step 3 Click "Management" on the right -side menu to access the interface shown in Figure 7 -1. 
+Figure 7-1 Explanation of the Project Program Import and Export Interface  
+ 
+Step 4 Select the program to be backed up from the left side and click  to complete the backup of the 
+program to the USB drive.  
+7.4.2  Program loading  
+Step 1 Insert the USB flash drive into the USB port of the teach pendant.  
+control table, 
+control cabinet 
+operation panel  enable the switch  E-stop buttons and enable 
+switches can effectively cut 
+off the servo power during 
+operation.  
+   ●  ● Cable set, teach 
+pendant cable, 
+other external 
+wiring  Make sure there is no 
+damage, broken, loose joints  Visual check.  
+Tighten.  
+If the cable is damaged, 
+replace it.  
+     ● Teach pendant  Confirmation of damage, 
+cleaning of operation 
+position, confirmation of 
+LCD display  Visual check and cleaning.  
+When the display of the 
+LCD screen becomes 
+obviously dark, replace the 
+teach pendant.  
+     ● Overhaul  
+PC Files  
+New  USB Path  Root  Engineering Files  
+
+ 
+99 Step 2 Click  to enter the project m anagement interface.  
+Step 3 Click "Management" on the right -side menu to access the interface shown in Figure 7 -1. 
+Figure 7 -2 Explanation of the Project Program Import and Export Interface  
+ 
+Step 4 Click the "USB Path" at the bottom right to select the previously backed -up program and import it into the teach 
+pendant.  
+Step 5 Once the program is located in the "Program Management" interface, click the "Load" button.  
+7.5  List of spare parts  
+Table 7 -1 Spare Parts List for ERC3 -C1 Control Cabinet  
+S/N SAP Name  Qty. 
+1 21200000216  Drive board ERC3 -C1-DRV -1004 -V100B2  1 
+2 21200000217  Drive board ERC3 -C1-DRV -0404 -V100B1  1 
+3 21200000414  Drive board ERC3 -C1-DRV -2004-V100B 0 1 
+4 21G00000028  Power board ERC3 -C1-POW -V100B3  1 
+5 21J00000005  Capacitor board ERC3 -CAP -A-V100B1  1 
+6 15000000063  Robot controller ERC30F  1 
+7 13100003531  16-channel digital input expansion card  1 
+8 13100003532  16-channel NPN digital output expansion card  1 
+9 13100003845  16-channel PNP digital output expansion card  1 
+10 13100003533  ABZ expansion card  1 
+11 13100004315  Ethernet port interface expansion card  1 
+ 
+Root  Engineering Files  PC Files  
+New  USB Path  
+
