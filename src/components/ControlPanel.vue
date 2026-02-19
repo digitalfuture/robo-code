@@ -145,59 +145,26 @@ const setSpeed = () => {
     </div>
   </div>
 
-  <!-- Modbus Test Panel -->
+  <!-- Modbus Control Panel -->
   <div class="modbus-test-panel">
-    <div class="label-heading mono">Modbus TCP Control</div>
+    <div class="label-heading mono">Modbus Control (Port 1502)</div>
     <div class="modbus-controls">
-      <button @click="startProgram" class="start-btn mono">
-        ▶ Start Program
+      <button @click="startProgram" class="start-btn mono" title="Start robot program">
+        ▶ Start
       </button>
-      <button @click="stopProgram" class="stop-btn mono">
-        ⏹ Stop Program
+      <button @click="stopProgram" class="stop-btn mono" title="Stop robot program">
+        ⏹ Stop
       </button>
-      <button @click="resetErrors" class="reset-btn mono">
-        ↺ Reset Errors
+      <button @click="resetErrors" class="reset-btn mono" title="Reset robot errors">
+        ↺ Reset
       </button>
-    </div>
-    <div class="modbus-controls" style="margin-top: 0.5rem;">
-      <div class="input-group">
+      <div class="speed-control">
         <label>Speed: {{speed}}%</label>
         <input type="range" v-model="speed" min="0" max="100" class="speed-slider" />
+        <button @click="setSpeed" class="set-btn mono" title="Set robot speed">
+          Set
+        </button>
       </div>
-      <button @click="setSpeed" class="set-btn mono">
-        Set Speed
-      </button>
-    </div>
-    <div class="modbus-hint mono">
-      <strong>Commands:</strong> Start (0x04), Stop (0x08), Reset (0x10)<br/>
-      <strong>Command Flag:</strong> 40051 = 0x11 (enable)<br/>
-      <strong>Commands Register:</strong> 40052 (rising edge trigger)
-    </div>
-  </div>
-
-  <!-- Modbus Test Panel -->
-  <div class="modbus-test-panel">
-    <div class="label-heading mono">Modbus TCP Scanner</div>
-    <div class="modbus-controls">
-      <div class="input-group">
-        <label>Address:</label>
-        <input type="number" v-model="modbusAddress" class="mono" />
-      </div>
-      <div class="input-group">
-        <label>Count:</label>
-        <input type="number" v-model="modbusCount" class="mono" min="1" max="50" />
-      </div>
-      <button @click="readModbusTest" class="read-btn mono">
-        Read Registers
-      </button>
-      <button @click="scanModbusRegisters" class="scan-btn mono">
-        Scan for Changes
-      </button>
-    </div>
-    <div class="modbus-hint mono">
-      <strong>Read Registers:</strong> Read specific address range<br/>
-      <strong>Scan for Changes:</strong> Monitor registers for 15s to find dynamic data (coordinates, joints)<br/>
-      <strong>Try:</strong> 0-20 (base), 40000-40050 (full map)
     </div>
   </div>
 </template>
@@ -482,92 +449,43 @@ const setSpeed = () => {
   }
 }
 
-/* Modbus Control Buttons */
+/* Modbus Control - Compact */
+.modbus-test-panel {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
 .modbus-controls {
   display: flex;
   gap: 0.5rem;
   align-items: center;
   flex-wrap: wrap;
 
-  .start-btn {
-    padding: 0.5rem 1rem;
-    background: var(--color-success);
-    color: #000;
-    border: none;
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      background: var(--color-success-light);
-      color: #000;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 255, 128, 0.3);
-    }
+  button {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
   }
 
-  .stop-btn {
-    padding: 0.5rem 1rem;
-    background: var(--color-warning);
-    color: #000;
-    border: none;
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      background: var(--color-warning-light);
-      color: #000;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(255, 200, 0, 0.3);
+  .speed-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+    
+    label {
+      font-size: 0.75rem;
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      white-space: nowrap;
     }
-  }
-
-  .reset-btn {
-    padding: 0.5rem 1rem;
-    background: var(--color-danger);
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      background: var(--color-danger-light);
-      color: #fff;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+    
+    .speed-slider {
+      width: 80px;
+      accent-color: var(--color-info);
     }
-  }
-
-  .set-btn {
-    padding: 0.5rem 1rem;
-    background: var(--color-info);
-    color: #000;
-    border: none;
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      background: var(--color-info-light);
-      color: #000;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 200, 255, 0.3);
-    }
-  }
-
-  .speed-slider {
-    width: 150px;
-    accent-color: var(--color-info);
   }
 }
 
