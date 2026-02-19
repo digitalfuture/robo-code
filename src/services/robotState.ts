@@ -109,8 +109,8 @@ export const robotService = {
 
     const proxyUrl = import.meta.env.VITE_PROXY_URL || 'ws://localhost:3000';
     const robotIp = import.meta.env.VITE_ROBOT_IP || '192.168.1.100';
-    const robotPort = Number(import.meta.env.VITE_ROBOT_PORT) || 502;
-    const protocol = robotPort === 502 ? 'Modbus TCP' : 'TCP String (ER Series RCS2 V1.5.3)';
+    const robotPort = Number(import.meta.env.VITE_ROBOT_PORT) || 1502;
+    const protocol = (robotPort === 502 || robotPort === 1502) ? 'Modbus TCP' : 'TCP String (ER Series RCS2 V1.5.3)';
 
     this.addLog('=== CONNECTION STARTED ===', 'info');
     this.addLog(`Protocol: ${protocol}`, 'info');
@@ -153,10 +153,15 @@ export const robotService = {
       this.addLog(`Handshake sent: ${handshake}`, 'cmd');
 
       // Start automatic register scanning for Modbus TCP
-      if (robotPort === 502) {
+      if (robotPort === 502 || robotPort === 1502) {
         this.addLog('Starting automatic Modbus register scan...', 'info');
-        this.addLog('Scanning registers 0-999 in batches of 100...', 'info');
-        this.scanAllModbusRegisters();
+        this.addLog('Reading coordinates (regs 100-109) and joints (regs 200-205)...', 'info');
+        // Read coordinates first (registers 100-109)
+        this.readModbusRegisters(100, 10);
+        // Then read joints (registers 200-205) after delay
+        setTimeout(() => {
+          this.readModbusRegisters(200, 6);
+        }, 500);
       } else {
         // TCP String Protocol
         this.addLog('Requesting robot status...', 'info');
@@ -368,7 +373,7 @@ export const robotService = {
 
   /**
    * Handle Modbus register data
-   * Called automatically by polling - updates state silently
+   * Called automatically when REGISTER_DATA received
    * 
    * Register Map (Port 1502):
    * - Registers 100-108: Cartesian coordinates (X,Y,Z,A,B,C) - scale 100
@@ -378,9 +383,14 @@ export const robotService = {
     // Skip processing if paused
     if (this._isPaused) return;
     
+    // Detect if this is coordinates data (register 100+ contains values like 50000+)
+    const isCoordinates = values.length >= 9 && (values[0] > 1000 || values[2] > 1000 || values[4] > 1000);
+    
+    // Detect if this is joints data (register 200+ contains values in 1000-50000 range)
+    const isJoints = values.length >= 6 && values[0] > 100 && values[0] < 60000;
+    
     // Update coordinates from registers 100-108
-    // Raw values are scaled by 100 (e.g., 50100 = 501.00mm)
-    if (values.length >= 9) {
+    if (isCoordinates && values.length >= 9) {
       const rawX = values[0] || 0;
       const rawY = values[2] || 0;
       const rawZ = values[4] || 0;
@@ -405,16 +415,18 @@ export const robotService = {
         state.coordinates.z = newZ;
         state.coordinates.a = newA;
         state.coordinates.b = newB;
+        this.addLog(`Position: X=${newX.toFixed(2)}, Y=${newY.toFixed(2)}, Z=${newZ.toFixed(2)}, A=${newA.toFixed(2)}°, B=${newB.toFixed(2)}°`, 'info');
       }
     }
 
     // Update joints from registers 200-205
-    if (values.length >= 6) {
+    if (isJoints && values.length >= 6) {
       const newJoints = values.slice(0, 6).map(v => v / 100);
       
       // Update if different
       if (JSON.stringify(newJoints) !== JSON.stringify(state.joints)) {
         state.joints = newJoints;
+        this.addLog(`Joints: J1=${newJoints[0].toFixed(2)}°, J2=${newJoints[1].toFixed(2)}°, J3=${newJoints[2].toFixed(2)}°, J4=${newJoints[3].toFixed(2)}°, J5=${newJoints[4].toFixed(2)}°, J6=${newJoints[5].toFixed(2)}°`, 'info');
       }
     }
   },
