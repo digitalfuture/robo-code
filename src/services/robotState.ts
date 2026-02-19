@@ -195,6 +195,9 @@ export const robotService = {
 
         if (data.type === 'REGISTER_DATA') {
           // Modbus TCP register data received - process silently
+          // Log only for manual read operations (first 20 values)
+          const preview = data.values.slice(0, 20).join(', ');
+          this.addLog(`Registers: [${preview}]`, 'info');
           this.handleModbusData(data.values);
         }
 
