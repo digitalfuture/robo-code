@@ -27,9 +27,13 @@ console.log('──────────────────────�
 // Protocol constants
 const COMMAND_TIMEOUT = 5000; // 5 seconds
 const HEARTBEAT_INTERVAL = 30000; // 30 seconds
+const MODBUS_POLL_INTERVAL = 100; // 100ms for Modbus TCP polling
 
 // Robot encoding for TCP String Protocol
 let robotEncoding = 'utf8';
+
+// Modbus polling
+let modbusPollTimer = null;
 
 const wss = new WebSocketServer({ port: PORT });
 let robotSocket = null;
@@ -55,6 +59,9 @@ const initModbus = () => {
 
         // Test connection by reading registers
         testModbusConnection();
+
+        // Start polling loop
+        startModbusPolling();
     });
 
     robotSocket.on('data', (data) => {
@@ -63,6 +70,37 @@ const initModbus = () => {
 
     robotSocket.on('error', handleModbusError);
     robotSocket.on('close', handleModbusClose);
+};
+
+const startModbusPolling = () => {
+    if (modbusPollTimer) clearInterval(modbusPollTimer);
+    
+    modbusPollTimer = setInterval(async () => {
+        if (!isRobotConnected || !modbusClient) return;
+        
+        try {
+            // Poll registers 0-20 for robot data
+            const response = await modbusClient.readHoldingRegisters(0, 20);
+            const values = response.response.body.values;
+            
+            // Broadcast to frontend
+            if (frontendClient && frontendClient.readyState === 1) {
+                frontendClient.send(JSON.stringify({
+                    type: 'REGISTER_DATA',
+                    values: values
+                }));
+            }
+        } catch (err) {
+            // Silent fail for polling
+        }
+    }, MODBUS_POLL_INTERVAL);
+};
+
+const stopModbusPolling = () => {
+    if (modbusPollTimer) {
+        clearInterval(modbusPollTimer);
+        modbusPollTimer = null;
+    }
 };
 
 const testModbusConnection = async () => {
@@ -101,6 +139,9 @@ const handleModbusClose = () => {
     isRobotConnected = false;
     robotSocket = null;
     modbusClient = null;
+    
+    // Stop polling
+    stopModbusPolling();
 
     if (frontendClient && frontendClient.readyState === 1) {
         frontendClient.send(JSON.stringify({
