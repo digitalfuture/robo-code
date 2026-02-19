@@ -445,9 +445,13 @@ const setSpeed = () => {
       font-family: var(--font-mono);
       font-weight: bold;
       cursor: pointer;
+      transition: all 0.2s;
 
       &:hover {
         background: var(--color-info-light);
+        color: #000;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 200, 255, 0.3);
       }
     }
 
@@ -460,9 +464,13 @@ const setSpeed = () => {
       font-family: var(--font-mono);
       font-weight: bold;
       cursor: pointer;
+      transition: all 0.2s;
 
       &:hover {
         background: var(--color-success-light);
+        color: #000;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 255, 128, 0.3);
       }
     }
   }
@@ -490,9 +498,13 @@ const setSpeed = () => {
     font-family: var(--font-mono);
     font-weight: bold;
     cursor: pointer;
+    transition: all 0.2s;
 
     &:hover {
       background: var(--color-success-light);
+      color: #000;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 255, 128, 0.3);
     }
   }
 
@@ -505,9 +517,13 @@ const setSpeed = () => {
     font-family: var(--font-mono);
     font-weight: bold;
     cursor: pointer;
+    transition: all 0.2s;
 
     &:hover {
       background: var(--color-warning-light);
+      color: #000;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(255, 200, 0, 0.3);
     }
   }
 
@@ -520,9 +536,13 @@ const setSpeed = () => {
     font-family: var(--font-mono);
     font-weight: bold;
     cursor: pointer;
+    transition: all 0.2s;
 
     &:hover {
       background: var(--color-danger-light);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
     }
   }
 
@@ -535,9 +555,13 @@ const setSpeed = () => {
     font-family: var(--font-mono);
     font-weight: bold;
     cursor: pointer;
+    transition: all 0.2s;
 
     &:hover {
       background: var(--color-info-light);
+      color: #000;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 200, 255, 0.3);
     }
   }
 

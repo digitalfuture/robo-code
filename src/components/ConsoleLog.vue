@@ -113,6 +113,9 @@ onMounted(() => {
 
   &:hover {
     background: var(--color-success-light);
+    color: #000;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 255, 128, 0.3);
   }
 }
 
