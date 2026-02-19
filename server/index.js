@@ -1,5 +1,6 @@
 import { WebSocketServer } from 'ws';
 import net from 'net';
+import jsmodbus from 'jsmodbus';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,22 +13,27 @@ const PORT = process.env.VITE_PROXY_PORT || 3000;
 const ROBOT_IP = process.env.VITE_ROBOT_IP || '192.168.1.100';
 const ROBOT_PORT = Number(process.env.VITE_ROBOT_PORT) || 502;
 
+// Determine protocol based on port
+const PROTOCOL = ROBOT_PORT === 5000 ? 'TCP_STRING' : 'MODBUS_TCP';
+
 console.log('=== ROBOT PROXY SERVER STARTING ===');
 console.log(`Configuration:`);
 console.log(`  VITE_PROXY_PORT: ${PORT}`);
 console.log(`  VITE_ROBOT_IP: ${ROBOT_IP}`);
 console.log(`  VITE_ROBOT_PORT: ${ROBOT_PORT}`);
+console.log(`  PROTOCOL: ${PROTOCOL}`);
 console.log('─────────────────────────────────');
 
 // Protocol constants
 const COMMAND_TIMEOUT = 5000; // 5 seconds
-const HEARTBEAT_INTERVAL = 30000; // 30 seconds (per manual Section 5.1)
+const HEARTBEAT_INTERVAL = 30000; // 30 seconds
 
-// Robot encoding - will be auto-detected on first connection
+// Robot encoding for TCP String Protocol
 let robotEncoding = 'utf8';
 
 const wss = new WebSocketServer({ port: PORT });
 let robotSocket = null;
+let modbusClient = null;
 let isRobotConnected = false;
 let robotConnectAttempted = false;
 let responseBuffer = '';
@@ -37,233 +43,258 @@ let frontendClient = null;
 
 console.log(`[Proxy] WebSocket server listening on port ${PORT}`);
 
-// Connect to Robot (TCP Client)
-const connectRobot = () => {
-    if (robotConnectAttempted && isRobotConnected) return;
-    robotConnectAttempted = true;
+// ============ MODBUS TCP FUNCTIONS ============
 
-    console.log(`[Proxy] Attempting TCP connection to Robot at ${ROBOT_IP}:${ROBOT_PORT}...`);
+const initModbus = () => {
+    robotSocket = new net.Socket();
+    modbusClient = new jsmodbus.client.TCP(robotSocket);
 
-    if (robotSocket) {
-        robotSocket.destroy();
+    robotSocket.connect({ host: ROBOT_IP, port: ROBOT_PORT }, () => {
+        console.log('[Proxy] ✓ Modbus TCP connection established');
+        isRobotConnected = true;
+
+        // Test connection by reading registers
+        testModbusConnection();
+    });
+
+    robotSocket.on('data', (data) => {
+        console.log('[Proxy] ← Modbus raw:', data.toString('hex'));
+    });
+
+    robotSocket.on('error', handleModbusError);
+    robotSocket.on('close', handleModbusClose);
+};
+
+const testModbusConnection = async () => {
+    try {
+        console.log('[Proxy] Testing Modbus connection...');
+        const response = await modbusClient.readHoldingRegisters(0, 10);
+        console.log('[Proxy] ✓ Modbus test read successful:', response.response.body.values);
+    } catch (err) {
+        console.warn('[Proxy] Modbus test read failed:', err.message);
+    }
+};
+
+const handleModbusError = (err) => {
+    console.warn(`[Proxy] ✗ Modbus Error: ${err.message}`);
+    console.warn(`[Proxy] Error code: ${err.code}`);
+
+    isRobotConnected = false;
+    robotSocket = null;
+    modbusClient = null;
+
+    if (frontendClient && frontendClient.readyState === 1) {
+        frontendClient.send(JSON.stringify({
+            type: 'STATUS',
+            connected: false,
+            error: err.message,
+            errorCode: err.code
+        }));
     }
 
+    console.log('[Proxy] Retrying in 5 seconds...');
+    setTimeout(connectRobot, 5000);
+};
+
+const handleModbusClose = () => {
+    console.log('[Proxy] Modbus connection closed');
+    isRobotConnected = false;
+    robotSocket = null;
+    modbusClient = null;
+
+    if (frontendClient && frontendClient.readyState === 1) {
+        frontendClient.send(JSON.stringify({
+            type: 'STATUS',
+            connected: false,
+            reason: 'Robot closed connection'
+        }));
+    }
+
+    console.log('[Proxy] Retrying connection in 5 seconds...');
+    setTimeout(connectRobot, 5000);
+};
+
+// ============ TCP STRING PROTOCOL FUNCTIONS ============
+
+const initTcpString = () => {
     robotSocket = new net.Socket();
 
     robotSocket.connect({ host: ROBOT_IP, port: ROBOT_PORT }, () => {
-        console.log('[Proxy] ✓ TCP connection established with robot');
+        console.log('[Proxy] ✓ TCP String connection established');
         isRobotConnected = true;
-        
-        // Send init command with proper spacing (per manual format)
-        // Format: [Command(); id = X] with spaces around =
+
+        // Send init command
         const initCommand = `[getRobotRunStatus_IFace(); id = 999]`;
         console.log('[Proxy] → Sending init command:', initCommand);
         robotSocket.write(initCommand);
     });
 
-    robotSocket.on('data', (data) => {
-        // Check for heartbeat (single space 0x20 per manual Section 5.1)
-        // Robot sends heartbeat every 18 seconds when idle
-        if (data.length === 1 && data[0] === 0x20) {
-            console.log('[Proxy] ← Robot heartbeat (0x20)');
-            // Respond with heartbeat acknowledgment to keep connection alive
-            // This may be required before robot accepts commands
-            robotSocket.write(Buffer.from([0x20]));
-            console.log('[Proxy] → Heartbeat response sent');
-            return;
-        }
-        
-        // Auto-detect encoding on first response
-        // ER Series robots may use UTF-8, UTF-16LE, or GBK (Chinese)
-        let chunk;
-        if (robotEncoding === 'utf8') {
-            // Try UTF-8 first
-            chunk = data.toString('utf8');
+    robotSocket.on('data', handleTcpStringData);
+    robotSocket.on('error', handleTcpStringError);
+    robotSocket.on('close', handleTcpStringClose);
+};
 
-            // Check for garbage characters (replacement character or unusual patterns)
-            if (/[\uFFFD]/.test(chunk) || chunk.includes('')) {
-                // UTF-8 failed, try UTF-16LE
-                const utf16chunk = data.toString('utf16le');
-                // If UTF-16LE looks more valid (has brackets and semicolons), switch to it
-                if (utf16chunk.includes('[') && utf16chunk.includes(';')) {
-                    robotEncoding = 'utf16le';
-                    console.log('[Proxy] ✓ Auto-detected encoding: UTF-16LE');
-                    chunk = utf16chunk;
-                } else {
-                    // Likely GBK (Chinese) - use iconv-lite for decoding
-                    console.log('[Proxy] Raw data (hex):', data.toString('hex'));
-                    console.log('[Proxy] Raw data length:', data.length);
-                    try {
-                        chunk = iconv.decode(data, 'gbk');
-                        robotEncoding = 'gbk';
-                        console.log('[Proxy] ✓ Auto-detected encoding: GBK (Chinese)');
-                        console.log('[Proxy] GBK decoded:', chunk);
-                    } catch (e) {
-                        // Fallback to hex dump
-                        robotEncoding = 'hex';
-                        console.log('[Proxy] GBK decode error:', e.message);
-                        chunk = '[Encoded data - see hex dump]';
-                    }
+const handleTcpStringData = (data) => {
+    // Check for heartbeat (single space 0x20)
+    if (data.length === 1 && data[0] === 0x20) {
+        console.log('[Proxy] ← Robot heartbeat (0x20)');
+        robotSocket.write(Buffer.from([0x20]));
+        console.log('[Proxy] → Heartbeat response sent');
+        return;
+    }
+
+    // Log raw data
+    console.log('[Proxy] Raw data (hex):', data.toString('hex'));
+    console.log('[Proxy] Raw data length:', data.length);
+
+    // Auto-detect encoding
+    let chunk;
+    if (robotEncoding === 'utf8') {
+        chunk = data.toString('utf8');
+
+        if (/[\uFFFD]/.test(chunk) || chunk.includes('')) {
+            const utf16chunk = data.toString('utf16le');
+            if (utf16chunk.includes('[') && utf16chunk.includes(';')) {
+                robotEncoding = 'utf16le';
+                console.log('[Proxy] ✓ Auto-detected encoding: UTF-16LE');
+                chunk = utf16chunk;
+            } else {
+                try {
+                    chunk = iconv.decode(data, 'gbk');
+                    robotEncoding = 'gbk';
+                    console.log('[Proxy] ✓ Auto-detected encoding: GBK (Chinese)');
+                    console.log('[Proxy] GBK decoded:', chunk);
+                } catch (e) {
+                    robotEncoding = 'hex';
+                    console.log('[Proxy] GBK decode error:', e.message);
+                    chunk = '[Encoded data]';
                 }
             }
-        } else if (robotEncoding === 'hex') {
-            // Show hex dump
-            console.log('[Proxy] Raw bytes:', data.toString('hex'));
-            chunk = '[Encoded data]';
-        } else if (robotEncoding === 'gbk') {
-            // Use iconv-lite for GBK
-            try {
-                chunk = iconv.decode(data, 'gbk');
-            } catch (e) {
-                chunk = '[GBK decode error]';
-            }
-        } else {
-            // Use detected encoding (utf16le)
-            chunk = data.toString(robotEncoding);
         }
-        
-        console.log('[Proxy] ← Robot raw:', chunk);
-        
-        // Accumulate response buffer
-        responseBuffer += chunk;
-        
-        // Try to parse complete responses
-        // Response format: [id = X; Ok; data] or [id = X; FAIL]
-        // Also: [FeedMovFinish: X], [ActMovFinish: X], [RobotStop: X], [SafeDoorIsOpen: X]
-        processResponseBuffer();
-    });
-
-    robotSocket.on('error', (err) => {
-        console.warn(`[Proxy] ✗ Robot Connection Error: ${err.message}`);
-        console.warn(`[Proxy] Error code: ${err.code}`);
-
-        if (err.code === 'ENOTFOUND') {
-            console.warn(`[Proxy] Host ${ROBOT_IP} not found - check IP address`);
-        } else if (err.code === 'ECONNREFUSED') {
-            console.warn(`[Proxy] Connection refused on port ${ROBOT_PORT} - robot may be offline or not in TCP server mode`);
-        } else if (err.code === 'ETIMEDOUT') {
-            console.warn(`[Proxy] Connection timed out - firewall or network issue`);
+    } else if (robotEncoding === 'hex') {
+        console.log('[Proxy] Raw bytes:', data.toString('hex'));
+        chunk = '[Encoded data]';
+    } else if (robotEncoding === 'gbk') {
+        try {
+            chunk = iconv.decode(data, 'gbk');
+        } catch (e) {
+            chunk = '[GBK decode error]';
         }
+    } else {
+        chunk = data.toString(robotEncoding);
+    }
 
-        isRobotConnected = false;
-        robotSocket = null;
+    console.log('[Proxy] ← Robot raw:', chunk);
 
-        // Broadcast error to frontend
-        if (frontendClient && frontendClient.readyState === 1) {
-            frontendClient.send(JSON.stringify({
-                type: 'STATUS',
-                connected: false,
-                error: err.message,
-                errorCode: err.code
-            }));
-        }
+    // Accumulate response buffer
+    responseBuffer += chunk;
 
-        // Retry logic
-        console.log('[Proxy] Retrying in 5 seconds...');
-        setTimeout(connectRobot, 5000);
-    });
+    // Process complete responses
+    processResponseBuffer();
+};
 
-    robotSocket.on('close', () => {
-        console.log('[Proxy] Robot connection closed');
-        isRobotConnected = false;
-        robotSocket = null;
-        
-        // Reset encoding detection on disconnect
-        robotEncoding = 'utf8';
-
-        if (frontendClient && frontendClient.readyState === 1) {
-            frontendClient.send(JSON.stringify({
-                type: 'STATUS',
-                connected: false,
-                reason: 'Robot closed connection'
-            }));
-        }
-
-        // Reject pending command
-        if (pendingCommand) {
-            pendingCommand.reject(new Error('Robot connection closed'));
-            clearTimeout(pendingCommand.timeout);
-            pendingCommand = null;
-        }
-
-        // Retry logic
-        console.log('[Proxy] Retrying connection in 5 seconds...');
-        setTimeout(connectRobot, 5000);
-    });
-}
-
-/**
- * Process accumulated response buffer to extract complete commands
- */
-function processResponseBuffer() {
-    // Look for complete responses in buffer
-    // Each response is enclosed in [] and ends with ]
+const processResponseBuffer = () => {
     let match;
     const responseRegex = /\[([^\]]+)\]/g;
-    
+
     while ((match = responseRegex.exec(responseBuffer)) !== null) {
         const fullMatch = match[0];
         console.log('[Proxy] Parsed response:', fullMatch);
-        
-        // Handle the complete response
+
         handleRobotResponse(fullMatch);
     }
-    
-    // Clear processed data from buffer
+
     const lastCompleteResponse = responseBuffer.lastIndexOf(']');
     if (lastCompleteResponse >= 0) {
         responseBuffer = responseBuffer.substring(lastCompleteResponse + 1);
     }
-}
+};
 
-/**
- * Handle a complete robot response
- */
-function handleRobotResponse(response) {
-    // Parse response to extract ID
-    // Format: [id = X; Ok; data] or [id = X; FAIL]
+const handleRobotResponse = (response) => {
     const idMatch = response.match(/\[id\s*=\s*(\d+)/i);
     const motionFinishMatch = response.match(/\[(FeedMovFinish|ActMovFinish):\s*(\d+)/i);
-    const robotStopMatch = response.match(/\[RobotStop:\s*(\d+)/i);
-    const safeDoorMatch = response.match(/\[SafeDoorIsOpen:\s*(\d+)/i);
 
     let responseId = null;
-    
+
     if (idMatch) {
         responseId = parseInt(idMatch[1]);
     } else if (motionFinishMatch) {
         responseId = parseInt(motionFinishMatch[2]);
-    } else if (robotStopMatch) {
-        responseId = parseInt(robotStopMatch[1]);
-    } else if (safeDoorMatch) {
-        responseId = parseInt(safeDoorMatch[1]);
     }
-    
-    // Resolve pending command if ID matches
+
     if (pendingCommand && responseId === pendingCommand.id) {
         clearTimeout(pendingCommand.timeout);
         pendingCommand.resolve(response);
         pendingCommand = null;
     }
-    
-    // Forward response to frontend
-    broadcastToClient(JSON.stringify({
-        type: 'ROBOT_RESPONSE',
-        response: response
-    }));
-}
 
-/**
- * Send command to robot
- */
-function sendToRobot(command) {
+    if (frontendClient && frontendClient.readyState === 1) {
+        frontendClient.send(JSON.stringify({
+            type: 'ROBOT_RESPONSE',
+            response: response
+        }));
+    }
+};
+
+const handleTcpStringError = (err) => {
+    console.warn(`[Proxy] ✗ TCP String Error: ${err.message}`);
+    isRobotConnected = false;
+    robotSocket = null;
+
+    if (frontendClient && frontendClient.readyState === 1) {
+        frontendClient.send(JSON.stringify({
+            type: 'STATUS',
+            connected: false,
+            error: err.message
+        }));
+    }
+
+    setTimeout(connectRobot, 5000);
+};
+
+const handleTcpStringClose = () => {
+    console.log('[Proxy] TCP String connection closed');
+    isRobotConnected = false;
+    robotSocket = null;
+    robotEncoding = 'utf8';
+
+    if (frontendClient && frontendClient.readyState === 1) {
+        frontendClient.send(JSON.stringify({
+            type: 'STATUS',
+            connected: false,
+            reason: 'Robot closed connection'
+        }));
+    }
+
+    setTimeout(connectRobot, 5000);
+};
+
+// ============ COMMON FUNCTIONS ============
+
+const connectRobot = () => {
+    if (robotConnectAttempted && isRobotConnected) return;
+    robotConnectAttempted = true;
+
+    console.log(`[Proxy] Attempting ${PROTOCOL} connection to Robot at ${ROBOT_IP}:${ROBOT_PORT}...`);
+
+    if (robotSocket) {
+        robotSocket.destroy();
+    }
+
+    if (PROTOCOL === 'MODBUS_TCP') {
+        initModbus();
+    } else {
+        initTcpString();
+    }
+};
+
+const sendToRobotTcpString = (command) => {
     return new Promise((resolve, reject) => {
         if (!robotSocket || !isRobotConnected) {
             reject(new Error('Not connected to robot'));
             return;
         }
 
-        // Extract command ID - support both formats: "id=X" and "id = X"
         const idMatch = command.match(/id\s*=\s*(\d+)/);
         if (!idMatch) {
             reject(new Error('Invalid command format - missing ID'));
@@ -272,21 +303,15 @@ function sendToRobot(command) {
 
         const commandId = parseInt(idMatch[1]);
 
-        // Clear any previous pending command
         if (pendingCommand) {
             clearTimeout(pendingCommand.timeout);
             pendingCommand = null;
         }
 
-        // Send command
         console.log('[Proxy] → Robot:', command);
-        console.log('[Proxy] Robot socket writable:', robotSocket.writable);
-        console.log('[Proxy] Robot socket destroyed:', robotSocket.destroyed);
-        
         const written = robotSocket.write(command);
         console.log('[Proxy] Write result:', written);
 
-        // Set timeout
         const timeout = setTimeout(() => {
             if (pendingCommand) {
                 console.log('[Proxy] Command timeout - no response from robot');
@@ -302,22 +327,21 @@ function sendToRobot(command) {
             timeout
         };
     });
-}
+};
 
 // Handle Frontend Connections
 wss.on('connection', (ws, req) => {
     const clientIp = req.socket.remoteAddress || 'unknown';
     console.log(`[Proxy] ✓ Frontend client connected from ${clientIp}`);
-    
-    // Store frontend client immediately for broadcasts
+
     frontendClient = ws;
 
-    // Send initial connection status
     ws.send(JSON.stringify({
         type: 'STATUS',
         connected: isRobotConnected,
         robotIp: ROBOT_IP,
-        robotPort: ROBOT_PORT
+        robotPort: ROBOT_PORT,
+        protocol: PROTOCOL
     }));
 
     ws.on('close', () => {
@@ -330,55 +354,78 @@ wss.on('connection', (ws, req) => {
         frontendClient = null;
     });
 
-    // Handle Commands from Frontend
     ws.on('message', async (msg) => {
         try {
             const message = JSON.parse(msg.toString());
-            console.log(`[Proxy] ← Frontend: ${message.type || message.cmd || 'UNKNOWN'}`, 
-                       message.params ? JSON.stringify(message.params) : '');
+            console.log(`[Proxy] ← Frontend: ${message.type || message.cmd || 'UNKNOWN'}`,
+                message.params ? JSON.stringify(message.params) : '');
 
             if (message.cmd === 'CONNECT' || message.type === 'CONNECT') {
                 console.log(`[Proxy] Handshake request received for robot at ${message.target?.ip}:${message.target?.port}`);
 
-                // Update robot connection settings if provided
                 const targetIp = message.target?.ip || ROBOT_IP;
                 const targetPort = message.target?.port || ROBOT_PORT;
 
-                // Send confirmation to client
                 ws.send(JSON.stringify({
                     type: 'STATUS',
                     connected: isRobotConnected,
                     robotIp: targetIp,
-                    robotPort: targetPort
+                    robotPort: targetPort,
+                    protocol: PROTOCOL
                 }));
 
-                // Attempt to connect or reconnect if not connected
                 if (!isRobotConnected) {
                     connectRobot();
                 }
             }
 
             if (message.type === 'ROBOT_COMMAND') {
-                // Forward command to robot
-                try {
-                    const response = await sendToRobot(message.command);
-                    console.log('[Proxy] Command completed:', response);
-                } catch (error) {
-                    console.error('[Proxy] Command failed:', error.message);
+                if (PROTOCOL === 'TCP_STRING') {
+                    try {
+                        const response = await sendToRobotTcpString(message.command);
+                        console.log('[Proxy] Command completed:', response);
+                    } catch (error) {
+                        console.error('[Proxy] Command failed:', error.message);
+                        ws.send(JSON.stringify({
+                            type: 'COMMAND_ERROR',
+                            error: error.message
+                        }));
+                    }
+                } else {
                     ws.send(JSON.stringify({
-                        type: 'COMMAND_ERROR',
-                        error: error.message
+                        type: 'ERROR',
+                        message: 'ROBOT_COMMAND not supported for Modbus TCP. Use WRITE_REGISTER instead.'
                     }));
                 }
             }
 
-            if (message.type === 'WRITE_REGISTER') {
-                // Legacy modbus support - log warning
-                console.warn('[Proxy] WRITE_REGISTER received but Modbus is not supported. Use ROBOT_COMMAND instead.');
-                ws.send(JSON.stringify({
-                    type: 'ERROR',
-                    message: 'Modbus not supported. Use TCP string protocol with ROBOT_COMMAND type.'
-                }));
+            if (message.type === 'WRITE_REGISTER' && PROTOCOL === 'MODBUS_TCP') {
+                try {
+                    await modbusClient.writeSingleRegister(message.addr, message.val);
+                    console.log(`[Proxy] Write Reg ${message.addr} -> ${message.val}`);
+                } catch (error) {
+                    console.error('[Proxy] Write failed:', error.message);
+                    ws.send(JSON.stringify({
+                        type: 'ERROR',
+                        message: error.message
+                    }));
+                }
+            }
+
+            if (message.type === 'READ_REGISTER' && PROTOCOL === 'MODBUS_TCP') {
+                try {
+                    const response = await modbusClient.readHoldingRegisters(message.addr, message.count);
+                    ws.send(JSON.stringify({
+                        type: 'REGISTER_DATA',
+                        values: response.response.body.values
+                    }));
+                } catch (error) {
+                    console.error('[Proxy] Read failed:', error.message);
+                    ws.send(JSON.stringify({
+                        type: 'ERROR',
+                        message: error.message
+                    }));
+                }
             }
         } catch (e) {
             console.error('[Proxy] Message parse error:', e.message);
@@ -390,36 +437,17 @@ wss.on('connection', (ws, req) => {
     });
 });
 
-/**
- * Broadcast message to connected frontend client
- */
-function broadcastToClient(data) {
-    if (frontendClient && frontendClient.readyState === 1) {
-        frontendClient.send(data);
-    }
-}
-
-// Handle server errors
-wss.on('error', (err) => {
-    console.error(`[Proxy] Server error: ${err.message}`);
-    if (err.code === 'EADDRINUSE') {
-        console.error(`[Proxy] Port ${PORT} is already in use!`);
-        console.error(`[Proxy] Try: netstat -ano | find "${PORT}"`);
-    }
-});
-
-// Start initial connection attempt
-console.log('[Proxy] Initiating robot connection...');
-connectRobot();
-
-// Heartbeat check (optional - per manual Section 5.1)
+// Heartbeat
 setInterval(() => {
     if (isRobotConnected && frontendClient) {
-        // Send heartbeat status
-        broadcastToClient(JSON.stringify({
+        frontendClient.send(JSON.stringify({
             type: 'HEARTBEAT',
             connected: true,
             timestamp: Date.now()
         }));
     }
 }, HEARTBEAT_INTERVAL);
+
+// Start initial connection
+console.log('[Proxy] Initiating robot connection...');
+connectRobot();
