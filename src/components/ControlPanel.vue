@@ -12,6 +12,9 @@ const speed = ref(50); // %
 const modbusAddress = ref(0);
 const modbusCount = ref(20);
 
+// TCP 5000 test
+const useTcp5000 = ref(false);
+
 const toggleSystem = () => {
     // If connected, disconnect. If not, we can't really "connect" without IP yet.
     if (state.isConnected) {
@@ -77,6 +80,31 @@ const testModbusWrite = () => {
 
 const scanWritableRegisters = () => {
     robotService.scanWritableRegisters();
+};
+
+const toggleTcpMode = () => {
+    useTcp5000.value = !useTcp5000.value;
+    if (useTcp5000.value) {
+        // Switch to TCP 5000
+        localStorage.setItem('VITE_ROBOT_PORT', '5000');
+        robotService.addLog('Switched to TCP String Protocol (Port 5000)', 'info');
+        robotService.addLog('Reconnect to apply changes', 'warn');
+    } else {
+        // Switch to Modbus 1502
+        localStorage.setItem('VITE_ROBOT_PORT', '1502');
+        robotService.addLog('Switched to Modbus TCP (Port 1502)', 'info');
+        robotService.addLog('Reconnect to apply changes', 'warn');
+    }
+};
+
+const testTcpCommand = async () => {
+    robotService.addLog('=== TESTING TCP STRING COMMAND ===', 'info');
+    robotService.addLog('Sending: GetCurJPos()', 'cmd');
+    
+    const response = await robotService.getCurrentJointPosition();
+    if (response) {
+        robotService.addLog(`Response: ${JSON.stringify(response)}`, 'info');
+    }
 };
 </script>
 
@@ -155,7 +183,14 @@ const scanWritableRegisters = () => {
 
   <!-- Modbus Control Panel -->
   <div class="modbus-test-panel">
-    <div class="label-heading mono">Modbus Control (Port 1502)</div>
+    <div class="label-heading mono">
+      Modbus Control (Port 1502) 
+      <span class="protocol-toggle">
+        <button @click="toggleTcpMode" class="tcp-toggle-btn" :class="{ active: useTcp5000 }">
+          {{ useTcp5000 ? 'TCP 5000' : 'Modbus 1502' }}
+        </button>
+      </span>
+    </div>
     <div class="modbus-controls">
       <button @click="startProgram" class="start-btn mono" title="Start robot program">
         ▶ Start
@@ -171,6 +206,9 @@ const scanWritableRegisters = () => {
       </button>
       <button @click="scanWritableRegisters" class="scan-btn mono" title="Scan for writable registers">
         🔍 Scan Writable
+      </button>
+      <button @click="testTcpCommand" class="tcp-btn mono" title="Test TCP string command (Port 5000)">
+        📡 TCP Test
       </button>
       <div class="speed-control">
         <label>Speed: {{speed}}%</label>
@@ -452,6 +490,51 @@ const scanWritableRegisters = () => {
         color: #000;
         transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(0, 255, 128, 0.3);
+      }
+    }
+
+    .tcp-btn {
+      padding: 0.5rem 1rem;
+      background: var(--color-warning);
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: var(--color-warning-light);
+        color: #000;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(255, 170, 0, 0.3);
+      }
+    }
+  }
+
+  .protocol-toggle {
+    margin-left: 1rem;
+    
+    .tcp-toggle-btn {
+      padding: 2px 8px;
+      font-size: 0.65rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-dim);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: rgba(255,255,255,0.2);
+        color: var(--color-text);
+      }
+
+      &.active {
+        background: var(--color-info);
+        color: #000;
+        border-color: var(--color-info);
       }
     }
   }
