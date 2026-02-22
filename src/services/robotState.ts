@@ -108,8 +108,9 @@ export const robotService = {
     }
 
     const proxyUrl = import.meta.env.VITE_PROXY_URL || 'ws://localhost:3000';
+    // Get port from localStorage or env
+    const robotPort = Number(localStorage.getItem('VITE_ROBOT_PORT')) || Number(import.meta.env.VITE_ROBOT_PORT) || 1502;
     const robotIp = import.meta.env.VITE_ROBOT_IP || '192.168.1.100';
-    const robotPort = Number(import.meta.env.VITE_ROBOT_PORT) || 1502;
     const protocol = (robotPort === 502 || robotPort === 1502) ? 'Modbus TCP' : 'TCP String (ER Series RCS2 V1.5.3)';
 
     this.addLog('=== CONNECTION STARTED ===', 'info');
@@ -144,7 +145,7 @@ export const robotService = {
       this.addLog('✓ WebSocket connection established', 'success');
       state.isConnected = true;
 
-      // Send handshake to proxy
+      // Send handshake to proxy WITH PORT
       const handshake = JSON.stringify({
         cmd: 'CONNECT',
         target: { ip: robotIp, port: robotPort }

@@ -10,11 +10,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const PORT = process.env.VITE_PROXY_PORT || 3000;
-const ROBOT_IP = process.env.VITE_ROBOT_IP || '192.168.1.100';
-const ROBOT_PORT = Number(process.env.VITE_ROBOT_PORT) || 502;
+let ROBOT_IP = process.env.VITE_ROBOT_IP || '192.168.1.100';
+let ROBOT_PORT = Number(process.env.VITE_ROBOT_PORT) || 502;
 
-// Determine protocol based on port
-const PROTOCOL = ROBOT_PORT === 5000 ? 'TCP_STRING' : 'MODBUS_TCP';
+// Protocol will be determined dynamically based on connection
+let PROTOCOL = ROBOT_PORT === 5000 ? 'TCP_STRING' : 'MODBUS_TCP';
+let currentRobotPort = ROBOT_PORT;
 
 console.log('=== ROBOT PROXY SERVER STARTING ===');
 console.log(`Configuration:`);
@@ -405,16 +406,37 @@ wss.on('connection', (ws, req) => {
 
                 const targetIp = message.target?.ip || ROBOT_IP;
                 const targetPort = message.target?.port || ROBOT_PORT;
-
+                
+                // Update protocol based on target port
+                const connectionProtocol = targetPort === 5000 ? 'TCP_STRING' : 'MODBUS_TCP';
+                
                 ws.send(JSON.stringify({
                     type: 'STATUS',
                     connected: isRobotConnected,
                     robotIp: targetIp,
                     robotPort: targetPort,
-                    protocol: PROTOCOL
+                    protocol: connectionProtocol
                 }));
 
-                if (!isRobotConnected) {
+                // Reconnect if port changed or not connected
+                if (!isRobotConnected || currentRobotPort !== targetPort) {
+                    console.log(`[Proxy] Switching protocol: ${connectionProtocol} (port ${targetPort})`);
+                    PROTOCOL = connectionProtocol;
+                    currentRobotPort = targetPort;
+                    
+                    // Close existing connection
+                    if (robotSocket) {
+                        robotSocket.destroy();
+                        robotSocket = null;
+                    }
+                    if (modbusClient) {
+                        modbusClient = null;
+                    }
+                    isRobotConnected = false;
+                    
+                    // Reconnect with new settings
+                    ROBOT_IP = targetIp;
+                    ROBOT_PORT = targetPort;
                     connectRobot();
                 }
             }
