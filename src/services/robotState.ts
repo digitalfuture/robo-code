@@ -108,8 +108,8 @@ export const robotService = {
     }
 
     const proxyUrl = import.meta.env.VITE_PROXY_URL || 'ws://localhost:3000';
-    // Get port from localStorage or env
-    const robotPort = Number(localStorage.getItem('VITE_ROBOT_PORT')) || Number(import.meta.env.VITE_ROBOT_PORT) || 1502;
+    // Get port from localStorage or env (default: 5000 for TCP String Protocol)
+    const robotPort = Number(localStorage.getItem('VITE_ROBOT_PORT')) || Number(import.meta.env.VITE_ROBOT_PORT) || 5000;
     const robotIp = import.meta.env.VITE_ROBOT_IP || '192.168.1.100';
     const protocol = (robotPort === 502 || robotPort === 1502) ? 'Modbus TCP' : 'TCP String (ER Series RCS2 V1.5.3)';
 

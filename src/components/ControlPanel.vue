@@ -13,7 +13,7 @@ const modbusAddress = ref(0);
 const modbusCount = ref(20);
 
 // TCP 5000 test
-const useTcp5000 = ref(false);
+const useTcp5000 = ref(true); // Default to TCP 5000 since Modbus port is closed
 
 const toggleSystem = () => {
     // If connected, disconnect. If not, we can't really "connect" without IP yet.
@@ -184,7 +184,7 @@ const testTcpCommand = async () => {
   <!-- Modbus Control Panel -->
   <div class="modbus-test-panel">
     <div class="label-heading mono">
-      Modbus Control (Port 1502) 
+      Protocol Control 
       <span class="protocol-toggle">
         <button @click="toggleTcpMode" class="tcp-toggle-btn" :class="{ active: useTcp5000 }">
           {{ useTcp5000 ? 'TCP 5000' : 'Modbus 1502' }}
