@@ -372,6 +372,58 @@ export const robotService = {
   },
 
   /**
+   * Test write to Modbus register - for verifying control capability
+   */
+  testModbusWrite() {
+    this.addLog('=== TESTING MODBUS WRITE ===', 'info');
+    this.addLog('Step 1: Setting command flag (40051 = 0x11)', 'cmd');
+    this.writeModbusRegister(40051, 0x11);
+    
+    setTimeout(() => {
+      this.addLog('Step 2: Writing test value to 40052 (0x01)', 'cmd');
+      this.writeModbusRegister(40052, 0x01);
+      
+      setTimeout(() => {
+        this.addLog('Step 3: Reading back registers 40050-40055', 'info');
+        this.readModbusRegisters(40050, 6);
+      }, 200);
+    }, 200);
+  },
+
+  /**
+   * Send start command via Modbus (40052 = 0x04)
+   */
+  sendStartCommand() {
+    this.addLog('Sending START command (40052 = 0x04)', 'cmd');
+    this.writeModbusRegister(40051, 0x11);
+    setTimeout(() => {
+      this.writeModbusRegister(40052, 0x04);
+    }, 100);
+  },
+
+  /**
+   * Send stop command via Modbus (40052 = 0x08)
+   */
+  sendStopCommand() {
+    this.addLog('Sending STOP command (40052 = 0x08)', 'cmd');
+    this.writeModbusRegister(40051, 0x11);
+    setTimeout(() => {
+      this.writeModbusRegister(40052, 0x08);
+    }, 100);
+  },
+
+  /**
+   * Send reset command via Modbus (40052 = 0x10)
+   */
+  sendResetCommand() {
+    this.addLog('Sending RESET command (40052 = 0x10)', 'cmd');
+    this.writeModbusRegister(40051, 0x11);
+    setTimeout(() => {
+      this.writeModbusRegister(40052, 0x10);
+    }, 100);
+  },
+
+  /**
    * Handle Modbus register data
    * Called automatically when REGISTER_DATA received
    * 

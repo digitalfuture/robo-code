@@ -70,6 +70,10 @@ const resetErrors = () => {
 const setSpeed = () => {
     robotService.setGlobalSpeed(speed.value);
 };
+
+const testModbusWrite = () => {
+    robotService.testModbusWrite();
+};
 </script>
 
 <template>
@@ -157,6 +161,9 @@ const setSpeed = () => {
       </button>
       <button @click="resetErrors" class="reset-btn mono" title="Reset robot errors">
         ↺ Reset
+      </button>
+      <button @click="testModbusWrite" class="test-btn mono" title="Test Modbus write operation">
+        🧪 Test Write
       </button>
       <div class="speed-control">
         <label>Speed: {{speed}}%</label>
