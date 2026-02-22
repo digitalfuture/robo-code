@@ -74,6 +74,10 @@ const setSpeed = () => {
 const testModbusWrite = () => {
     robotService.testModbusWrite();
 };
+
+const scanWritableRegisters = () => {
+    robotService.scanWritableRegisters();
+};
 </script>
 
 <template>
@@ -164,6 +168,9 @@ const testModbusWrite = () => {
       </button>
       <button @click="testModbusWrite" class="test-btn mono" title="Test Modbus write operation">
         🧪 Test Write
+      </button>
+      <button @click="scanWritableRegisters" class="scan-btn mono" title="Scan for writable registers">
+        🔍 Scan Writable
       </button>
       <div class="speed-control">
         <label>Speed: {{speed}}%</label>

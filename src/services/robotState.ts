@@ -424,6 +424,53 @@ export const robotService = {
   },
 
   /**
+   * Scan for writable registers - test write to common command registers
+   */
+  scanWritableRegisters() {
+    this.addLog('=== SCANNING FOR WRITABLE REGISTERS ===', 'info');
+    
+    // Common command register addresses to test
+    const testAddresses = [
+      // Estun command registers
+      40051, 40052, 40053, 40054, 40055,
+      // Standard holding registers
+      10, 11, 12, 13, 14, 15,
+      50, 51, 52,
+      1000, 1001, 1002,
+      2000, 2001, 2002,
+      3000, 3001, 3002,
+      4000, 4001, 4002,
+      5000, 5001, 5002
+    ];
+
+    let index = 0;
+    
+    const testNext = () => {
+      if (index >= testAddresses.length) {
+        this.addLog('=== SCAN COMPLETE ===', 'success');
+        return;
+      }
+
+      const addr = testAddresses[index];
+      const testValue = 0x01;
+      
+      this.addLog(`Testing write to R${addr} = ${testValue}...`, 'info');
+      
+      // Try to write
+      this.writeModbusRegister(addr, testValue);
+      
+      // Read back after delay
+      setTimeout(() => {
+        this.readModbusRegisters(addr, 1);
+        index++;
+        setTimeout(testNext, 500);
+      }, 200);
+    };
+
+    testNext();
+  },
+
+  /**
    * Handle Modbus register data
    * Called automatically when REGISTER_DATA received
    * 
