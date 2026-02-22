@@ -36,6 +36,19 @@ const exportLogs = () => {
   robotService.exportLogsToFile();
 };
 
+const copyLogsToClipboard = async () => {
+  const logText = state.logs
+    .map(log => `[${log.time}] ${log.msg}`)
+    .join('\n');
+  
+  try {
+    await navigator.clipboard.writeText(logText);
+    robotService.addLog('Logs copied to clipboard', 'success');
+  } catch (err) {
+    robotService.addLog('Failed to copy logs', 'error');
+  }
+};
+
 // Disable auto-scroll completely
 // watch(() => state.logs.length, scrollToBottom);
 
@@ -50,6 +63,9 @@ onMounted(() => {
 <template>
   <div class="console-log">
     <div class="logs-header">
+      <button class="copy-btn" @click="copyLogsToClipboard" title="Copy logs to clipboard">
+        📋 Copy
+      </button>
       <button class="export-btn" @click="exportLogs" title="Export logs to file">
         📥 Export
       </button>
@@ -116,6 +132,28 @@ onMounted(() => {
     color: #000;
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 255, 128, 0.3);
+  }
+}
+
+.copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  background: var(--color-info);
+  border: 1px solid var(--color-info);
+  border-radius: 4px;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: bold;
+
+  &:hover {
+    background: var(--color-info-light);
+    color: #000;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 200, 255, 0.3);
   }
 }
 
