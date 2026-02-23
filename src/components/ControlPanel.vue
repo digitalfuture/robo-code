@@ -13,7 +13,7 @@ const modbusAddress = ref(0);
 const modbusCount = ref(20);
 
 // TCP 5000 test
-const useTcp5000 = ref(true); // Default to TCP 5000 since Modbus port is closed
+const useTcp5000 = ref(false); // Default to Modbus 1502, switch to TCP 5000 if needed
 
 const toggleSystem = () => {
     // If connected, disconnect. If not, we can't really "connect" without IP yet.
