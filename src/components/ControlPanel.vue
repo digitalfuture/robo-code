@@ -82,6 +82,14 @@ const scanWritableRegisters = () => {
     robotService.scanWritableRegisters();
 };
 
+const readRobotStatus = () => {
+    robotService.readRobotStatus();
+};
+
+const readCommandStatus = () => {
+    robotService.readCommandStatus();
+};
+
 const toggleTcpMode = () => {
     useTcp5000.value = !useTcp5000.value;
     if (useTcp5000.value) {
@@ -200,6 +208,12 @@ const testTcpCommand = async () => {
       </button>
       <button @click="resetErrors" class="reset-btn mono" title="Reset robot errors">
         ↺ Reset
+      </button>
+      <button @click="readRobotStatus" class="status-btn mono" title="Read robot status (40002-40018)">
+        📊 Status
+      </button>
+      <button @click="readCommandStatus" class="status-btn mono" title="Read command status (40018)">
+        ✓ Cmd Status
       </button>
       <button @click="testModbusWrite" class="test-btn mono" title="Test Modbus write operation">
         🧪 Test Write
@@ -509,6 +523,25 @@ const testTcpCommand = async () => {
         color: #000;
         transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(255, 170, 0, 0.3);
+      }
+    }
+
+    .status-btn {
+      padding: 0.5rem 1rem;
+      background: var(--color-primary);
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: var(--color-primary);
+        color: #000;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 255, 157, 0.3);
       }
     }
   }

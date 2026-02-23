@@ -373,6 +373,24 @@ export const robotService = {
   },
 
   /**
+   * Read robot status registers (40002-40018)
+   * Based on ESTUN Modbus TCP Control Interface Data Table
+   */
+  readRobotStatus() {
+    this.addLog('Reading robot status (regs 40002-40018)...', 'info');
+    this.readModbusRegisters(40002, 17);
+  },
+
+  /**
+   * Read command execution status (register 40018)
+   * Shows which commands completed successfully
+   */
+  readCommandStatus() {
+    this.addLog('Reading command status (reg 40018)...', 'info');
+    this.readModbusRegisters(40018, 1);
+  },
+
+  /**
    * Test write to Modbus register - for verifying control capability
    */
   testModbusWrite() {
