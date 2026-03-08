@@ -50,6 +50,7 @@ interface RobotState {
     targets: any[];
   };
   logs: LogEntry[];
+  lastRegisters: number[]; // Store last received Modbus register values
 }
 
 // Initial State - DISCONNECTED by default
@@ -70,7 +71,8 @@ const state = reactive<RobotState>({
     hasSignal: false,
     targets: []
   },
-  logs: []
+  logs: [],
+  lastRegisters: []
 });
 
 // WebSocket instance
@@ -447,7 +449,7 @@ export const robotService = {
    */
   scanWritableRegisters() {
     this.addLog('=== SCANNING FOR WRITABLE REGISTERS ===', 'info');
-    
+
     // Common command register addresses to test
     const testAddresses = [
       // Estun command registers
@@ -463,18 +465,18 @@ export const robotService = {
     ];
 
     let index = 0;
-    
+
     const testNext = () => {
       if (index >= testAddresses.length) {
         this.addLog('=== SCAN COMPLETE ===', 'success');
         return;
       }
 
-      const addr = testAddresses[index];
+      const addr = testAddresses[index] ?? 0;
       const testValue = 0x01;
-      
+
       this.addLog(`Testing write to R${addr} = ${testValue}...`, 'info');
-      
+
       // Try to write
       this.writeModbusRegister(addr, testValue);
       
@@ -492,29 +494,29 @@ export const robotService = {
   /**
    * Handle Modbus register data
    * Called automatically when REGISTER_DATA received
-   * 
+   *
    * Register Map (Port 1502):
    * - Registers 100-108: Cartesian coordinates (X,Y,Z,A,B,C) - scale 100
    * - Registers 200-205: Joint angles (J1-J6) - scale 100
    */
   handleModbusData(values: number[]) {
-    // Skip processing if paused
-    if (this._isPaused) return;
-    
+    // Store raw register values for diagnostics
+    state.lastRegisters = [...values];
+
     // Coordinates have pattern: [val, 0, val, 0, val, 0, val, 0, val, 0]
     // Every other register is 0 or small value
-    const isCoordinates = values.length >= 9 && 
-                          values[0] > 10000 &&  // X ~50000
-                          values[1] < 1000 &&   // reserved
-                          values[2] > 10000 &&  // Y ~17000
-                          values[3] > 10000;    // not zero (some values)
-    
+    const isCoordinates = values.length >= 9 &&
+                          (values[0] || 0) > 10000 &&  // X ~50000
+                          (values[1] || 0) < 1000 &&   // reserved
+                          (values[2] || 0) > 10000 &&  // Y ~17000
+                          (values[3] || 0) > 10000;    // not zero (some values)
+
     // Joints are 6 consecutive values in range 1000-60000
-    const isJoints = values.length >= 6 && 
-                     values[0] > 500 && values[0] < 60000 &&
-                     values[1] > 500 && values[1] < 60000 &&
-                     values[2] > 500 && values[2] < 60000;
-    
+    const isJoints = values.length >= 6 &&
+                     (values[0] || 0) > 500 && (values[0] || 0) < 60000 &&
+                     (values[1] || 0) > 500 && (values[1] || 0) < 60000 &&
+                     (values[2] || 0) > 500 && (values[2] || 0) < 60000;
+
     // Update coordinates from registers 100-108
     if (isCoordinates && values.length >= 9) {
       const rawX = values[0] || 0;
@@ -522,19 +524,19 @@ export const robotService = {
       const rawZ = values[4] || 0;
       const rawA = values[6] || 0;
       const rawB = values[8] || 0;
-      
+
       // Apply scale factor (÷100)
       const newX = rawX / 100;
       const newY = rawY / 100;
       const newZ = rawZ / 100;
       const newA = rawA / 100;
       const newB = rawB / 100;
-      
+
       // Update state if values changed
       const changed = Math.abs(newX - state.coordinates.x) > 0.1 ||
                       Math.abs(newY - state.coordinates.y) > 0.1 ||
                       Math.abs(newZ - state.coordinates.z) > 0.1;
-      
+
       if (changed) {
         state.coordinates.x = newX;
         state.coordinates.y = newY;
@@ -548,12 +550,17 @@ export const robotService = {
     // Update joints from registers 200-205 (6 consecutive values)
     // Only if NOT coordinates data
     if (isJoints && !isCoordinates && values.length >= 6) {
-      const newJoints = values.slice(0, 6).map(v => v / 100);
-      
+      const newJoints = values.slice(0, 6).map(v => (v || 0) / 100);
+
       // Update if different
       if (JSON.stringify(newJoints) !== JSON.stringify(state.joints)) {
         state.joints = newJoints;
-        this.addLog(`Joints: J1=${newJoints[0].toFixed(2)}°, J2=${newJoints[1].toFixed(2)}°, J3=${newJoints[2].toFixed(2)}°, J4=${newJoints[3].toFixed(2)}°, J5=${newJoints[4].toFixed(2)}°, J6=${newJoints[5].toFixed(2)}°`, 'info');
+        this.addLog(
+          `Joints: J1=${(newJoints[0] || 0).toFixed(2)}°, J2=${(newJoints[1] || 0).toFixed(2)}°, ` +
+          `J3=${(newJoints[2] || 0).toFixed(2)}°, J4=${(newJoints[3] || 0).toFixed(2)}°, ` +
+          `J5=${(newJoints[4] || 0).toFixed(2)}°, J6=${(newJoints[5] || 0).toFixed(2)}°`,
+          'info'
+        );
       }
     }
   },

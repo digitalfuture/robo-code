@@ -8,10 +8,6 @@ const isSystemActive = computed(() => state.isConnected);
 const mode = ref<'AUTO' | 'MANUAL'>('MANUAL');
 const speed = ref(50); // %
 
-// Modbus test panel
-const modbusAddress = ref(0);
-const modbusCount = ref(20);
-
 // TCP 5000 test
 const useTcp5000 = ref(false); // Default to Modbus 1502, switch to TCP 5000 if needed
 
@@ -36,26 +32,13 @@ const setMode = (m: 'AUTO' | 'MANUAL') => {
   robotService.sendCommand('SET_MODE');
 };
 
-const handleJog = (axis: string) => {
-    if (state.connection.protocol === 'Modbus TCP') {
-        // For Modbus, we need to find the correct register addresses
-        // This is a placeholder - actual addresses depend on robot configuration
-        robotService.jogRobotModbus(axis, 1);
-    } else {
-        robotService.sendCommand('JOG');
-    }
+const handleJog = (_axis: string) => {
+    // Jog functionality - placeholder for future implementation
+    robotService.addLog('Jog not yet implemented', 'warn');
 };
 
 const handleAction = (action: string) => {
     robotService.sendCommand(action);
-};
-
-const readModbusTest = () => {
-    robotService.readModbusRegisters(modbusAddress.value, modbusCount.value);
-};
-
-const scanModbusRegisters = () => {
-    robotService.scanModbusRegisters(0, 50, 15000); // Scan 0-49 for 15 seconds
 };
 
 const startProgram = () => {

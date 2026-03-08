@@ -4,6 +4,7 @@ import CameraFeed from './components/CameraFeed.vue';
 import RobotStatus from './components/RobotStatus.vue';
 import ConsoleLog from './components/ConsoleLog.vue';
 import ControlPanel from './components/ControlPanel.vue';
+import DiagnosticsPanel from './components/DiagnosticsPanel.vue';
 import { currentLang, setLanguage, t } from './services/i18n';
 import { robotService } from './services/robotState';
 import type { Language } from './services/i18n';
@@ -60,6 +61,7 @@ onMounted(() => {
         <CameraFeed />
       </div>
       <div class="side-panel">
+        <DiagnosticsPanel />
         <RobotStatus />
       </div>
     </main>
