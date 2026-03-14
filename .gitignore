@@ -29,5 +29,11 @@ dist-ssr
 # Documentation images
 docs/images/
 
+# Virtual Teach Pedant config and application
+docs/config/
+
+# Presentations from developers
+docs/pptx/
+
 # Package lock (using yarn/pnpm instead)
 package-lock.json
