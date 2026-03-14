@@ -1,101 +1,123 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { robotService } from '../services/robotState';
-import { t } from '../services/i18n';
+import { ref, computed } from "vue";
+import { robotService } from "../services/robotState";
+import { t } from "../services/i18n";
 
 const state = robotService.state;
 const isSystemActive = computed(() => state.isConnected);
-const mode = ref<'AUTO' | 'MANUAL'>('MANUAL');
+const mode = ref<"AUTO" | "MANUAL">("MANUAL");
 const speed = ref(50); // %
 
 // TCP 5000 test
 const useTcp5000 = ref(false); // Default to Modbus 1502, switch to TCP 5000 if needed
 
 const toggleSystem = () => {
-    // If connected, disconnect. If not, we can't really "connect" without IP yet.
-    if (state.isConnected) {
-        robotService.disconnect();
-    } else {
-        // For now, let's treat the big power button as the Demo Toggle for user convenience,
-        // OR add a specific Demo button. Let's add a debug Demo Toggle.
-        // But user asked for "Real" look. So main button should try to connect real first.
-        robotService.connect(); // Proxy will handle target IP
-    }
+  // If connected, disconnect. If not, we can't really "connect" without IP yet.
+  if (state.isConnected) {
+    robotService.disconnect();
+  } else {
+    // For now, let's treat the big power button as the Demo Toggle for user convenience,
+    // OR add a specific Demo button. Let's add a debug Demo Toggle.
+    // But user asked for "Real" look. So main button should try to connect real first.
+    robotService.connect(); // Proxy will handle target IP
+  }
 };
 
 const toggleDemo = () => {
-    robotService.toggleDemoMode(!state.isConnected);
-}
+  robotService.toggleDemoMode(!state.isConnected);
+};
 
-const setMode = (m: 'AUTO' | 'MANUAL') => {
+const setMode = (m: "AUTO" | "MANUAL") => {
   mode.value = m;
-  robotService.sendCommand('SET_MODE');
+  robotService.sendCommand("SET_MODE");
 };
 
 const handleJog = (_axis: string) => {
-    // Jog functionality - placeholder for future implementation
-    robotService.addLog('Jog not yet implemented', 'warn');
+  // Jog functionality - placeholder for future implementation
+  robotService.addLog("Jog not yet implemented", "warn");
 };
 
 const handleAction = (action: string) => {
-    robotService.sendCommand(action);
+  robotService.sendCommand(action);
 };
 
 const startProgram = () => {
-    robotService.startRobotProgram();
+  robotService.startRobotProgram();
 };
 
 const stopProgram = () => {
-    robotService.stopRobotProgram();
+  robotService.stopRobotProgram();
 };
 
 const resetErrors = () => {
-    robotService.resetRobotErrors();
+  robotService.resetRobotErrors();
 };
 
 const setSpeed = () => {
-    robotService.setGlobalSpeed(speed.value);
+  robotService.setGlobalSpeed(speed.value);
 };
 
 const testModbusWrite = () => {
-    robotService.testModbusWrite();
+  robotService.testModbusWrite();
 };
 
 const scanWritableRegisters = () => {
-    robotService.scanWritableRegisters();
+  robotService.scanWritableRegisters();
 };
 
 const readRobotStatus = () => {
-    robotService.readRobotStatus();
+  robotService.readRobotStatus();
 };
 
 const readCommandStatus = () => {
-    robotService.readCommandStatus();
+  robotService.readCommandStatus();
 };
 
 const toggleTcpMode = () => {
-    useTcp5000.value = !useTcp5000.value;
-    if (useTcp5000.value) {
-        // Switch to TCP 5000
-        localStorage.setItem('VITE_ROBOT_PORT', '5000');
-        robotService.addLog('Switched to TCP String Protocol (Port 5000)', 'info');
-        robotService.addLog('Reconnect to apply changes', 'warn');
-    } else {
-        // Switch to Modbus 1502
-        localStorage.setItem('VITE_ROBOT_PORT', '1502');
-        robotService.addLog('Switched to Modbus TCP (Port 1502)', 'info');
-        robotService.addLog('Reconnect to apply changes', 'warn');
-    }
+  useTcp5000.value = !useTcp5000.value;
+  if (useTcp5000.value) {
+    // Switch to TCP 5000
+    localStorage.setItem("VITE_ROBOT_PORT", "5000");
+    robotService.addLog("Switched to TCP String Protocol (Port 5000)", "info");
+    robotService.addLog("Reconnect to apply changes", "warn");
+  } else {
+    // Switch to Modbus 1502
+    localStorage.setItem("VITE_ROBOT_PORT", "1502");
+    robotService.addLog("Switched to Modbus TCP (Port 1502)", "info");
+    robotService.addLog("Reconnect to apply changes", "warn");
+  }
 };
 
 const testTcpCommand = async () => {
-    robotService.addLog('=== TESTING TCP STRING COMMAND ===', 'info');
-    robotService.addLog('Sending: GetCurJPos()', 'cmd');
-    
-    const response = await robotService.getCurrentJointPosition();
-    if (response) {
-        robotService.addLog(`Response: ${JSON.stringify(response)}`, 'info');
-    }
+  robotService.addLog("=== TESTING TCP STRING COMMAND ===", "info");
+  robotService.addLog("Sending: GetCurJPos()", "cmd");
+
+  const response = await robotService.getCurrentJointPosition();
+  if (response) {
+    robotService.addLog(`Response: ${JSON.stringify(response)}`, "info");
+  }
+};
+
+const testDirectWrite = () => {
+  robotService.addLog("=== TESTING DIRECT MODBUS WRITE ===", "info");
+  robotService.addLog(
+    "Step 1: Write 0x11 to register 40051 (command flag)",
+    "cmd",
+  );
+  robotService.writeModbusRegister(50, 0x11); // Address 50 = Modbus 40051
+
+  setTimeout(() => {
+    robotService.addLog(
+      "Step 2: Write 0x04 to register 40052 (start command)",
+      "cmd",
+    );
+    robotService.writeModbusRegister(51, 0x04); // Address 51 = Modbus 40052
+
+    setTimeout(() => {
+      robotService.addLog("Step 3: Read back registers 40050-40055", "info");
+      robotService.readModbusRegisters(49, 6); // Read addresses 49-54
+    }, 300);
+  }, 300);
 };
 </script>
 
@@ -103,113 +125,171 @@ const testTcpCommand = async () => {
   <div class="control-panel panel">
     <!-- Left: Main System State -->
     <div class="group main-controls">
-      <div class="label-heading mono">{{ t('control.system') }}</div>
-      <button 
-        @click="toggleSystem" 
-        class="power-btn" 
+      <div class="label-heading mono">{{ t("control.system") }}</div>
+      <button
+        @click="toggleSystem"
+        class="power-btn"
         :class="{ active: isSystemActive }"
       >
         <div class="icon-power">⏻</div>
-        <span>{{ isSystemActive ? t('header.online') : t('control.standby') }}</span>
+        <span>{{
+          isSystemActive ? t("header.online") : t("control.standby")
+        }}</span>
       </button>
-      
+
       <!-- Hidden Dev Tool for Demo -->
       <button @click="toggleDemo" class="demo-btn">
-         {{ isSystemActive ? t('control.demo_stop') : t('control.demo_start') }}
+        {{ isSystemActive ? t("control.demo_stop") : t("control.demo_start") }}
       </button>
     </div>
 
     <!-- Center: Operation Mode & Speed -->
     <div class="group mode-controls">
-      <div class="label-heading mono">{{ t('control.mode') }}</div>
+      <div class="label-heading mono">{{ t("control.mode") }}</div>
       <div class="mode-switch">
-        <button 
-            :class="{ selected: mode === 'MANUAL' }" 
-            @click="setMode('MANUAL')"
-        >{{ t('control.manual') }}</button>
-        <button 
-            :class="{ selected: mode === 'AUTO' }" 
-            @click="setMode('AUTO')"
-        >{{ t('control.auto') }}</button>
+        <button
+          :class="{ selected: mode === 'MANUAL' }"
+          @click="setMode('MANUAL')"
+        >
+          {{ t("control.manual") }}
+        </button>
+        <button :class="{ selected: mode === 'AUTO' }" @click="setMode('AUTO')">
+          {{ t("control.auto") }}
+        </button>
       </div>
-      
+
       <div class="speed-slider">
-        <span class="mono">{{ t('control.speed') }}: {{ speed }}%</span>
+        <span class="mono">{{ t("control.speed") }}: {{ speed }}%</span>
         <input type="range" v-model="speed" min="1" max="100" />
       </div>
 
       <div class="sub-actions">
-          <button class="sm-btn" @click="handleAction('SERVO_ON')">{{ t('control.servo') }}</button>
-          <button class="sm-btn" @click="handleAction('RESET')">{{ t('control.reset') }}</button>
-          <button class="sm-btn" @click="handleAction('HOME')">{{ t('control.home') }}</button>
+        <button class="sm-btn" @click="handleAction('SERVO_ON')">
+          {{ t("control.servo") }}
+        </button>
+        <button class="sm-btn" @click="handleAction('RESET')">
+          {{ t("control.reset") }}
+        </button>
+        <button class="sm-btn" @click="handleAction('HOME')">
+          {{ t("control.home") }}
+        </button>
       </div>
     </div>
 
     <!-- Right: Manual Jog / Actions -->
     <div class="group action-controls">
-      <div class="label-heading mono">{{ t('control.manualdata') }}</div>
-      
+      <div class="label-heading mono">{{ t("control.manualdata") }}</div>
+
       <div v-if="mode === 'MANUAL'" class="jog-grid">
-         <button class="jog-btn" @click="handleJog('X-')">X-</button>
-         <button class="jog-btn" @click="handleJog('Y+')">Y+</button>
-         <button class="jog-btn" @click="handleJog('X+')">X+</button>
-         <button class="jog-btn" @click="handleJog('Z-')">Z-</button>
-         <button class="jog-btn" @click="handleJog('Y-')">Y-</button>
-         <button class="jog-btn" @click="handleJog('Z+')">Z+</button>
+        <button class="jog-btn" @click="handleJog('X-')">X-</button>
+        <button class="jog-btn" @click="handleJog('Y+')">Y+</button>
+        <button class="jog-btn" @click="handleJog('X+')">X+</button>
+        <button class="jog-btn" @click="handleJog('Z-')">Z-</button>
+        <button class="jog-btn" @click="handleJog('Y-')">Y-</button>
+        <button class="jog-btn" @click="handleJog('Z+')">Z+</button>
       </div>
-      
+
       <div v-else class="auto-msg mono">
-         <span class="pulse-dot"></span>
-         {{ t('control.aipilot') }}
+        <span class="pulse-dot"></span>
+        {{ t("control.aipilot") }}
       </div>
     </div>
-    
+
     <!-- Emergency Stop -->
     <div class="estop-wrapper">
-       <button class="estop-btn" @click="handleAction('ESTOP')">
-         <span>{{ t('control.stop') }}</span>
-       </button>
+      <button class="estop-btn" @click="handleAction('ESTOP')">
+        <span>{{ t("control.stop") }}</span>
+      </button>
     </div>
   </div>
 
   <!-- Modbus Control Panel -->
   <div class="modbus-test-panel">
     <div class="label-heading mono">
-      Protocol Control 
+      Protocol Control
       <span class="protocol-toggle">
-        <button @click="toggleTcpMode" class="tcp-toggle-btn" :class="{ active: useTcp5000 }">
-          {{ useTcp5000 ? 'TCP 5000' : 'Modbus 1502' }}
+        <button
+          @click="toggleTcpMode"
+          class="tcp-toggle-btn"
+          :class="{ active: useTcp5000 }"
+        >
+          {{ useTcp5000 ? "TCP 5000" : "Modbus 1502" }}
         </button>
       </span>
     </div>
     <div class="modbus-controls">
-      <button @click="startProgram" class="start-btn mono" title="Start robot program">
+      <button
+        @click="startProgram"
+        class="start-btn mono"
+        title="Start robot program"
+      >
         ▶ Start
       </button>
-      <button @click="stopProgram" class="stop-btn mono" title="Stop robot program">
+      <button
+        @click="stopProgram"
+        class="stop-btn mono"
+        title="Stop robot program"
+      >
         ⏹ Stop
       </button>
-      <button @click="resetErrors" class="reset-btn mono" title="Reset robot errors">
+      <button
+        @click="resetErrors"
+        class="reset-btn mono"
+        title="Reset robot errors"
+      >
         ↺ Reset
       </button>
-      <button @click="readRobotStatus" class="status-btn mono" title="Read robot status (40002-40018)">
+      <button
+        @click="readRobotStatus"
+        class="status-btn mono"
+        title="Read robot status (40002-40018)"
+      >
         📊 Status
       </button>
-      <button @click="readCommandStatus" class="status-btn mono" title="Read command status (40018)">
+      <button
+        @click="readCommandStatus"
+        class="status-btn mono"
+        title="Read command status (40018)"
+      >
         ✓ Cmd Status
       </button>
-      <button @click="testModbusWrite" class="test-btn mono" title="Test Modbus write operation">
+      <button
+        @click="testModbusWrite"
+        class="test-btn mono"
+        title="Test Modbus write operation"
+      >
         🧪 Test Write
       </button>
-      <button @click="scanWritableRegisters" class="scan-btn mono" title="Scan for writable registers">
+      <button
+        @click="scanWritableRegisters"
+        class="scan-btn mono"
+        title="Scan for writable registers"
+      >
         🔍 Scan Writable
       </button>
-      <button @click="testTcpCommand" class="tcp-btn mono" title="Test TCP string command (Port 5000)">
+      <button
+        @click="testTcpCommand"
+        class="tcp-btn mono"
+        title="Test TCP string command (Port 5000)"
+      >
         📡 TCP Test
       </button>
+      <button
+        @click="testDirectWrite"
+        class="test-btn mono"
+        title="Test direct Modbus write (40051=0x11, 40052=0x04)"
+      >
+        🧪 Direct Write
+      </button>
       <div class="speed-control">
-        <label>Speed: {{speed}}%</label>
-        <input type="range" v-model="speed" min="0" max="100" class="speed-slider" />
+        <label>Speed: {{ speed }}%</label>
+        <input
+          type="range"
+          v-model="speed"
+          min="0"
+          max="100"
+          class="speed-slider"
+        />
         <button @click="setSpeed" class="set-btn mono" title="Set robot speed">
           Set
         </button>
@@ -238,19 +318,19 @@ const testTcpCommand = async () => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  
+
   .label-heading {
     font-size: 0.7rem;
     color: var(--color-text-dim);
     letter-spacing: 1px;
-    border-bottom: 2px solid rgba(255,255,255,0.05);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
     padding-bottom: 4px;
     margin-bottom: 4px;
   }
 }
 
 .main-controls {
-    min-width: 120px;
+  min-width: 120px;
 }
 
 .power-btn {
@@ -260,25 +340,29 @@ const testTcpCommand = async () => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--color-border);
   color: var(--color-text-dim);
   transition: all 0.3s ease;
-  
-  .icon-power { font-size: 1.5rem; }
-  
-  &:hover {
-     background: rgba(255,255,255,0.1);
-     color: var(--color-text);
+
+  .icon-power {
+    font-size: 1.5rem;
   }
-  
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text);
+  }
+
   &.active {
     border-color: var(--color-primary);
     background: rgba(0, 255, 157, 0.1);
     color: var(--color-primary);
-    box-shadow: 0 0 15px rgba(0,255,157,0.2);
-    
-    .icon-power { text-shadow: 0 0 8px var(--color-primary); }
+    box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+
+    .icon-power {
+      text-shadow: 0 0 8px var(--color-primary);
+    }
   }
 }
 
@@ -290,35 +374,38 @@ const testTcpCommand = async () => {
   color: var(--color-text-dim);
   border: 1px dashed var(--color-border);
   opacity: 0.5;
-  &:hover { opacity: 1; color: var(--color-warning); border-color: var(--color-warning); }
+  &:hover {
+    opacity: 1;
+    color: var(--color-warning);
+    border-color: var(--color-warning);
+  }
 }
 
 .mode-controls {
-    flex-grow: 1;
-    max-width: 300px;
+  flex-grow: 1;
+  max-width: 300px;
 }
 
 .mode-switch {
   display: flex;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   padding: 4px;
   border-radius: 6px;
-  
+
   button {
     flex: 1;
     background: transparent;
     font-size: 0.8rem;
     padding: 6px;
     color: var(--color-text-dim);
-    
+
     &.selected {
       background: var(--color-info);
       color: #000;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     }
   }
 }
-
 
 .sub-actions {
   display: flex;
@@ -327,7 +414,7 @@ const testTcpCommand = async () => {
 }
 
 .sm-btn {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--color-border);
   color: var(--color-text-dim);
   font-size: 0.65rem;
@@ -341,80 +428,93 @@ const testTcpCommand = async () => {
 }
 
 .speed-slider {
-    margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 0.8rem;
-    color: var(--color-text-dim);
-    
-    input[type=range] {
-        width: 100%;
-        accent-color: var(--color-info);
-    }
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--color-text-dim);
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--color-info);
+  }
 }
 
 .action-controls {
-    flex-grow: 1;
+  flex-grow: 1;
 }
 
 .jog-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    
-    .jog-btn {
-        padding: 8px;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid var(--color-border);
-        font-family: var(--font-mono);
-        &:hover { background: var(--color-info); color: #000; }
-        &:active { transform: translateY(1px); }
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+
+  .jog-btn {
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    &:hover {
+      background: var(--color-info);
+      color: #000;
     }
+    &:active {
+      transform: translateY(1px);
+    }
+  }
 }
 
 .auto-msg {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--color-info);
-    border: 1px dashed var(--color-info);
-    border-radius: 4px;
-    background: rgba(0, 217, 255, 0.05);
-    gap: 10px;
-    
-    .pulse-dot {
-        width: 8px; height: 8px; background: var(--color-info); border-radius: 50%;
-        animation: blink 1s infinite;
-    }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-info);
+  border: 1px dashed var(--color-info);
+  border-radius: 4px;
+  background: rgba(0, 217, 255, 0.05);
+  gap: 10px;
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--color-info);
+    border-radius: 50%;
+    animation: blink 1s infinite;
+  }
 }
 
 .estop-wrapper {
-   display: flex;
-   align-items: center;
-   border-left: 1px solid var(--color-border);
-   padding-left: 2rem;
+  display: flex;
+  align-items: center;
+  border-left: 1px solid var(--color-border);
+  padding-left: 2rem;
 }
 
 .estop-btn {
-  width: 80px; height: 80px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, #ff4444, #990000);
   border: 4px solid #550000;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
   color: white;
   font-weight: bold;
   cursor: pointer;
-  &:hover { background: radial-gradient(circle at 30% 30%, #ff6666, #cc0000); }
-  &:active { transform: scale(0.95); }
+  &:hover {
+    background: radial-gradient(circle at 30% 30%, #ff6666, #cc0000);
+  }
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 /* Modbus Test Panel */
 .modbus-test-panel {
   margin-top: 1rem;
   padding: 1rem;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--color-border);
   border-radius: 4px;
 
@@ -438,7 +538,7 @@ const testTcpCommand = async () => {
       input {
         width: 80px;
         padding: 0.5rem;
-        background: rgba(255,255,255,0.05);
+        background: rgba(255, 255, 255, 0.05);
         border: 1px solid var(--color-border);
         color: var(--color-text);
         font-family: var(--font-mono);
@@ -531,11 +631,11 @@ const testTcpCommand = async () => {
 
   .protocol-toggle {
     margin-left: 1rem;
-    
+
     .tcp-toggle-btn {
       padding: 2px 8px;
       font-size: 0.65rem;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       border: 1px solid var(--color-border);
       color: var(--color-text-dim);
       border-radius: 3px;
@@ -543,7 +643,7 @@ const testTcpCommand = async () => {
       transition: all 0.2s;
 
       &:hover {
-        background: rgba(255,255,255,0.2);
+        background: rgba(255, 255, 255, 0.2);
         color: var(--color-text);
       }
 
@@ -566,7 +666,7 @@ const testTcpCommand = async () => {
 .modbus-test-panel {
   margin-top: 0.5rem;
   padding: 0.5rem;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--color-border);
   border-radius: 4px;
 }
@@ -587,14 +687,14 @@ const testTcpCommand = async () => {
     align-items: center;
     gap: 0.5rem;
     margin-left: auto;
-    
+
     label {
       font-size: 0.75rem;
       color: var(--color-text);
       font-family: var(--font-mono);
       white-space: nowrap;
     }
-    
+
     .speed-slider {
       width: 80px;
       accent-color: var(--color-info);
@@ -602,6 +702,13 @@ const testTcpCommand = async () => {
   }
 }
 
-@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
 </style>
