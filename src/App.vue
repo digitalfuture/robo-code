@@ -1,26 +1,35 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue';
-import CameraFeed from './components/CameraFeed.vue';
-import RobotStatus from './components/RobotStatus.vue';
-import ConsoleLog from './components/ConsoleLog.vue';
-import ControlPanel from './components/ControlPanel.vue';
-import DiagnosticsPanel from './components/DiagnosticsPanel.vue';
-import { currentLang, setLanguage, t } from './services/i18n';
-import { robotService } from './services/robotState';
-import type { Language } from './services/i18n';
+import { onMounted, computed, ref } from "vue";
+import CameraFeed from "./components/CameraFeed.vue";
+import RobotStatus from "./components/RobotStatus.vue";
+import ConsoleLog from "./components/ConsoleLog.vue";
+import ControlPanel from "./components/ControlPanel.vue";
+import DiagnosticsPanel from "./components/DiagnosticsPanel.vue";
+import { currentLang, setLanguage, t } from "./services/i18n";
+import { robotService } from "./services/robotState";
+import { robotDiagnostics } from "./services/robotDiagnostics";
+import type { Language } from "./services/i18n";
 
-const langs: Language[] = ['EN', 'RU', 'CN'];
+const langs: Language[] = ["EN", "RU", "CN"];
 const state = robotService.state;
 const isConnected = computed(() => state.isConnected);
 const showConsole = ref(false);
 
 // Auto-connect on app mount
 onMounted(() => {
-  robotService.addLog('=== APPLICATION STARTED ===', 'success');
-  robotService.addLog(`Interface language: ${currentLang.value}`, 'info');
-  robotService.addLog('Attempting initial connection...', 'info');
+  robotService.addLog("=== APPLICATION STARTED ===", "success");
+  robotService.addLog(`Interface language: ${currentLang.value}`, "info");
+  robotService.addLog("Attempting initial connection...", "info");
   robotService.connect();
   showConsole.value = true;
+
+  // Auto-read diagnostics after connection
+  setTimeout(() => {
+    if (robotService.state.isConnected) {
+      robotService.addLog("Reading robot diagnostics...", "info");
+      robotDiagnostics.readDiagnostics();
+    }
+  }, 2000);
 });
 </script>
 
@@ -29,30 +38,38 @@ onMounted(() => {
     <header>
       <div class="brand">
         <h1>ROBO<span class="highlight">CORE</span> v2.0</h1>
-        <span class="subtitle mono">{{ t('header.subtitle') }}</span>
+        <span class="subtitle mono">{{ t("header.subtitle") }}</span>
       </div>
 
       <div class="header-right">
-          <div class="lang-switch">
-             <button
-                v-for="l in langs"
-                :key="l"
-                class="lang-btn"
-                :class="{ active: currentLang === l }"
-                @click="setLanguage(l)"
-             >
-               {{ l }}
-             </button>
-          </div>
-          <div class="network-status mono">
-            <button class="console-toggle-btn" @click="showConsole = !showConsole">
-              <span class="icon">📋</span>
-              <span class="label">{{ showConsole ? t('log.hide') : t('log.show') }}</span>
-            </button>
-            <span class="divider">|</span>
-            {{ t('header.net') }}: <span :class="isConnected ? 'online' : 'offline'">{{ isConnected ? t('header.online') : t('status.offline') }}</span>
-            <template v-if="isConnected">| {{ t('header.ping') }}: 24ms</template>
-          </div>
+        <div class="lang-switch">
+          <button
+            v-for="l in langs"
+            :key="l"
+            class="lang-btn"
+            :class="{ active: currentLang === l }"
+            @click="setLanguage(l)"
+          >
+            {{ l }}
+          </button>
+        </div>
+        <div class="network-status mono">
+          <button
+            class="console-toggle-btn"
+            @click="showConsole = !showConsole"
+          >
+            <span class="icon">📋</span>
+            <span class="label">{{
+              showConsole ? t("log.hide") : t("log.show")
+            }}</span>
+          </button>
+          <span class="divider">|</span>
+          {{ t("header.net") }}:
+          <span :class="isConnected ? 'online' : 'offline'">{{
+            isConnected ? t("header.online") : t("status.offline")
+          }}</span>
+          <template v-if="isConnected">| {{ t("header.ping") }}: 24ms</template>
+        </div>
       </div>
     </header>
 
@@ -76,12 +93,18 @@ onMounted(() => {
         <div v-if="showConsole" class="console-modal-overlay">
           <div class="console-modal" @click.stop>
             <div class="modal-header">
-              <h3 class="modal-title mono">{{ t('log.title') }}</h3>
+              <h3 class="modal-title mono">{{ t("log.title") }}</h3>
               <div class="modal-actions">
-                <button class="clear-btn" @click="robotService.clearLogs()" :title="t('log.clear')">
-                  🗑 {{ t('log.clear') }}
+                <button
+                  class="clear-btn"
+                  @click="robotService.clearLogs()"
+                  :title="t('log.clear')"
+                >
+                  🗑 {{ t("log.clear") }}
                 </button>
-                <button class="modal-close" @click="showConsole = false">×</button>
+                <button class="modal-close" @click="showConsole = false">
+                  ×
+                </button>
               </div>
             </div>
             <ConsoleLog />
@@ -115,11 +138,21 @@ header {
   align-items: center;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--color-border);
-  
+
   .brand {
-    h1 { font-size: 1.5rem; letter-spacing: 2px; }
-    .highlight { color: var(--color-primary); }
-    .subtitle { color: var(--color-text-dim); font-size: 0.8rem; margin-top: 4px; display: block;}
+    h1 {
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+    }
+    .highlight {
+      color: var(--color-primary);
+    }
+    .subtitle {
+      color: var(--color-text-dim);
+      font-size: 0.8rem;
+      margin-top: 4px;
+      display: block;
+    }
   }
 
   .network-status {
@@ -129,9 +162,16 @@ header {
     align-items: center;
     gap: 10px;
 
-    .divider { color: var(--color-border); }
-    .online { color: var(--color-primary); text-shadow: 0 0 5px var(--color-primary); }
-    .offline { color: var(--color-danger); }
+    .divider {
+      color: var(--color-border);
+    }
+    .online {
+      color: var(--color-primary);
+      text-shadow: 0 0 5px var(--color-primary);
+    }
+    .offline {
+      color: var(--color-danger);
+    }
   }
 }
 
@@ -159,7 +199,9 @@ header {
   padding: 2px 8px;
   cursor: pointer;
 
-  &:hover { color: var(--color-text); }
+  &:hover {
+    color: var(--color-text);
+  }
   &.active {
     background: var(--color-primary);
     color: #000;
@@ -179,7 +221,9 @@ header {
   font-family: var(--font-mono);
   color: var(--color-text-dim);
 
-  .icon { font-size: 0.9rem; }
+  .icon {
+    font-size: 0.9rem;
+  }
 
   &:hover {
     background: var(--color-primary);
