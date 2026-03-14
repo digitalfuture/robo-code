@@ -1,4 +1,4 @@
-import { reactive, readonly } from 'vue';
+import { reactive, readonly } from "vue";
 import {
   ProtocolParser,
   CommandBuilder,
@@ -7,14 +7,14 @@ import {
   Scope,
   VarType,
   IOType,
-  type CommandResponse
-} from './robotProtocol';
+  type CommandResponse,
+} from "./robotProtocol";
 
 // Define the shape of our robot state
 interface LogEntry {
   id: number;
   time: string;
-  type: 'info' | 'warn' | 'error' | 'success' | 'cmd';
+  type: "info" | "warn" | "error" | "success" | "cmd";
   msg: string;
 }
 
@@ -25,7 +25,7 @@ interface RobotState {
     port: number;
     protocol: string;
   };
-  mode: 'MANUAL' | 'AUTO' | 'REMOTE';
+  mode: "MANUAL" | "AUTO" | "REMOTE";
   coordinates: {
     x: number;
     y: number;
@@ -57,11 +57,11 @@ interface RobotState {
 const state = reactive<RobotState>({
   isConnected: false,
   connection: {
-    address: import.meta.env.VITE_ROBOT_IP || '192.168.1.100',
+    address: import.meta.env.VITE_ROBOT_IP || "192.168.1.100",
     port: Number(import.meta.env.VITE_ROBOT_PORT) || 1502,
-    protocol: 'Modbus TCP (Port 1502)'
+    protocol: "Modbus TCP (Port 1502)",
   },
-  mode: 'MANUAL',
+  mode: "MANUAL",
   coordinates: { x: 0, y: 0, z: 0, a: 0, b: 0, c: 0 },
   joints: [0, 0, 0, 0, 0, 0],
   runStatus: RunStatus.PROG_STOPPED,
@@ -69,10 +69,10 @@ const state = reactive<RobotState>({
   servoEnabled: false,
   camera: {
     hasSignal: false,
-    targets: []
+    targets: [],
   },
   logs: [],
-  lastRegisters: []
+  lastRegisters: [],
 });
 
 // WebSocket instance
@@ -84,20 +84,20 @@ let ws: WebSocket | null = null;
 export const robotService = {
   state: readonly(state),
 
-  addLog(msg: string, type: LogEntry['type'] = 'info') {
+  addLog(msg: string, type: LogEntry["type"] = "info") {
     const now = new Date();
     state.logs.push({
       id: Date.now() + Math.random(),
       time: now.toLocaleTimeString(),
       type,
-      msg
+      msg,
     });
     if (state.logs.length > 100) state.logs.shift();
   },
 
   clearLogs() {
     state.logs = [];
-    this.addLog('Logs cleared', 'info');
+    this.addLog("Logs cleared", "info");
   },
 
   /**
@@ -105,60 +105,78 @@ export const robotService = {
    */
   connect() {
     if (state.isConnected) {
-      this.addLog('Already connected, skipping...', 'warn');
+      this.addLog("Already connected, skipping...", "warn");
       return;
     }
 
-    const proxyUrl = import.meta.env.VITE_PROXY_URL || 'ws://localhost:3000';
+    const proxyUrl = import.meta.env.VITE_PROXY_URL || "ws://localhost:3000";
     // Get port from localStorage or env (default: 1502 for Modbus TCP)
-    const robotPort = Number(localStorage.getItem('VITE_ROBOT_PORT')) || Number(import.meta.env.VITE_ROBOT_PORT) || 1502;
-    const robotIp = import.meta.env.VITE_ROBOT_IP || '192.168.1.100';
-    const protocol = (robotPort === 502 || robotPort === 1502) ? 'Modbus TCP' : 'TCP String (ER Series RCS2 V1.5.3)';
+    const robotPort =
+      Number(localStorage.getItem("VITE_ROBOT_PORT")) ||
+      Number(import.meta.env.VITE_ROBOT_PORT) ||
+      1502;
+    const robotIp = import.meta.env.VITE_ROBOT_IP || "192.168.1.100";
+    const protocol =
+      robotPort === 502 || robotPort === 1502
+        ? "Modbus TCP"
+        : "TCP String (ER Series RCS2 V1.5.3)";
 
-    this.addLog('=== CONNECTION STARTED ===', 'info');
-    this.addLog(`Protocol: ${protocol}`, 'info');
-    this.addLog(`ENV Settings:`, 'info');
-    this.addLog(`  VITE_ROBOT_IP: ${robotIp}`, 'info');
-    this.addLog(`  VITE_ROBOT_PORT: ${robotPort}`, 'info');
-    this.addLog(`  VITE_PROXY_URL: ${proxyUrl}`, 'info');
-    this.addLog(`Attempting WebSocket connection to: ${proxyUrl}`, 'info');
+    this.addLog("=== CONNECTION STARTED ===", "info");
+    this.addLog(`Protocol: ${protocol}`, "info");
+    this.addLog(`ENV Settings:`, "info");
+    this.addLog(`  VITE_ROBOT_IP: ${robotIp}`, "info");
+    this.addLog(`  VITE_ROBOT_PORT: ${robotPort}`, "info");
+    this.addLog(`  VITE_PROXY_URL: ${proxyUrl}`, "info");
+    this.addLog(`Attempting WebSocket connection to: ${proxyUrl}`, "info");
 
     try {
       ws = new WebSocket(proxyUrl);
     } catch (e: any) {
-      this.addLog(`CRITICAL ERROR: Failed to create WebSocket: ${e.message}`, 'error');
+      this.addLog(
+        `CRITICAL ERROR: Failed to create WebSocket: ${e.message}`,
+        "error",
+      );
       state.isConnected = false;
       return;
     }
 
     const connectionTimeout = setTimeout(() => {
       if (!state.isConnected) {
-        this.addLog(`CONNECTION TIMEOUT: No response from proxy server after 10s`, 'error');
-        this.addLog(`Possible causes:`, 'warn');
-        this.addLog(`  1. Proxy server is not running (npm run server)`, 'warn');
-        this.addLog(`  2. Wrong proxy address: ${proxyUrl}`, 'warn');
-        this.addLog(`  3. Firewall blocking connection`, 'warn');
+        this.addLog(
+          `CONNECTION TIMEOUT: No response from proxy server after 10s`,
+          "error",
+        );
+        this.addLog(`Possible causes:`, "warn");
+        this.addLog(
+          `  1. Proxy server is not running (npm run server)`,
+          "warn",
+        );
+        this.addLog(`  2. Wrong proxy address: ${proxyUrl}`, "warn");
+        this.addLog(`  3. Firewall blocking connection`, "warn");
         ws?.close();
       }
     }, 10000);
 
     ws.onopen = () => {
       clearTimeout(connectionTimeout);
-      this.addLog('✓ WebSocket connection established', 'success');
+      this.addLog("✓ WebSocket connection established", "success");
       state.isConnected = true;
 
       // Send handshake to proxy WITH PORT
       const handshake = JSON.stringify({
-        cmd: 'CONNECT',
-        target: { ip: robotIp, port: robotPort }
+        cmd: "CONNECT",
+        target: { ip: robotIp, port: robotPort },
       });
       ws?.send(handshake);
-      this.addLog(`Handshake sent: ${handshake}`, 'cmd');
+      this.addLog(`Handshake sent: ${handshake}`, "cmd");
 
       // Start automatic register scanning for Modbus TCP
       if (robotPort === 502 || robotPort === 1502) {
-        this.addLog('Starting automatic Modbus register scan...', 'info');
-        this.addLog('Reading coordinates (regs 100-109) and joints (regs 200-205)...', 'info');
+        this.addLog("Starting automatic Modbus register scan...", "info");
+        this.addLog(
+          "Reading coordinates (regs 100-109) and joints (regs 200-205)...",
+          "info",
+        );
         // Read coordinates first (registers 100-109)
         this.readModbusRegisters(100, 10);
         // Then read joints (registers 200-205) after delay
@@ -167,7 +185,7 @@ export const robotService = {
         }, 500);
       } else {
         // TCP String Protocol
-        this.addLog('Requesting robot status...', 'info');
+        this.addLog("Requesting robot status...", "info");
         this.getRunStatus();
       }
     };
@@ -176,21 +194,24 @@ export const robotService = {
       try {
         const data = JSON.parse(event.data);
 
-        if (data.type === 'STATUS') {
+        if (data.type === "STATUS") {
           if (data.connected) {
-            this.addLog('✓ Robot connection confirmed', 'success');
+            this.addLog("✓ Robot connection confirmed", "success");
             // Update protocol if provided by server
             if (data.protocol) {
               state.connection.protocol = data.protocol;
             }
           } else {
-            this.addLog(`✗ Robot connection failed: ${data.error || 'Unknown error'}`, 'error');
+            this.addLog(
+              `✗ Robot connection failed: ${data.error || "Unknown error"}`,
+              "error",
+            );
             state.isConnected = false;
           }
         }
 
-        if (data.type === 'ROBOT_RESPONSE') {
-          this.addLog(`← Robot: ${data.response}`, 'info');
+        if (data.type === "ROBOT_RESPONSE") {
+          this.addLog(`← Robot: ${data.response}`, "info");
 
           // Parse response and update state
           const response = ProtocolParser.parseResponse(data.response);
@@ -199,44 +220,47 @@ export const robotService = {
           }
         }
 
-        if (data.type === 'REGISTER_DATA') {
+        if (data.type === "REGISTER_DATA") {
           // Modbus TCP register data received
           // Log only for manual read operations
           if (this._logNextRegisterData) {
-            const preview = data.values.slice(0, 20).join(', ');
-            this.addLog(`Registers: [${preview}]`, 'info');
+            const preview = data.values.slice(0, 20).join(", ");
+            this.addLog(`Registers: [${preview}]`, "info");
             this._logNextRegisterData = false; // Reset flag
           }
           this.handleModbusData(data.values);
         }
 
-        if (data.type === 'HEARTBEAT') {
-          this.addLog('♥ Heartbeat received', 'info');
+        if (data.type === "HEARTBEAT") {
+          this.addLog("♥ Heartbeat received", "info");
         }
 
-        if (data.type === 'ERROR') {
-          this.addLog(`ROBOT ERROR: ${data.message}`, 'error');
+        if (data.type === "ERROR") {
+          this.addLog(`ROBOT ERROR: ${data.message}`, "error");
         }
       } catch (e: any) {
-        this.addLog(`Parse error: ${e.message} | Raw: ${event.data}`, 'error');
+        this.addLog(`Parse error: ${e.message} | Raw: ${event.data}`, "error");
       }
     };
 
     ws.onclose = (event) => {
       clearTimeout(connectionTimeout);
       state.isConnected = false;
-      this.addLog('✗ WebSocket connection closed', 'error');
-      this.addLog(`Code: ${event.code}, Reason: ${event.reason || 'No reason'}`, 'error');
+      this.addLog("✗ WebSocket connection closed", "error");
+      this.addLog(
+        `Code: ${event.code}, Reason: ${event.reason || "No reason"}`,
+        "error",
+      );
 
       if (event.code === 1006) {
-        this.addLog('Code 1006: Server unreachable', 'error');
-        this.addLog(`Check: npm run server`, 'warn');
+        this.addLog("Code 1006: Server unreachable", "error");
+        this.addLog(`Check: npm run server`, "warn");
       }
     };
 
     ws.onerror = () => {
-      this.addLog('✗ WebSocket error', 'error');
-      this.addLog('Server may be offline', 'warn');
+      this.addLog("✗ WebSocket error", "error");
+      this.addLog("Server may be offline", "warn");
     };
   },
 
@@ -246,28 +270,28 @@ export const robotService = {
   handleRobotResponse(response: CommandResponse) {
     // Update state based on response type
     if (!response.success) {
-      this.addLog(`Command ${response.id} failed: ${response.error}`, 'error');
+      this.addLog(`Command ${response.id} failed: ${response.error}`, "error");
       return;
     }
 
     // Response data handling based on command type
     if (response.data) {
       // Check for motion finish
-      if (response.data.type === 'MOVE_FINISH') {
-        this.addLog(`Motion completed (ID: ${response.id})`, 'success');
+      if (response.data.type === "MOVE_FINISH") {
+        this.addLog(`Motion completed (ID: ${response.id})`, "success");
       }
-      if (response.data.type === 'ROBOT_STOP') {
-        this.addLog(`Robot stopped (ID: ${response.id})`, 'warn');
+      if (response.data.type === "ROBOT_STOP") {
+        this.addLog(`Robot stopped (ID: ${response.id})`, "warn");
         state.runStatus = RunStatus.PROG_STOPPED;
       }
-      if (response.data.type === 'SAFE_DOOR_OPEN') {
-        this.addLog(`Safety door open! (ID: ${response.id})`, 'error');
+      if (response.data.type === "SAFE_DOOR_OPEN") {
+        this.addLog(`Safety door open! (ID: ${response.id})`, "error");
       }
     }
   },
 
   disconnect() {
-    this.addLog('Manual Disconnect', 'warn');
+    this.addLog("Manual Disconnect", "warn");
     state.isConnected = false;
     ws?.close();
     ws = null;
@@ -279,20 +303,25 @@ export const robotService = {
    */
   readModbusRegisters(address: number = 100, count: number = 20) {
     if (!ws || !state.isConnected) {
-      this.addLog('Cannot read Modbus: No connection', 'error');
+      this.addLog("Cannot read Modbus: No connection", "error");
       return;
     }
 
     // Set flag to log the response
     this._logNextRegisterData = true;
 
-    ws.send(JSON.stringify({
-      type: 'READ_REGISTER',
-      addr: address,
-      count: count
-    }));
+    ws.send(
+      JSON.stringify({
+        type: "READ_REGISTER",
+        addr: address,
+        count: count,
+      }),
+    );
 
-    this.addLog(`Reading Modbus registers ${address}-${address + count - 1}`, 'cmd');
+    this.addLog(
+      `Reading Modbus registers ${address}-${address + count - 1}`,
+      "cmd",
+    );
   },
 
   // Flag to log next register data (for manual read operations)
@@ -303,24 +332,26 @@ export const robotService = {
    */
   writeModbusRegister(address: number, value: number) {
     if (!ws || !state.isConnected) {
-      this.addLog('Cannot write Modbus: No connection', 'error');
+      this.addLog("Cannot write Modbus: No connection", "error");
       return;
     }
 
-    ws.send(JSON.stringify({
-      type: 'WRITE_REGISTER',
-      addr: address,
-      val: value
-    }));
+    ws.send(
+      JSON.stringify({
+        type: "WRITE_REGISTER",
+        addr: address,
+        val: value,
+      }),
+    );
 
-    this.addLog(`Write Modbus ${address} -> ${value}`, 'cmd');
+    this.addLog(`Write Modbus ${address} -> ${value}`, "cmd");
   },
 
   /**
    * Start robot program via Modbus
    */
   startRobotProgram() {
-    this.addLog('Starting robot program...', 'cmd');
+    this.addLog("Starting robot program...", "cmd");
     // Set command flag (40051 = 0x11)
     this.writeModbusRegister(40051, 0x11);
     // Send Start command (40052 = 0x04)
@@ -333,7 +364,7 @@ export const robotService = {
    * Stop robot program via Modbus
    */
   stopRobotProgram() {
-    this.addLog('Stopping robot program...', 'cmd');
+    this.addLog("Stopping robot program...", "cmd");
     // Set command flag (40051 = 0x11)
     this.writeModbusRegister(40051, 0x11);
     // Send Stop command (40052 = 0x08)
@@ -346,7 +377,7 @@ export const robotService = {
    * Reset robot errors via Modbus
    */
   resetRobotErrors() {
-    this.addLog('Resetting robot errors...', 'cmd');
+    this.addLog("Resetting robot errors...", "cmd");
     // Set command flag (40051 = 0x11)
     this.writeModbusRegister(40051, 0x11);
     // Send Reset command (40052 = 0x10)
@@ -359,7 +390,7 @@ export const robotService = {
    * Set global speed via Modbus
    */
   setGlobalSpeed(speed: number) {
-    this.addLog(`Setting global speed: ${speed}%`, 'cmd');
+    this.addLog(`Setting global speed: ${speed}%`, "cmd");
     this.writeModbusRegister(40053, speed);
   },
 
@@ -367,7 +398,7 @@ export const robotService = {
    * Reset command state machine (use after errors)
    */
   resetStateMachine() {
-    this.addLog('Resetting command state machine...', 'warn');
+    this.addLog("Resetting command state machine...", "warn");
     this.writeModbusRegister(40051, 0x11);
     setTimeout(() => {
       this.writeModbusRegister(40052, 0x400);
@@ -377,10 +408,11 @@ export const robotService = {
   /**
    * Read robot status registers (40002-40018)
    * Based on ESTUN Modbus TCP Control Interface Data Table
+   * Note: Modbus 40002 = address 1, 40018 = address 17
    */
   readRobotStatus() {
-    this.addLog('Reading robot status (regs 40002-40018)...', 'info');
-    this.readModbusRegisters(40002, 17);
+    this.addLog("Reading robot status (regs 40002-40018)...", "info");
+    this.readModbusRegisters(1, 17); // Address 1-17 (Modbus 40002-40018)
   },
 
   /**
@@ -388,24 +420,24 @@ export const robotService = {
    * Shows which commands completed successfully
    */
   readCommandStatus() {
-    this.addLog('Reading command status (reg 40018)...', 'info');
-    this.readModbusRegisters(40018, 1);
+    this.addLog("Reading command status (reg 40018)...", "info");
+    this.readModbusRegisters(17, 1); // Address 17 (Modbus 40018)
   },
 
   /**
    * Test write to Modbus register - for verifying control capability
    */
   testModbusWrite() {
-    this.addLog('=== TESTING MODBUS WRITE ===', 'info');
-    this.addLog('Step 1: Setting command flag (40051 = 0x11)', 'cmd');
+    this.addLog("=== TESTING MODBUS WRITE ===", "info");
+    this.addLog("Step 1: Setting command flag (40051 = 0x11)", "cmd");
     this.writeModbusRegister(40051, 0x11);
-    
+
     setTimeout(() => {
-      this.addLog('Step 2: Writing test value to 40052 (0x01)', 'cmd');
+      this.addLog("Step 2: Writing test value to 40052 (0x01)", "cmd");
       this.writeModbusRegister(40052, 0x01);
-      
+
       setTimeout(() => {
-        this.addLog('Step 3: Reading back registers 40050-40055', 'info');
+        this.addLog("Step 3: Reading back registers 40050-40055", "info");
         this.readModbusRegisters(40050, 6);
       }, 200);
     }, 200);
@@ -415,7 +447,7 @@ export const robotService = {
    * Send start command via Modbus (40052 = 0x04)
    */
   sendStartCommand() {
-    this.addLog('Sending START command (40052 = 0x04)', 'cmd');
+    this.addLog("Sending START command (40052 = 0x04)", "cmd");
     this.writeModbusRegister(40051, 0x11);
     setTimeout(() => {
       this.writeModbusRegister(40052, 0x04);
@@ -426,7 +458,7 @@ export const robotService = {
    * Send stop command via Modbus (40052 = 0x08)
    */
   sendStopCommand() {
-    this.addLog('Sending STOP command (40052 = 0x08)', 'cmd');
+    this.addLog("Sending STOP command (40052 = 0x08)", "cmd");
     this.writeModbusRegister(40051, 0x11);
     setTimeout(() => {
       this.writeModbusRegister(40052, 0x08);
@@ -437,7 +469,7 @@ export const robotService = {
    * Send reset command via Modbus (40052 = 0x10)
    */
   sendResetCommand() {
-    this.addLog('Sending RESET command (40052 = 0x10)', 'cmd');
+    this.addLog("Sending RESET command (40052 = 0x10)", "cmd");
     this.writeModbusRegister(40051, 0x11);
     setTimeout(() => {
       this.writeModbusRegister(40052, 0x10);
@@ -448,38 +480,33 @@ export const robotService = {
    * Scan for writable registers - test write to common command registers
    */
   scanWritableRegisters() {
-    this.addLog('=== SCANNING FOR WRITABLE REGISTERS ===', 'info');
+    this.addLog("=== SCANNING FOR WRITABLE REGISTERS ===", "info");
 
     // Common command register addresses to test
     const testAddresses = [
       // Estun command registers
       40051, 40052, 40053, 40054, 40055,
       // Standard holding registers
-      10, 11, 12, 13, 14, 15,
-      50, 51, 52,
-      1000, 1001, 1002,
-      2000, 2001, 2002,
-      3000, 3001, 3002,
-      4000, 4001, 4002,
-      5000, 5001, 5002
+      10, 11, 12, 13, 14, 15, 50, 51, 52, 1000, 1001, 1002, 2000, 2001, 2002,
+      3000, 3001, 3002, 4000, 4001, 4002, 5000, 5001, 5002,
     ];
 
     let index = 0;
 
     const testNext = () => {
       if (index >= testAddresses.length) {
-        this.addLog('=== SCAN COMPLETE ===', 'success');
+        this.addLog("=== SCAN COMPLETE ===", "success");
         return;
       }
 
       const addr = testAddresses[index] ?? 0;
       const testValue = 0x01;
 
-      this.addLog(`Testing write to R${addr} = ${testValue}...`, 'info');
+      this.addLog(`Testing write to R${addr} = ${testValue}...`, "info");
 
       // Try to write
       this.writeModbusRegister(addr, testValue);
-      
+
       // Read back after delay
       setTimeout(() => {
         this.readModbusRegisters(addr, 1);
@@ -505,17 +532,22 @@ export const robotService = {
 
     // Coordinates have pattern: [val, 0, val, 0, val, 0, val, 0, val, 0]
     // Every other register is 0 or small value
-    const isCoordinates = values.length >= 9 &&
-                          (values[0] || 0) > 10000 &&  // X ~50000
-                          (values[1] || 0) < 1000 &&   // reserved
-                          (values[2] || 0) > 10000 &&  // Y ~17000
-                          (values[3] || 0) > 10000;    // not zero (some values)
+    const isCoordinates =
+      values.length >= 9 &&
+      (values[0] || 0) > 10000 && // X ~50000
+      (values[1] || 0) < 1000 && // reserved
+      (values[2] || 0) > 10000 && // Y ~17000
+      (values[3] || 0) > 10000; // not zero (some values)
 
     // Joints are 6 consecutive values in range 1000-60000
-    const isJoints = values.length >= 6 &&
-                     (values[0] || 0) > 500 && (values[0] || 0) < 60000 &&
-                     (values[1] || 0) > 500 && (values[1] || 0) < 60000 &&
-                     (values[2] || 0) > 500 && (values[2] || 0) < 60000;
+    const isJoints =
+      values.length >= 6 &&
+      (values[0] || 0) > 500 &&
+      (values[0] || 0) < 60000 &&
+      (values[1] || 0) > 500 &&
+      (values[1] || 0) < 60000 &&
+      (values[2] || 0) > 500 &&
+      (values[2] || 0) < 60000;
 
     // Update coordinates from registers 100-108
     if (isCoordinates && values.length >= 9) {
@@ -533,9 +565,10 @@ export const robotService = {
       const newB = rawB / 100;
 
       // Update state if values changed
-      const changed = Math.abs(newX - state.coordinates.x) > 0.1 ||
-                      Math.abs(newY - state.coordinates.y) > 0.1 ||
-                      Math.abs(newZ - state.coordinates.z) > 0.1;
+      const changed =
+        Math.abs(newX - state.coordinates.x) > 0.1 ||
+        Math.abs(newY - state.coordinates.y) > 0.1 ||
+        Math.abs(newZ - state.coordinates.z) > 0.1;
 
       if (changed) {
         state.coordinates.x = newX;
@@ -543,23 +576,26 @@ export const robotService = {
         state.coordinates.z = newZ;
         state.coordinates.a = newA;
         state.coordinates.b = newB;
-        this.addLog(`Position: X=${newX.toFixed(2)}, Y=${newY.toFixed(2)}, Z=${newZ.toFixed(2)}, A=${newA.toFixed(2)}°, B=${newB.toFixed(2)}°`, 'info');
+        this.addLog(
+          `Position: X=${newX.toFixed(2)}, Y=${newY.toFixed(2)}, Z=${newZ.toFixed(2)}, A=${newA.toFixed(2)}°, B=${newB.toFixed(2)}°`,
+          "info",
+        );
       }
     }
 
     // Update joints from registers 200-205 (6 consecutive values)
     // Only if NOT coordinates data
     if (isJoints && !isCoordinates && values.length >= 6) {
-      const newJoints = values.slice(0, 6).map(v => (v || 0) / 100);
+      const newJoints = values.slice(0, 6).map((v) => (v || 0) / 100);
 
       // Update if different
       if (JSON.stringify(newJoints) !== JSON.stringify(state.joints)) {
         state.joints = newJoints;
         this.addLog(
           `Joints: J1=${(newJoints[0] || 0).toFixed(2)}°, J2=${(newJoints[1] || 0).toFixed(2)}°, ` +
-          `J3=${(newJoints[2] || 0).toFixed(2)}°, J4=${(newJoints[3] || 0).toFixed(2)}°, ` +
-          `J5=${(newJoints[4] || 0).toFixed(2)}°, J6=${(newJoints[5] || 0).toFixed(2)}°`,
-          'info'
+            `J3=${(newJoints[2] || 0).toFixed(2)}°, J4=${(newJoints[3] || 0).toFixed(2)}°, ` +
+            `J5=${(newJoints[4] || 0).toFixed(2)}°, J6=${(newJoints[5] || 0).toFixed(2)}°`,
+          "info",
         );
       }
     }
@@ -575,35 +611,40 @@ export const robotService = {
   /**
    * Scan all Modbus registers automatically
    * Called automatically on connect for Modbus TCP
-   * 
+   *
    * Now optimized for known register map:
    * - Registers 100-109: Cartesian coordinates
    * - Registers 200-205: Joint angles
    */
   scanAllModbusRegisters() {
     if (!ws || !state.isConnected) {
-      this.addLog('Cannot scan: No connection', 'error');
+      this.addLog("Cannot scan: No connection", "error");
       return;
     }
 
-    this.addLog('=== STARTING MODBUS REGISTER SCAN ===', 'info');
-    this.addLog('Port 1502 - Known register map:', 'info');
-    this.addLog('  Registers 100-109: Cartesian (X,Y,Z,A,B,C)', 'info');
-    this.addLog('  Registers 200-205: Joint angles (J1-J6)', 'info');
-    this.addLog('Scanning full range 0-999 for additional data...', 'info');
+    this.addLog("=== STARTING MODBUS REGISTER SCAN ===", "info");
+    this.addLog("Port 1502 - Known register map:", "info");
+    this.addLog("  Registers 100-109: Cartesian (X,Y,Z,A,B,C)", "info");
+    this.addLog("  Registers 200-205: Joint angles (J1-J6)", "info");
+    this.addLog("Scanning full range 0-999 for additional data...", "info");
 
     // Scan full range 0-999
-    this.scanRegisterRange('Holding', 0, 1000, () => {
-      this.addLog('=== FULL SCAN COMPLETE ===', 'success');
-      this.addLog('Check logs for non-zero values', 'info');
-      this.addLog('Use "Export Logs" button to save to file', 'info');
+    this.scanRegisterRange("Holding", 0, 1000, () => {
+      this.addLog("=== FULL SCAN COMPLETE ===", "success");
+      this.addLog("Check logs for non-zero values", "info");
+      this.addLog('Use "Export Logs" button to save to file', "info");
     });
   },
 
   /**
    * Scan a range of Modbus registers
    */
-  scanRegisterRange(type: 'Holding' | 'Input' | 'Coils', startAddr: number, endAddr: number, callback?: () => void) {
+  scanRegisterRange(
+    type: "Holding" | "Input" | "Coils",
+    startAddr: number,
+    endAddr: number,
+    callback?: () => void,
+  ) {
     const batchSize = 100;
     const batches = Math.ceil((endAddr - startAddr) / batchSize);
     let batchIndex = 0;
@@ -614,28 +655,40 @@ export const robotService = {
         return;
       }
 
-      const addr = startAddr + (batchIndex * batchSize);
+      const addr = startAddr + batchIndex * batchSize;
       const count = Math.min(batchSize, endAddr - addr);
 
-      this.addLog(`Scanning ${type} ${addr}-${addr + count - 1} (${batchIndex + 1}/${batches})`, 'info');
+      this.addLog(
+        `Scanning ${type} ${addr}-${addr + count - 1} (${batchIndex + 1}/${batches})`,
+        "info",
+      );
 
       const handler = (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.type === 'REGISTER_DATA' || data.type === 'INPUT_DATA' || data.type === 'COIL_DATA') {
+          if (
+            data.type === "REGISTER_DATA" ||
+            data.type === "INPUT_DATA" ||
+            data.type === "COIL_DATA"
+          ) {
             // Log only non-zero values
             const nonZeroValues = data.values
               .map((v: number, i: number) => ({ addr: addr + i, value: v }))
-              .filter((item: { addr: number; value: number }) => item.value !== 0);
+              .filter(
+                (item: { addr: number; value: number }) => item.value !== 0,
+              );
 
             if (nonZeroValues.length > 0) {
               const logStr = nonZeroValues
-                .map((item: { addr: number; value: number }) => `R${item.addr}=${item.value}`)
-                .join(', ');
-              this.addLog(`${type} Non-zero: [${logStr}]`, 'info');
+                .map(
+                  (item: { addr: number; value: number }) =>
+                    `R${item.addr}=${item.value}`,
+                )
+                .join(", ");
+              this.addLog(`${type} Non-zero: [${logStr}]`, "info");
             }
 
-            ws?.removeEventListener('message', handler);
+            ws?.removeEventListener("message", handler);
             batchIndex++;
             setTimeout(scanNextBatch, 300);
           }
@@ -644,17 +697,23 @@ export const robotService = {
         }
       };
 
-      ws?.addEventListener('message', handler);
+      ws?.addEventListener("message", handler);
 
       // Send appropriate read command based on type
-      const readType = type === 'Holding' ? 'READ_REGISTER' : 
-                       type === 'Input' ? 'READ_INPUT_REGISTER' : 'READ_COIL';
-      
-      ws?.send(JSON.stringify({
-        type: readType,
-        addr: addr,
-        count: count
-      }));
+      const readType =
+        type === "Holding"
+          ? "READ_REGISTER"
+          : type === "Input"
+            ? "READ_INPUT_REGISTER"
+            : "READ_COIL";
+
+      ws?.send(
+        JSON.stringify({
+          type: readType,
+          addr: addr,
+          count: count,
+        }),
+      );
     };
 
     scanNextBatch();
@@ -665,32 +724,39 @@ export const robotService = {
    */
   exportLogsToFile() {
     const logText = state.logs
-      .map(log => `[${log.time}] ${log.msg}`)
-      .join('\n');
+      .map((log) => `[${log.time}] ${log.msg}`)
+      .join("\n");
 
-    const blob = new Blob([logText], { type: 'text/plain' });
+    const blob = new Blob([logText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `robot-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+    a.download = `robot-logs-${new Date().toISOString().replace(/[:.]/g, "-")}.txt`;
     a.click();
     URL.revokeObjectURL(url);
 
-    this.addLog('Logs exported to file', 'success');
+    this.addLog("Logs exported to file", "success");
   },
 
   /**
    * Scan Modbus registers to find changing values (for mapping discovery)
    * Reads registers in batches and logs which ones change over time
    */
-  scanModbusRegisters(startAddress: number, count: number, scanDuration: number = 10000) {
+  scanModbusRegisters(
+    startAddress: number,
+    count: number,
+    scanDuration: number = 10000,
+  ) {
     if (!ws || !state.isConnected) {
-      this.addLog('Cannot scan: No connection', 'error');
+      this.addLog("Cannot scan: No connection", "error");
       return;
     }
 
-    this.addLog(`Starting register scan: ${startAddress}-${startAddress + count - 1}`, 'info');
-    this.addLog(`Scan duration: ${scanDuration}ms`, 'info');
+    this.addLog(
+      `Starting register scan: ${startAddress}-${startAddress + count - 1}`,
+      "info",
+    );
+    this.addLog(`Scan duration: ${scanDuration}ms`, "info");
 
     const baselineValues = new Map<number, number>();
     const changingRegisters = new Set<number>();
@@ -702,27 +768,29 @@ export const robotService = {
         const handler = (event: MessageEvent) => {
           try {
             const data = JSON.parse(event.data);
-            if (data.type === 'REGISTER_DATA') {
+            if (data.type === "REGISTER_DATA") {
               data.values.forEach((value: number, index: number) => {
                 baselineValues.set(startAddress + index, value);
               });
-              ws?.removeEventListener('message', handler);
+              ws?.removeEventListener("message", handler);
               resolve();
             }
           } catch (e) {
             // Ignore parse errors
           }
         };
-        ws?.addEventListener('message', handler);
+        ws?.addEventListener("message", handler);
 
-        ws?.send(JSON.stringify({
-          type: 'READ_REGISTER',
-          addr: startAddress,
-          count: count
-        }));
+        ws?.send(
+          JSON.stringify({
+            type: "READ_REGISTER",
+            addr: startAddress,
+            count: count,
+          }),
+        );
 
         setTimeout(() => {
-          ws?.removeEventListener('message', handler);
+          ws?.removeEventListener("message", handler);
           resolve();
         }, 2000);
       });
@@ -733,12 +801,18 @@ export const robotService = {
       const checkInterval = setInterval(() => {
         if (Date.now() - scanStartTime > scanDuration) {
           clearInterval(checkInterval);
-          this.addLog('=== SCAN COMPLETE ===', 'success');
+          this.addLog("=== SCAN COMPLETE ===", "success");
           if (changingRegisters.size > 0) {
-            this.addLog(`Changing registers found: ${Array.from(changingRegisters).join(', ')}`, 'success');
-            this.addLog(`These registers may contain dynamic data (coordinates, joints, status)`, 'info');
+            this.addLog(
+              `Changing registers found: ${Array.from(changingRegisters).join(", ")}`,
+              "success",
+            );
+            this.addLog(
+              `These registers may contain dynamic data (coordinates, joints, status)`,
+              "info",
+            );
           } else {
-            this.addLog('No changing registers detected', 'warn');
+            this.addLog("No changing registers detected", "warn");
           }
           return;
         }
@@ -747,13 +821,16 @@ export const robotService = {
         const handler = (event: MessageEvent) => {
           try {
             const data = JSON.parse(event.data);
-            if (data.type === 'REGISTER_DATA') {
+            if (data.type === "REGISTER_DATA") {
               data.values.forEach((value: number, index: number) => {
                 const addr = startAddress + index;
                 const baseline = baselineValues.get(addr);
                 if (baseline !== undefined && value !== baseline) {
                   changingRegisters.add(addr);
-                  this.addLog(`Register ${addr}: ${baseline} → ${value}`, 'info');
+                  this.addLog(
+                    `Register ${addr}: ${baseline} → ${value}`,
+                    "info",
+                  );
                   baselineValues.set(addr, value); // Update baseline
                 }
               });
@@ -762,23 +839,25 @@ export const robotService = {
             // Ignore parse errors
           }
         };
-        ws?.addEventListener('message', handler);
+        ws?.addEventListener("message", handler);
 
-        ws?.send(JSON.stringify({
-          type: 'READ_REGISTER',
-          addr: startAddress,
-          count: count
-        }));
+        ws?.send(
+          JSON.stringify({
+            type: "READ_REGISTER",
+            addr: startAddress,
+            count: count,
+          }),
+        );
 
         setTimeout(() => {
-          ws?.removeEventListener('message', handler);
+          ws?.removeEventListener("message", handler);
         }, 500);
       }, 1000);
     };
 
     // Start the scan
     getBaseline().then(() => {
-      this.addLog('Baseline acquired, monitoring for changes...', 'info');
+      this.addLog("Baseline acquired, monitoring for changes...", "info");
       monitorChanges();
     });
   },
@@ -788,7 +867,7 @@ export const robotService = {
    */
   async sendCommand(command: string): Promise<CommandResponse | null> {
     if (!ws || !state.isConnected) {
-      this.addLog(`Failed to send: No connection`, 'error');
+      this.addLog(`Failed to send: No connection`, "error");
       return null;
     }
 
@@ -796,10 +875,10 @@ export const robotService = {
       const handler = (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.type === 'ROBOT_RESPONSE') {
+          if (data.type === "ROBOT_RESPONSE") {
             const response = ProtocolParser.parseResponse(data.response);
             if (response) {
-              ws?.removeEventListener('message', handler);
+              ws?.removeEventListener("message", handler);
               resolve(response);
             }
           }
@@ -808,20 +887,22 @@ export const robotService = {
         }
       };
 
-      ws?.addEventListener('message', handler);
+      ws?.addEventListener("message", handler);
 
       // Send command through proxy
-      ws?.send(JSON.stringify({
-        type: 'ROBOT_COMMAND',
-        command
-      }));
+      ws?.send(
+        JSON.stringify({
+          type: "ROBOT_COMMAND",
+          command,
+        }),
+      );
 
-      this.addLog(`→ Robot: ${command}`, 'cmd');
+      this.addLog(`→ Robot: ${command}`, "cmd");
 
       // Timeout
       setTimeout(() => {
-        ws?.removeEventListener('message', handler);
-        resolve({ id: 0, success: false, error: 'Timeout' });
+        ws?.removeEventListener("message", handler);
+        resolve({ id: 0, success: false, error: "Timeout" });
       }, 5000);
     });
   },
@@ -837,8 +918,18 @@ export const robotService = {
     if (response?.success && response.data) {
       const joints = ProtocolParser.parseJointPosition(response.data);
       if (joints) {
-        state.joints = [joints.j1, joints.j2, joints.j3, joints.j4, joints.j5, joints.j6];
-        this.addLog(`Joints: ${state.joints.map(j => j.toFixed(2)).join(', ')}`, 'info');
+        state.joints = [
+          joints.j1,
+          joints.j2,
+          joints.j3,
+          joints.j4,
+          joints.j5,
+          joints.j6,
+        ];
+        this.addLog(
+          `Joints: ${state.joints.map((j) => j.toFixed(2)).join(", ")}`,
+          "info",
+        );
       }
     }
     return response;
@@ -854,13 +945,24 @@ export const robotService = {
       const pos = ProtocolParser.parseWorldPositionV3(response.data);
       if (pos) {
         state.coordinates = {
-          x: pos.x, y: pos.y, z: pos.z,
-          a: pos.a, b: pos.b, c: pos.c,
+          x: pos.x,
+          y: pos.y,
+          z: pos.z,
+          a: pos.a,
+          b: pos.b,
+          c: pos.c,
           mod: pos.mod,
-          cf1: pos.cf1, cf2: pos.cf2, cf3: pos.cf3,
-          cf4: pos.cf4, cf5: pos.cf5, cf6: pos.cf6
+          cf1: pos.cf1,
+          cf2: pos.cf2,
+          cf3: pos.cf3,
+          cf4: pos.cf4,
+          cf5: pos.cf5,
+          cf6: pos.cf6,
         };
-        this.addLog(`Position: X=${pos.x.toFixed(2)}, Y=${pos.y.toFixed(2)}, Z=${pos.z.toFixed(2)}`, 'info');
+        this.addLog(
+          `Position: X=${pos.x.toFixed(2)}, Y=${pos.y.toFixed(2)}, Z=${pos.z.toFixed(2)}`,
+          "info",
+        );
       }
     }
     return response;
@@ -869,13 +971,17 @@ export const robotService = {
   /**
    * Move to joint position (Section 3.42)
    */
-  async moveToJointPosition(joints: number[], speed: number = 50, blend: number = 100) {
-    const pointPos = joints.map(j => j.toFixed(3)).join('_');
+  async moveToJointPosition(
+    joints: number[],
+    speed: number = 50,
+    blend: number = 100,
+  ) {
+    const pointPos = joints.map((j) => j.toFixed(3)).join("_");
     const param = `0_${speed}_${blend}`;
-    const command = CommandBuilder.movePointV3(1, pointPos, '', param);
+    const command = CommandBuilder.movePointV3(1, pointPos, "", param);
     const response = await this.sendCommand(command);
     if (response?.success) {
-      this.addLog(`MoveJ started (ID: ${response.id})`, 'success');
+      this.addLog(`MoveJ started (ID: ${response.id})`, "success");
     }
     return response;
   },
@@ -883,14 +989,22 @@ export const robotService = {
   /**
    * Move to world position (Section 3.42)
    */
-  async moveToWorldPosition(x: number, y: number, z: number, a: number, b: number, c: number,
-                            speed: number = 50, blend: number = 100) {
+  async moveToWorldPosition(
+    x: number,
+    y: number,
+    z: number,
+    a: number,
+    b: number,
+    c: number,
+    speed: number = 50,
+    blend: number = 100,
+  ) {
     const pointPos = `${x.toFixed(3)}_${y.toFixed(3)}_${z.toFixed(3)}_${a.toFixed(3)}_${b.toFixed(3)}_${c.toFixed(3)}`;
     const param = `0_${speed}_${blend}`;
-    const command = CommandBuilder.movePointV3(2, pointPos, '', param);
+    const command = CommandBuilder.movePointV3(2, pointPos, "", param);
     const response = await this.sendCommand(command);
     if (response?.success) {
-      this.addLog(`MoveL started (ID: ${response.id})`, 'success');
+      this.addLog(`MoveL started (ID: ${response.id})`, "success");
     }
     return response;
   },
@@ -902,7 +1016,7 @@ export const robotService = {
     const command = CommandBuilder.setIOValue(ioIndex, IOType.DOUT, value);
     const response = await this.sendCommand(command);
     if (response?.success) {
-      this.addLog(`DO[${ioIndex}] = ${value}`, 'success');
+      this.addLog(`DO[${ioIndex}] = ${value}`, "success");
     }
     return response;
   },
@@ -914,7 +1028,7 @@ export const robotService = {
     const command = CommandBuilder.ioGetDin(ioIndex);
     const response = await this.sendCommand(command);
     if (response?.success) {
-      this.addLog(`DI[${ioIndex}] = ${response.data}`, 'info');
+      this.addLog(`DI[${ioIndex}] = ${response.data}`, "info");
     }
     return response;
   },
@@ -922,11 +1036,16 @@ export const robotService = {
   /**
    * Set variable (Section 3.41)
    */
-  async setVariable(varType: VarType, varName: string, value: string, scope: Scope = Scope.GLOBAL) {
+  async setVariable(
+    varType: VarType,
+    varName: string,
+    value: string,
+    scope: Scope = Scope.GLOBAL,
+  ) {
     const command = CommandBuilder.setVarV3(varType, varName, value, scope);
     const response = await this.sendCommand(command);
     if (response?.success) {
-      this.addLog(`Set ${varName} = ${value}`, 'success');
+      this.addLog(`Set ${varName} = ${value}`, "success");
     }
     return response;
   },
@@ -934,11 +1053,15 @@ export const robotService = {
   /**
    * Get variable (Section 3.40)
    */
-  async getVariable(varType: VarType, varName: string, scope: Scope = Scope.GLOBAL) {
+  async getVariable(
+    varType: VarType,
+    varName: string,
+    scope: Scope = Scope.GLOBAL,
+  ) {
     const command = CommandBuilder.getVarV3(varType, varName, scope);
     const response = await this.sendCommand(command);
     if (response?.success) {
-      this.addLog(`${varName} = ${response.data}`, 'info');
+      this.addLog(`${varName} = ${response.data}`, "info");
     }
     return response;
   },
@@ -950,8 +1073,13 @@ export const robotService = {
     const command = CommandBuilder.changeMode(mode);
     const response = await this.sendCommand(command);
     if (response?.success) {
-      state.mode = mode === RobotMode.MANUAL ? 'MANUAL' : mode === RobotMode.AUTO ? 'AUTO' : 'REMOTE';
-      this.addLog(`Mode changed to: ${state.mode}`, 'success');
+      state.mode =
+        mode === RobotMode.MANUAL
+          ? "MANUAL"
+          : mode === RobotMode.AUTO
+            ? "AUTO"
+            : "REMOTE";
+      this.addLog(`Mode changed to: ${state.mode}`, "success");
     }
     return response;
   },
@@ -962,10 +1090,12 @@ export const robotService = {
   async getRunStatus() {
     const command = CommandBuilder.getRobotRunStatus();
     const response = await this.sendCommand(command);
-    if (response?.success && typeof response.data === 'number') {
+    if (response?.success && typeof response.data === "number") {
       state.runStatus = response.data as RunStatus;
-      const statusText = ['INIT', 'RUNNING', 'PAUSED', 'STOPPED', 'ERROR'][response.data];
-      this.addLog(`Run status: ${statusText}`, 'info');
+      const statusText = ["INIT", "RUNNING", "PAUSED", "STOPPED", "ERROR"][
+        response.data
+      ];
+      this.addLog(`Run status: ${statusText}`, "info");
     }
     return response;
   },
@@ -978,7 +1108,7 @@ export const robotService = {
     const response = await this.sendCommand(command);
     if (response?.success) {
       state.errorId = null;
-      this.addLog('Error reset', 'success');
+      this.addLog("Error reset", "success");
     }
     return response;
   },
@@ -991,7 +1121,10 @@ export const robotService = {
     const response = await this.sendCommand(command);
     if (response?.success) {
       state.errorId = response.data;
-      this.addLog(`Error ID: ${response.data}`, response.data ? 'error' : 'info');
+      this.addLog(
+        `Error ID: ${response.data}`,
+        response.data ? "error" : "info",
+      );
     }
     return response;
   },
@@ -1004,7 +1137,7 @@ export const robotService = {
     const response = await this.sendCommand(command);
     if (response?.success) {
       state.servoEnabled = enabled;
-      this.addLog(`Servo ${enabled ? 'ON' : 'OFF'}`, 'success');
+      this.addLog(`Servo ${enabled ? "ON" : "OFF"}`, "success");
     }
     return response;
   },
@@ -1016,7 +1149,7 @@ export const robotService = {
     const command = CommandBuilder.stopRun();
     const response = await this.sendCommand(command);
     if (response?.success) {
-      this.addLog('Motion stopped', 'warn');
+      this.addLog("Motion stopped", "warn");
       state.runStatus = RunStatus.PROG_STOPPED;
     }
     return response;
@@ -1029,7 +1162,7 @@ export const robotService = {
     const command = CommandBuilder.startRun();
     const response = await this.sendCommand(command);
     if (response?.success) {
-      this.addLog('Program started', 'success');
+      this.addLog("Program started", "success");
       state.runStatus = RunStatus.PROG_RUNNING;
     }
     return response;
@@ -1039,17 +1172,17 @@ export const robotService = {
 
   toggleDemoMode(enabled: boolean) {
     if (enabled) {
-      this.addLog('DEMO MODE STARTED', 'success');
+      this.addLog("DEMO MODE STARTED", "success");
       state.isConnected = true;
       state.camera.hasSignal = true;
       startSimulation();
     } else {
-      this.addLog('DEMO MODE STOPPED', 'warn');
+      this.addLog("DEMO MODE STOPPED", "warn");
       state.isConnected = false;
       state.camera.hasSignal = false;
       stopSimulation();
     }
-  }
+  },
 };
 
 // --- SIMULATION LOGIC (for demo/testing) ---
@@ -1067,14 +1200,16 @@ function startSimulation() {
     state.coordinates.z = +(50 + Math.sin(elapsed * 0.5) * 10).toFixed(1);
 
     state.joints = state.joints.map((_, i) => {
-       const offset = i * 0.5;
-       return +(Math.sin(elapsed * 0.5 + offset) * 90).toFixed(1);
+      const offset = i * 0.5;
+      return +(Math.sin(elapsed * 0.5 + offset) * 90).toFixed(1);
     });
 
     if (Math.random() > 0.8) {
-       state.camera.targets = [{ x: 50, y: 50, w: 10, h: 10, cls: 'TEST', conf: 0.99 }];
+      state.camera.targets = [
+        { x: 50, y: 50, w: 10, h: 10, cls: "TEST", conf: 0.99 },
+      ];
     } else {
-       state.camera.targets = [];
+      state.camera.targets = [];
     }
   }, 50);
 }
